@@ -1,0 +1,52 @@
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: presto-coordinator
+  namespace: gec-database
+  labels: 
+    name: hive-presto
+spec:
+  type: NodePort
+  ports:
+    - name: hive-presto-8080
+      port: 8080
+      nodePort: 30085
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    name: gec-hive-presto
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gec-hive-presto
+  namespace: gec-database
+  labels:
+    name: gec-hive-presto
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: gec-hive-presto
+  template:
+    metadata:
+      labels: 
+        name: gec-hive-presto
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: gec-presto-coordinator
+        image: shawnzhu/prestodb:0.181
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 4
+            memory: 4G
+          requests:
+            cpu: 100m
+            memory: 256Mi

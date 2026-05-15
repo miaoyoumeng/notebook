@@ -1,0 +1,203 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: gec-hive-hadoop-hdfs-site
+  namespace: gec-database
+  labels:
+    name: gec-hive
+data:
+  hdfs-site.xml: |-
+    <?xml version="1.0" encoding="UTF-8"?>
+    <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+    <configuration>
+    <property><name>dfs.namenode.datanode.registration.ip-hostname-check</name><value>false</value></property>
+    <property><name>dfs.permissions.enabled</name><value>false</value></property>
+    <property><name>dfs.webhdfs.enabled</name><value>true</value></property>
+    <property><name>dfs.namenode.rpc-bind-host</name><value>namenode</value></property>
+    <property><name>dfs.namenode.servicerpc-bind-host</name><value>namenode</value></property>
+    <property><name>dfs.namenode.http-bind-host</name><value>namenode</value></property>
+    <property><name>dfs.namenode.https-bind-host</name><value>namenode</value></property>
+    <property><name>dfs.client.use.datanode.hostname</name><value>true</value></property>
+    <property><name>dfs.datanode.use.datanode.hostname</name><value>true</value></property>
+    <property><name>dfs.datanode.address</name><value>datanode</value></property>
+    </configuration>
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: gec-hive-log4j2-properties
+  namespace: gec-database
+  labels:
+    name: gec-hive
+data:
+  hive-log4j2.properties: |-
+    status = INFO
+    name = HiveLog4j2
+    packages = org.apache.hadoop.hive.ql.log
+    property.hive.log.level = DEUBG
+    property.hive.root.logger = DRFA
+    property.hive.log.dir = ${sys:java.io.tmpdir}/${sys:user.name}
+    property.hive.log.file = hive.log
+    appenders = console, DRFA
+    appender.console.type = Console
+    appender.console.name = console
+    appender.console.target = SYSTEM_ERR
+    appender.console.layout.type = PatternLayout
+    appender.console.layout.pattern = %d{yy/MM/dd HH:mm:ss} [%t]: %p %c{2}: %m%n
+    appender.DRFA.type = RollingFile
+    appender.DRFA.name = DRFA
+    appender.DRFA.fileName = ${sys:hive.log.dir}/${sys:hive.log.file}
+    appender.DRFA.filePattern = ${sys:hive.log.dir}/${sys:hive.log.file}.%d{yyyy-MM-dd}
+    appender.DRFA.layout.type = PatternLayout
+    appender.DRFA.layout.pattern = %d{ISO8601} %-5p [%t]: %c{2} (%F:%M(%L)) - %m%n
+    appender.DRFA.policies.type = Policies
+    appender.DRFA.policies.time.type = TimeBasedTriggeringPolicy
+    appender.DRFA.policies.time.interval = 1
+    appender.DRFA.policies.time.modulate = true
+    appender.DRFA.strategy.type = DefaultRolloverStrategy
+    appender.DRFA.strategy.max = 30
+    loggers = NIOServerCnxn, ClientCnxnSocketNIO, DataNucleus, Datastore, JPOX
+    logger.NIOServerCnxn.name = org.apache.zookeeper.server.NIOServerCnxn
+    logger.NIOServerCnxn.level = WARN
+    logger.ClientCnxnSocketNIO.name = org.apache.zookeeper.ClientCnxnSocketNIO
+    logger.ClientCnxnSocketNIO.level = WARN
+    logger.DataNucleus.name = DataNucleus
+    logger.DataNucleus.level = ERROR
+    logger.Datastore.name = Datastore
+    logger.Datastore.level = ERROR
+    logger.JPOX.name = JPOX
+    logger.JPOX.level = ERROR
+    rootLogger.level = ${sys:hive.log.level}
+    rootLogger.appenderRefs = root
+    rootLogger.appenderRef.root.ref = ${sys:hive.root.logger}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gec-hive
+  namespace: gec-database
+  labels: 
+    name: gec-hive
+spec:
+  type: NodePort
+  ports:
+    - name: hive-server-10000
+      port: 10000
+      nodePort: 30084
+      protocol: TCP
+      targetPort: 10000
+  selector:
+    name: gec-hive
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gec-hive
+  namespace: gec-database
+  labels:
+    name: gec-hive
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: gec-hive
+  template:
+    metadata:
+      labels: 
+        name: gec-hive
+    spec:
+      hostAliases:
+      - ip: 10.110.161.196
+        hostnames:
+        - "gec-hadoop-datanode-5f9f4f4b6c-r4mmc"
+      restartPolicy: Always
+      containers:
+      - name: gec-hive-server
+        image: bde2020/hive:2.3.2-postgresql-metastore
+        ports:
+        - containerPort: 10000
+          protocol: TCP
+        env:
+        - name: HIVE_SITE_CONF_javax_jdo_option_ConnectionURL
+          value: "jdbc:postgresql://hive-metastore-postgresql/metastore"
+        - name: HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName
+          value: "org.postgresql.Driver"
+        - name: HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName
+          value: "hive"
+        - name: HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword
+          value: "hive"
+        - name: HIVE_SITE_CONF_datanucleus_autoCreateSchema
+          value: "false"
+        - name: HIVE_SITE_CONF_hive_metastore_uris
+          value: "thrift://hive-metastore:9083"
+        - name: HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check
+          value: "false"
+        - name: CORE_CONF_fs_defaultFS
+          value: "hdfs://namenode:8020"
+        - name: CORE_CONF_hadoop_http_staticuser_user
+          value: "root"
+        - name: CORE_CONF_hadoop_proxyuser_hue_hosts
+          value: "*"
+        - name: CORE_CONF_hadoop_proxyuser_hue_groups
+          value: "*"
+        - name: HDFS_CONF_dfs_webhdfs_enabled
+          value: "true"
+        - name: HDFS_CONF_dfs_permissions_enabled
+          value: "false"
+        - name: YARN_CONF_yarn_log___aggregation___enable
+          value: "true"
+        - name: YARN_CONF_yarn_resourcemanager_recovery_enabled
+          value: "true"
+        - name: YARN_CONF_yarn_resourcemanager_store_class
+          value: "org.apache.hadoop.yarn.server.resourcemanager.recovery.FileSystemRMStateStore"
+        - name: YARN_CONF_yarn_resourcemanager_fs_state___store_uri
+          value: "/rmstate"
+        - name: YARN_CONF_yarn_nodemanager_remote___app___log___dir
+          value: "/app-logs"
+        - name: YARN_CONF_yarn_log_server_url
+          value: "http://historyserver:8188/applicationhistory/logs/"
+        - name: YARN_CONF_yarn_timeline___service_enabled
+          value: "true"
+        - name: YARN_CONF_yarn_timeline___service_generic___application___history_enabled
+          value: "true"
+        - name: YARN_CONF_yarn_resourcemanager_system___metrics___publisher_enabled
+          value: "true"
+        - name: YARN_CONF_yarn_resourcemanager_hostname
+          value: "resourcemanager"
+        - name: YARN_CONF_yarn_timeline___service_hostname
+          value: "historyserver"
+        - name: YARN_CONF_yarn_resourcemanager_address
+          value: "resourcemanager:8032"
+        - name: YARN_CONF_yarn_resourcemanager_scheduler_address
+          value: "resourcemanager:8030"
+        - name: YARN_CONF_yarn_resourcemanager_resource__tracker_address
+          value: "resourcemanager:8031"
+        - name: HIVE_CORE_CONF_javax_jdo_option_ConnectionURL
+          value: "jdbc:postgresql://hive-metastore/metastore"
+        - name: SERVICE_PRECONDITION
+          value: "hive-metastore:9083"
+        - name: HADOOP_LOGLEVEL
+          value: "DEBUG"
+        resources:
+          limits:
+            cpu: 10
+            memory: 16G
+          requests:
+            cpu: 100m
+            memory: 512Mi
+        volumeMounts:
+        - name: gec-hive-hadoop-hdfs-site
+          mountPath: /opt/hadoop-2.7.4/etc/hadoop/hdfs-site.xml
+          subPath: hdfs-site.xml
+        # - name: gec-hive-log4j2-properties
+        #   mountPath: /opt/hive/conf/hive-log4j2.properties
+        #   subPath: hive-log4j2.properties
+      volumes:
+      - name: gec-hive-hadoop-hdfs-site
+        configMap:
+          name: gec-hive-hadoop-hdfs-site
+      - name: gec-hive-log4j2-properties
+        configMap:
+          name: gec-hive-log4j2-properties

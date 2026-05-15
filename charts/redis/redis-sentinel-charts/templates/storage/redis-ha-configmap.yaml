@@ -1,0 +1,283 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: redis-ha-configmap
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: redis-ha
+data:
+  haproxy.cfg: |-
+    defaults REDIS
+      mode tcp
+      timeout connect  10s
+      timeout server  360s
+      timeout client  360s
+
+    listen health_check_http_url
+      bind :8888
+      mode http
+      monitor-uri /healthz
+      option      dontlognull
+    # Check Sentinel and whether they are nominated master
+    backend check_if_redis_is_master_0
+      mode tcp
+      option tcp-check
+      tcp-check connect
+      tcp-check send AUTH\ REPLACE_AUTH_SECRET\r\n
+      tcp-check expect string +OK
+      tcp-check send PING\r\n
+      tcp-check expect string +PONG
+      tcp-check send SENTINEL\ get-master-addr-by-name\ mymaster\r\n
+      tcp-check expect string REPLACE_ANNOUNCE0
+      tcp-check send QUIT\r\n
+      tcp-check expect string +OK
+      server R0 redis-ha-announce-0:26379 check inter 1s
+      server R1 redis-ha-announce-1:26379 check inter 1s
+      server R2 redis-ha-announce-2:26379 check inter 1s
+    # Check Sentinel and whether they are nominated master
+    backend check_if_redis_is_master_1
+      mode tcp
+      option tcp-check
+      tcp-check connect
+      tcp-check send AUTH\ REPLACE_AUTH_SECRET\r\n
+      tcp-check expect string +OK
+      tcp-check send PING\r\n
+      tcp-check expect string +PONG
+      tcp-check send SENTINEL\ get-master-addr-by-name\ mymaster\r\n
+      tcp-check expect string REPLACE_ANNOUNCE1
+      tcp-check send QUIT\r\n
+      tcp-check expect string +OK
+      server R0 redis-ha-announce-0:26379 check inter 1s
+      server R1 redis-ha-announce-1:26379 check inter 1s
+      server R2 redis-ha-announce-2:26379 check inter 1s
+    # Check Sentinel and whether they are nominated master
+    backend check_if_redis_is_master_2
+      mode tcp
+      option tcp-check
+      tcp-check connect
+      tcp-check send AUTH\ REPLACE_AUTH_SECRET\r\n
+      tcp-check expect string +OK
+      tcp-check send PING\r\n
+      tcp-check expect string +PONG
+      tcp-check send SENTINEL\ get-master-addr-by-name\ mymaster\r\n
+      tcp-check expect string REPLACE_ANNOUNCE2
+      tcp-check send QUIT\r\n
+      tcp-check expect string +OK
+      server R0 redis-ha-announce-0:26379 check inter 1s
+      server R1 redis-ha-announce-1:26379 check inter 1s
+      server R2 redis-ha-announce-2:26379 check inter 1s
+
+    # decide redis backend to use
+    #master
+    frontend ft_redis_master
+      bind *:6379
+      use_backend bk_redis_master
+
+    # Check all redis servers to see if they think they are master
+    backend bk_redis_master
+      mode tcp
+      option tcp-check
+      tcp-check connect
+      tcp-check send AUTH\ REPLACE_AUTH_SECRET\r\n
+      tcp-check expect string +OK
+      tcp-check send PING\r\n
+      tcp-check expect string +PONG
+      tcp-check send info\ replication\r\n
+      tcp-check expect string role:master
+      tcp-check send QUIT\r\n
+      tcp-check expect string +OK
+      use-server R0 if { srv_is_up(R0) } { nbsrv(check_if_redis_is_master_0) ge 2 }
+      server R0 redis-ha-announce-0:6379 check inter 1s fall 1 rise 1
+      use-server R1 if { srv_is_up(R1) } { nbsrv(check_if_redis_is_master_1) ge 2 }
+      server R1 redis-ha-announce-1:6379 check inter 1s fall 1 rise 1
+      use-server R2 if { srv_is_up(R2) } { nbsrv(check_if_redis_is_master_2) ge 2 }
+      server R2 redis-ha-announce-2:6379 check inter 1s fall 1 rise 1
+  haproxy_init.sh: |
+    HAPROXY_CONF=/data/haproxy.cfg
+    cp /readonly/haproxy.cfg "$HAPROXY_CONF"
+    for loop in $(seq 1 10); do
+      getent hosts redis-ha-announce-0 && break
+      echo "Waiting for service redis-ha-announce-0 to be ready ($loop) ..." && sleep 1
+    done
+    ANNOUNCE_IP0=$(getent hosts "redis-ha-announce-0" | awk '{ print $1 }')
+    if [ -z "$ANNOUNCE_IP0" ]; then
+      echo "Could not resolve the announce ip for redis-ha-announce-0"
+      exit 1
+    fi
+    sed -i "s/REPLACE_ANNOUNCE0/$ANNOUNCE_IP0/" "$HAPROXY_CONF"
+    if [ "${AUTH:-}" ]; then
+        echo "Setting auth values"
+        ESCAPED_AUTH=$(echo "$AUTH" | sed -e 's/[\/&]/\\&/g');
+        sed -i "s/REPLACE_AUTH_SECRET/${ESCAPED_AUTH}/" "$HAPROXY_CONF"
+    fi
+    for loop in $(seq 1 10); do
+      getent hosts redis-ha-announce-1 && break
+      echo "Waiting for service redis-ha-announce-1 to be ready ($loop) ..." && sleep 1
+    done
+    ANNOUNCE_IP1=$(getent hosts "redis-ha-announce-1" | awk '{ print $1 }')
+    if [ -z "$ANNOUNCE_IP1" ]; then
+      echo "Could not resolve the announce ip for redis-ha-announce-1"
+      exit 1
+    fi
+    sed -i "s/REPLACE_ANNOUNCE1/$ANNOUNCE_IP1/" "$HAPROXY_CONF"
+    if [ "${AUTH:-}" ]; then
+        echo "Setting auth values"
+        ESCAPED_AUTH=$(echo "$AUTH" | sed -e 's/[\/&]/\\&/g');
+        sed -i "s/REPLACE_AUTH_SECRET/${ESCAPED_AUTH}/" "$HAPROXY_CONF"
+    fi
+    for loop in $(seq 1 10); do
+      getent hosts redis-ha-announce-2 && break
+      echo "Waiting for service redis-ha-announce-2 to be ready ($loop) ..." && sleep 1
+    done
+    ANNOUNCE_IP2=$(getent hosts "redis-ha-announce-2" | awk '{ print $1 }')
+    if [ -z "$ANNOUNCE_IP2" ]; then
+      echo "Could not resolve the announce ip for redis-ha-announce-2"
+      exit 1
+    fi
+    sed -i "s/REPLACE_ANNOUNCE2/$ANNOUNCE_IP2/" "$HAPROXY_CONF"
+    if [ "${AUTH:-}" ]; then
+        echo "Setting auth values"
+        ESCAPED_AUTH=$(echo "$AUTH" | sed -e 's/[\/&]/\\&/g');
+        sed -i "s/REPLACE_AUTH_SECRET/${ESCAPED_AUTH}/" "$HAPROXY_CONF"
+    fi
+  init.sh: >
+    HOSTNAME="$(hostname)"
+
+    INDEX="${HOSTNAME##*-}"
+
+    MASTER="$(redis-cli -h redis-ha -p 26379 sentinel get-master-addr-by-name
+    mymaster | grep -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')"
+
+    MASTER_GROUP="mymaster"
+
+    QUORUM="2"
+
+    REDIS_CONF=/data/conf/redis.conf
+
+    REDIS_PORT=6379
+
+    SENTINEL_CONF=/data/conf/sentinel.conf
+
+    SENTINEL_PORT=26379
+
+    SERVICE=redis-ha
+
+    set -eu
+
+
+    sentinel_update() {
+        echo "Updating sentinel config with master $MASTER"
+        eval MY_SENTINEL_ID="\${SENTINEL_ID_$INDEX}"
+        sed -i "1s/^/sentinel myid $MY_SENTINEL_ID\\n/" "$SENTINEL_CONF"
+        sed -i "2s/^/sentinel monitor $MASTER_GROUP $1 $REDIS_PORT $QUORUM \\n/" "$SENTINEL_CONF"
+        echo "sentinel announce-ip $ANNOUNCE_IP" >> $SENTINEL_CONF
+        echo "sentinel announce-port $SENTINEL_PORT" >> $SENTINEL_CONF
+    }
+
+
+    redis_update() {
+        echo "Updating redis config"
+        echo "slaveof $1 $REDIS_PORT" >> "$REDIS_CONF"
+        echo "slave-announce-ip $ANNOUNCE_IP" >> $REDIS_CONF
+        echo "slave-announce-port $REDIS_PORT" >> $REDIS_CONF
+    }
+
+
+    copy_config() {
+        cp /readonly-config/redis.conf "$REDIS_CONF"
+        cp /readonly-config/sentinel.conf "$SENTINEL_CONF"
+    }
+
+
+    setup_defaults() {
+        echo "Setting up defaults"
+        if [ "$INDEX" = "0" ]; then
+            echo "Setting this pod as the default master"
+            redis_update "$ANNOUNCE_IP"
+            sentinel_update "$ANNOUNCE_IP"
+            sed -i "s/^.*slaveof.*//" "$REDIS_CONF"
+        else
+            DEFAULT_MASTER="$(getent hosts "$SERVICE-announce-0" | awk '{ print $1 }')"
+            if [ -z "$DEFAULT_MASTER" ]; then
+                echo "Unable to resolve host"
+                exit 1
+            fi
+            echo "Setting default slave config.."
+            redis_update "$DEFAULT_MASTER"
+            sentinel_update "$DEFAULT_MASTER"
+        fi
+    }
+
+
+    find_master() {
+        echo "Attempting to find master"
+        if [ "$(redis-cli -h "$MASTER" -a "$AUTH" ping)" != "PONG" ]; then
+           echo "Can't ping master, attempting to force failover"
+           if redis-cli -h "$SERVICE" -p "$SENTINEL_PORT" sentinel failover "$MASTER_GROUP" | grep -q 'NOGOODSLAVE' ; then 
+               setup_defaults
+               return 0
+           fi
+           sleep 10
+           MASTER="$(redis-cli -h $SERVICE -p $SENTINEL_PORT sentinel get-master-addr-by-name $MASTER_GROUP | grep -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')"
+           if [ "$MASTER" ]; then
+               sentinel_update "$MASTER"
+               redis_update "$MASTER"
+           else
+              echo "Could not failover, exiting..."
+              exit 1
+           fi
+        else
+            echo "Found reachable master, updating config"
+            sentinel_update "$MASTER"
+            redis_update "$MASTER"
+        fi
+    }
+
+
+    mkdir -p /data/conf/
+
+
+    echo "Initializing config.."
+
+    copy_config
+
+
+    ANNOUNCE_IP=$(getent hosts "$SERVICE-announce-$INDEX" | awk '{ print $1 }')
+
+    if [ -z "$ANNOUNCE_IP" ]; then
+        "Could not resolve the announce ip for this pod"
+        exit 1
+    elif [ "$MASTER" ]; then
+        find_master
+    else
+        setup_defaults
+    fi
+
+
+    if [ "${AUTH:-}" ]; then
+        echo "Setting auth values"
+        ESCAPED_AUTH=$(echo "$AUTH" | sed -e 's/[\/&]/\\&/g');
+        sed -i "s/replace-default-auth/${ESCAPED_AUTH}/" "$REDIS_CONF" "$SENTINEL_CONF"
+    fi
+
+
+    echo "Ready..."
+  redis.conf: |
+    dir "/data"
+    port 6379
+    maxmemory 0
+    maxmemory-policy volatile-lru
+    min-replicas-max-lag 5
+    min-replicas-to-write 1
+    rdbchecksum yes
+    rdbcompression yes
+    repl-diskless-sync yes
+    save 900 1
+    requirepass replace-default-auth
+    masterauth replace-default-auth
+  sentinel.conf: |
+    dir "/data"
+    sentinel down-after-milliseconds mymaster 10000
+    sentinel failover-timeout mymaster 180000
+    sentinel parallel-syncs mymaster 5
+    sentinel auth-pass mymaster replace-default-auth

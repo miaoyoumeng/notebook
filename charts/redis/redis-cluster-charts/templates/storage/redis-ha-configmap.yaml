@@ -1,0 +1,74 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ $.Values.redis.name }}-redis-configmap
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: {{ $.Values.redis.name }}-redis
+data:
+  redis.conf: |
+    bind 0.0.0.0
+    port 6379
+    databases 16
+    protected-mode yes
+    dir "/data/redis"
+    ## 内存配置
+    maxmemory 0
+    maxmemory-policy volatile-lru
+
+    rdbchecksum yes
+    rdbcompression yes
+    repl-diskless-sync yes
+    save 900 1
+
+    requirepass replace-default-auth
+
+
+    cluster-enabled yes
+    cluster-config-file /data/redis/conf/nodes.conf
+    cluster-node-timeout 5000
+    cluster-require-full-coverage no
+
+  init.sh: >
+    HOSTNAME="$(hostname)"
+
+    INDEX="${HOSTNAME##*-}"
+
+    CONF_DIR=/data/redis/conf
+
+    if [ ! -d "$CONF_DIR" ]; then
+      echo "mdir $CONF_DIR"
+      mkdir -p $CONF_DIR
+    fi
+
+    REDIS_CONF=${CONF_DIR}/redis.conf
+    NODES_CONF=${CONF_DIR}/nodes.conf
+
+    set -eu
+
+    delete_cluster_nodes_file() {
+      if [ -f "$NODES_CONF" ];then
+          rm -rf $NODES_CONF
+      fi
+    }
+
+    copy_config() {
+      if [ ! -f "$REDIS_CONF" ];then
+        echo "cp file to dir $REDIS_CONF"
+        cp /data/script/redis.conf "$REDIS_CONF"
+      fi
+    }
+
+    echo "Initializing config.."
+
+    delete_cluster_nodes_file
+
+    copy_config
+
+    if [ "${REDIS_PASSWORD:-}" ]; then
+        echo "Setting auth values"
+        ESCAPED_AUTH=$(echo "$REDIS_PASSWORD" | sed -e 's/[\/&]/\\&/g');
+        sed -i "s/replace-default-auth/${ESCAPED_AUTH}/" "$REDIS_CONF"
+    fi
+
+    echo "Ready..."

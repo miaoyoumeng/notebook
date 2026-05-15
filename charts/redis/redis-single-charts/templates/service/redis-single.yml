@@ -1,0 +1,16 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ $.Values.redis.name }}-redis
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: {{ $.Values.redis.name }}-redis
+spec:
+  selector:
+    app: {{ $.Values.redis.name }}-redis
+  ports:
+    - name: redis
+      protocol: TCP
+      port: 6379
+      targetPort: 6379
+  type: NodePort

@@ -1,0 +1,14 @@
+数据库|yaml文件
+---|---
+ftp|ftp.yaml
+mariadb|mariadb.yaml
+oceanbase|oceanbase.yaml
+南大通用|gbase.yaml
+postgresql|postgresql.yaml
+人大金仓|kingbase.yaml
+华为高斯opengauss|opengauss.yaml
+达梦|dameng.yaml
+clickhouse|clickhouse.yaml
+db2|db2.yaml
+oracle|oracle.yaml
+sqlserver|sqlserver.yaml

@@ -1,0 +1,96 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: {{ $.Values.redis.name }}-redis-server
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: {{ $.Values.redis.name }}-redis
+spec:
+  replicas: {{ $.Values.replicas.redis_server_count | default 3 }}
+  serviceName: {{ $.Values.redis.name }}-redis
+  selector:
+    matchLabels:
+      app: {{ $.Values.redis.name }}-redis
+  template:
+    metadata:
+      labels:
+        app: {{ $.Values.redis.name }}-redis
+    spec:
+      volumes:
+        - name: config
+          configMap:
+            name: {{ $.Values.redis.name }}-redis-configmap
+            defaultMode: 420
+      initContainers:
+        - name: config-init
+          image: {{ $.Values.hub.repository | default "docker.io" }}/{{ $.Values.hub.images.busybox }}
+          command:
+            - sh
+          args:
+            - /data/script/init.sh
+          env:
+            - name: AUTH
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.redis.name }}-redis-secret
+                  key: auth
+          volumeMounts:
+            - name: config
+              readOnly: true
+              mountPath: /data/script
+            - name: data
+              mountPath: /data/redis
+      containers:
+        - name: redis
+          image: {{ $.Values.hub.repository | default "docker.io" }}/{{ $.Values.hub.images.redis_server }}
+          command:
+            - '/bin/sh'
+          args:
+            - "-c"
+            - |
+             redis-server /data/redis/conf/redis.conf --requirepass $REDIS_PASSWORD --cluster-announce-ip $MY_POD_IP
+          ports:
+            - name: redis
+              containerPort: 6379
+              protocol: TCP
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.redis.name }}-redis-secret
+                  key: auth
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          volumeMounts:
+            - name: data
+              mountPath: /data/redis
+          livenessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+      restartPolicy: Always
+      dnsPolicy: ClusterFirst
+      serviceAccountName: {{ $.Values.redis.name }}-redis
+      serviceAccount: {{ $.Values.redis.name }}-redis
+      securityContext:
+        runAsUser: 0
+        runAsNonRoot: false
+        fsGroup: 0
+  volumeClaimTemplates:
+    - kind: PersistentVolumeClaim
+      apiVersion: v1
+      metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 2Gi
+        storageClassName: {{ $.Values.k8s.storage_class_name }}

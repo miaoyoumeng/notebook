@@ -1,0 +1,68 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ $.Values.redis.name }}-redis-configmap
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: {{ $.Values.redis.name }}-redis
+data:
+  redis.conf: |
+    bind 0.0.0.0
+    port 6379
+    databases 16
+    protected-mode yes
+    dir "/data"
+    ## 内存配置
+    maxmemory 0
+    maxmemory-policy volatile-lru
+
+    #min-replicas-max-lag 5
+    #min-replicas-to-write 1
+
+    rdbchecksum yes
+    rdbcompression yes
+    repl-diskless-sync yes
+    save 900 1
+
+    requirepass replace-default-auth
+
+  init.sh: >
+    HOSTNAME="$(hostname)"
+
+    INDEX="${HOSTNAME##*-}"
+
+    REDIS_CONF=/data/conf/redis.conf
+
+    set -eu
+
+    copy_config() {
+        cp /readonly-config/redis.conf "$REDIS_CONF"
+    }
+
+    mkdir -p /data/conf/
+
+    echo "Initializing config.."
+
+    copy_config
+
+    if [ "${AUTH:-}" ]; then
+        echo "Setting auth values"
+        ESCAPED_AUTH=$(echo "$AUTH" | sed -e 's/[\/&]/\\&/g');
+        sed -i "s/replace-default-auth/${ESCAPED_AUTH}/" "$REDIS_CONF"
+    fi
+
+    echo "Ready..."
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $.Values.redis.name }}-redis-claim1
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: {{ $.Values.k8s.storage_class_name }}
+

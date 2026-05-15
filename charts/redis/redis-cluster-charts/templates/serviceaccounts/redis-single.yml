@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: {{ $.Values.redis.name }}-redis
+  name: {{ $.Values.redis.name }}-redis
+  namespace: {{ $.Release.Namespace }}

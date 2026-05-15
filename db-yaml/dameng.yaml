@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gec-dameng
+  namespace: gec-database
+  labels:
+    name: gec-dameng
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gec-dameng
+  template:
+    metadata:
+      labels:
+        app: gec-dameng
+    spec:
+      containers:
+      - command:
+        - /bin/bash
+        - /startDm.sh
+        image: harbor.tsingj.local/gec/dm8:v01
+        imagePullPolicy: IfNotPresent
+        name: dameng
+        ports:
+        - containerPort: 5236
+          name: dameng5236
+          protocol: TCP
+        resources:
+          limits:
+            cpu: "8"
+            memory: 10G
+          requests:
+            cpu: 100m
+            memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gec-dameng-svc
+  namespace: gec-database
+  labels: 
+    name: gec-dameng
+spec:
+  type: NodePort
+  ports:
+    - name: dameng-5236
+      nodePort: 30091
+      port: 5236
+      protocol: TCP
+      targetPort: 5236
+  selector:
+    name: gec-dameng

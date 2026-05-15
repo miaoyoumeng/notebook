@@ -1,0 +1,81 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ $.Values.redis.name }}-redis
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: {{ $.Values.redis.name }}-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ $.Values.redis.name }}-redis
+  template:
+    metadata:
+      labels:
+        app: {{ $.Values.redis.name }}-redis
+    spec:
+      volumes:
+        - name: config
+          configMap:
+            name: {{ $.Values.redis.name }}-redis-configmap
+            defaultMode: 420
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: {{ $.Values.redis.name }}-redis-claim1
+      initContainers:
+        - name: config-init
+          image: {{ $.Values.hub.repository | default "docker.io" }}/{{ $.Values.hub.images.redis_server }}
+          command:
+            - sh
+          args:
+            - /readonly-config/init.sh
+          env:
+            - name: AUTH
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.redis.name }}-redis-secret
+                  key: auth
+          volumeMounts:
+            - name: config
+              readOnly: true
+              mountPath: /readonly-config
+            - name: redis-data
+              mountPath: /data
+          imagePullPolicy: IfNotPresent
+      containers:
+        - name: redis
+          image: {{ $.Values.hub.repository | default "docker.io" }}/{{ $.Values.hub.images.redis_server }}
+          command:
+            - redis-server
+          args:
+            - /data/conf/redis.conf
+          ports:
+            - name: redis
+              containerPort: 6379
+              protocol: TCP
+          env:
+            - name: AUTH
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.redis.name }}-redis-secret
+                  key: auth
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+          livenessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+      restartPolicy: Always
+      dnsPolicy: ClusterFirst
+      serviceAccountName: {{ $.Values.redis.name }}-redis
+      serviceAccount: {{ $.Values.redis.name }}-redis
+      securityContext:
+        runAsUser: 0
+        runAsNonRoot: false
+        fsGroup: 0

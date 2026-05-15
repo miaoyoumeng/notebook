@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gec-mssql
+  namespace: gec-database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gec-mssql
+  template:
+    metadata:
+      labels:
+        app: gec-mssql
+    spec:
+      containers:
+      - image: mcr.microsoft.com/mssql/server:2019-latest
+        name: mssql
+        ports:
+        - containerPort: 1433
+          name: mssql1433
+        env:
+        - name: MSSQL_PID 
+          value: "Developer" 
+        - name: SA_PASSWORD
+          value: "Qwer1234"
+        - name: ACCEPT_EULA
+          value: "Y"
+        resources:
+          limits:
+            cpu: 8
+            memory: 10G
+          requests:
+            cpu: 100m
+            memory: 256Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gec-mssql-svc
+  namespace: gec-database
+spec:
+  type: NodePort
+  ports:
+  - port: 30089
+    nodePort: 30089
+    targetPort: 1433
+    name: mssql
+    protocol: TCP 
+  selector:
+    app: gec-mssql

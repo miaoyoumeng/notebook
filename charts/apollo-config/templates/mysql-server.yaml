@@ -1,0 +1,61 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ $.Values.apollo.name }}-apollo-mysql
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: {{ $.Values.apollo.name }}-apollo-mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ $.Values.apollo.name }}-apollo-mysql
+  template:
+    metadata:
+      labels:
+        app: {{ $.Values.apollo.name }}-apollo-mysql
+    spec:
+      volumes:
+        - name: config
+          configMap:
+            name: {{ $.Values.apollo.name }}-apollo-mysql-configmap
+            defaultMode: 420
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: {{ $.Values.apollo.name }}-apollo-mysql-claim1
+      containers:
+        - name: mysql
+          image: {{ $.Values.hub.repository | default "docker.io" }}/{{ $.Values.hub.images.mysql_server }}
+          ports:
+            - name: mysql
+              containerPort: 3306
+              protocol: TCP
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.apollo.name }}-apollo-mysql-secret
+                  key: auth
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /data
+            - name: config
+              mountPath: /etc/mysql/my.cnf
+              subPath: my.cnf
+
+          livenessProbe:
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+      restartPolicy: Always
+      dnsPolicy: ClusterFirst
+      serviceAccountName: {{ $.Values.apollo.name }}-apollo-mysql
+      serviceAccount: {{ $.Values.apollo.name }}-apollo-mysql
+      securityContext:
+        runAsUser: 0
+        runAsNonRoot: false
+        fsGroup: 0

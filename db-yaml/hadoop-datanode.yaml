@@ -1,0 +1,123 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hadoop-datanode-pvc
+  namespace: gec-database
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: yrcloudfile-sc
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: datanode
+  namespace: gec-database
+  labels: 
+    name: gec-hadoop-datanode
+spec:
+  type: NodePort
+  ports:
+    - name: haoop-datanode-50075
+      port: 50075
+      nodePort: 30081
+      protocol: TCP
+      targetPort: 50075
+    - name: haoop-datanode-50010
+      port: 50010
+      protocol: TCP
+      targetPort: 50010
+  selector:
+    name: gec-hadoop-datanode
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gec-hadoop-datanode
+  namespace: gec-database
+  labels:
+    name: gec-hadoop-datanode
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: gec-hadoop-datanode
+  template:
+    metadata:
+      labels: 
+        name: gec-hadoop-datanode
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: gec-hadoop-datanode
+        image: bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8
+        ports:
+        - containerPort: 50075
+          protocol: TCP
+        - containerPort: 50010
+          protocol: TCP
+        env:
+        - name: HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check
+          value: "false"
+        - name: CORE_CONF_fs_defaultFS
+          value: "hdfs://namenode:8020"
+        - name: CORE_CONF_hadoop_http_staticuser_user
+          value: "root"
+        - name: CORE_CONF_hadoop_proxyuser_hue_hosts
+          value: "*"
+        - name: CORE_CONF_hadoop_proxyuser_hue_groups
+          value: "*"
+        - name: HDFS_CONF_dfs_webhdfs_enabled
+          value: "true"
+        - name: HDFS_CONF_dfs_permissions_enabled
+          value: "false"
+        - name: YARN_CONF_yarn_log___aggregation___enable
+          value: "true"
+        - name: YARN_CONF_yarn_resourcemanager_recovery_enabled
+          value: "true"
+        - name: YARN_CONF_yarn_resourcemanager_store_class
+          value: "org.apache.hadoop.yarn.server.resourcemanager.recovery.FileSystemRMStateStore"
+        - name: YARN_CONF_yarn_resourcemanager_fs_state___store_uri
+          value: "/rmstate"
+        - name: YARN_CONF_yarn_nodemanager_remote___app___log___dir
+          value: "/app-logs"
+        - name: YARN_CONF_yarn_log_server_url
+          value: "http://historyserver:8188/applicationhistory/logs/"
+        - name: YARN_CONF_yarn_timeline___service_enabled
+          value: "true"
+        - name: YARN_CONF_yarn_timeline___service_generic___application___history_enabled
+          value: "true"
+        - name: YARN_CONF_yarn_resourcemanager_system___metrics___publisher_enabled
+          value: "true"
+        - name: YARN_CONF_yarn_resourcemanager_hostname
+          value: "resourcemanager"
+        - name: YARN_CONF_yarn_timeline___service_hostname
+          value: "historyserver"
+        - name: YARN_CONF_yarn_resourcemanager_address
+          value: "resourcemanager:8032"
+        - name: YARN_CONF_yarn_resourcemanager_scheduler_address
+          value: "resourcemanager:8030"
+        - name: YARN_CONF_yarn_resourcemanager_resource__tracker_address
+          value: "resourcemanager:8031"
+        - name: SERVICE_PRECONDITION
+          value: "namenode:50070"
+        resources:
+          limits:
+            cpu: 8
+            memory: 8G
+          requests:
+            cpu: 100m
+            memory: 512Mi
+        volumeMounts:
+        - mountPath: /hadoop/dfs/name
+          name: hadoop-datanode-pvc
+      volumes:
+      - name: hadoop-datanode-pvc
+        persistentVolumeClaim:
+          claimName: hadoop-datanode-pvc

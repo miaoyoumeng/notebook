@@ -1,0 +1,124 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: redis-ha-server
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: redis-ha
+spec:
+  replicas: {{ $.Values.replicas.redis_server_count | default 3 }}
+  serviceName: redis-ha
+  selector:
+    matchLabels:
+      app: redis-ha
+  template:
+    metadata:
+      labels:
+        app: redis-ha
+    spec:
+      volumes:
+        - name: config
+          configMap:
+            name: redis-ha-configmap
+            defaultMode: 420
+      initContainers:
+        - name: config-init
+          image: {{ $.Values.hub.repository | default "docker.io" }}/{{ $.Values.hub.images.redis_server }}
+          command:
+            - sh
+          args:
+            - /readonly-config/init.sh
+          env:
+            - name: SENTINEL_ID_0
+              value: 76570abc73c20d3c0e6c21105777ed9b0898cb75
+            - name: SENTINEL_ID_1
+              value: 0c5b5dae5039679890d11c4d6b6fb66a08625c08
+            - name: SENTINEL_ID_2
+              value: 0b174d8f2a622ce4e7f303c67ce788c35729251d
+            - name: AUTH
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: auth
+          volumeMounts:
+            - name: config
+              readOnly: true
+              mountPath: /readonly-config
+            - name: data
+              mountPath: /data
+          imagePullPolicy: IfNotPresent
+      containers:
+        - name: redis
+          image: {{ $.Values.hub.repository | default "docker.io" }}/{{ $.Values.hub.images.redis_server }}
+          command:
+            - redis-server
+          args:
+            - /data/conf/redis.conf
+          ports:
+            - name: redis
+              containerPort: 6379
+              protocol: TCP
+          env:
+            - name: AUTH
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: auth
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          livenessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+        - name: sentinel
+          image: {{ $.Values.hub.repository | default "docker.io" }}/{{ $.Values.hub.images.redis_server }}
+          command:
+            - redis-sentinel
+          args:
+            - /data/conf/sentinel.conf
+          ports:
+            - name: sentinel
+              containerPort: 26379
+              protocol: TCP
+          env:
+            - name: AUTH
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: auth
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          livenessProbe:
+            tcpSocket:
+              port: 26379
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+      restartPolicy: Always
+      dnsPolicy: ClusterFirst
+      serviceAccountName: redis-ha
+      serviceAccount: redis-ha
+      securityContext:
+        runAsUser: 0
+        runAsNonRoot: false
+        fsGroup: 0
+  volumeClaimTemplates:
+    - kind: PersistentVolumeClaim
+      apiVersion: v1
+      metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 2Gi
+        storageClassName: {{ $.Values.k8s.storage_class_name }}

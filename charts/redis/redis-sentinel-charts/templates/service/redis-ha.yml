@@ -1,0 +1,20 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: redis-ha
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: redis-ha
+spec:
+  ports:
+    - name: redis
+      protocol: TCP
+      port: 6379
+      targetPort: 6379
+    - name: sentinel
+      protocol: TCP
+      port: 26379
+      targetPort: 26379
+  selector:
+    app: redis-ha
+  clusterIP: None

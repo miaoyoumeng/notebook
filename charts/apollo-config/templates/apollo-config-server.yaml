@@ -1,0 +1,87 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  namespace: {{ $.Release.Namespace }}
+  name: {{ $.Values.apollo.name }}-apollo-config-server
+  labels:
+    app: {{ $.Values.apollo.name }}-apollo-config-server
+spec:
+  serviceName: {{ $.Values.apollo.name }}-apollo-config-server
+
+  replicas: {{ $.Values.replicas.apollo_config_server_count }}
+  selector:
+    matchLabels:
+      app: {{ $.Values.apollo.name }}-apollo-config-server
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: {{ $.Values.apollo.name }}-apollo-config-server
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - pod-apollo-config-server
+              topologyKey: kubernetes.io/hostname
+
+      volumes:
+        - name: config
+          configMap:
+            name: {{ $.Values.apollo.name }}-apollo-config-server-configmap
+            items:
+              - key: application.properties
+                path: application.properties
+      
+      containers:
+        - image: {{ $.Values.hub.repository | default "docker.io" }}/{{ $.Values.hub.images.apollo_config_server }}
+          securityContext:
+            privileged: true
+          name: apollo-config-server
+          ports:
+            - protocol: TCP
+              containerPort: 8080
+          
+          volumeMounts:
+            - name: config
+              mountPath: /apollo-configservice/config/application.properties
+              subPath: application.properties
+          env:
+            - name: MYSQL_SVC
+              value: {{ $.Values.apollo.name }}-apollo-mysql
+
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.apollo.name }}-apollo-mysql-secret
+                  key: mysql_user
+
+            - name: MYSQL_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.apollo.name }}-apollo-mysql-secret
+                  key: mysql_pwd
+
+            - name: EUREKA_CLUSTER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $.Values.apollo.name }}-apollo-mysql-secret
+                  key: mysql_pwd
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds:  120
+            periodSeconds: 10
+      dnsPolicy: ClusterFirst

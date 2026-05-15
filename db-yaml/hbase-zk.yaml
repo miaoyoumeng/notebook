@@ -1,0 +1,208 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gec-hbase-zookeeper-pvc
+  namespace: gec-database
+spec:
+  type: NodePort
+  ports:
+    - name: zookeeper-2181
+      port: 2181
+      nodePort: 30134
+      protocol: TCP
+      targetPort: 2181
+  selector:
+    name: gec-hbase-zookeeper
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: gec-hbase-zookeeper
+  name: gec-hbase-zookeeper
+  namespace: gec-database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: gec-hbase-zookeeper
+  template:
+    metadata:
+      labels:
+        name: gec-hbase-zookeeper
+    spec:
+      containers:
+      - image: zookeeper:3.6.3
+        imagePullPolicy: IfNotPresent
+        name: gec-hbase-zookeeper
+        ports:
+        - containerPort: 2181
+          protocol: TCP
+        resources:
+          limits:
+            cpu: "2"
+            memory: 2G
+          requests:
+            cpu: 100m
+            memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hbase-master
+  namespace: gec-database
+spec:
+  type: NodePort
+  ports:
+    - name: hbase-master-30140
+      port: 30140
+      nodePort: 30140
+      protocol: TCP
+      targetPort: 30140
+    - name: hbase-master-30141
+      port: 30141
+      nodePort: 30141
+      protocol: TCP
+      targetPort: 30141
+  selector:
+    name: gec-hbase-master
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hbase-regionserver
+  namespace: gec-database
+spec:
+  type: NodePort
+  ports:
+    - name: hbase-region-30142
+      port: 30142
+      nodePort: 30142
+      protocol: TCP
+      targetPort: 30142
+    - name: hbase-region-30143
+      port: 30143
+      nodePort: 30143
+      protocol: TCP
+      targetPort: 30143
+  selector:
+    name: gec-hbase-regionserver
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gec-hbase-master
+  namespace: gec-database
+  labels:
+    name: gec-hbase-master
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: gec-hbase-master
+  template:
+    metadata:
+      labels: 
+        name: gec-hbase-master
+    spec:
+      hostname: hbase-master
+      restartPolicy: Always
+      containers:
+      - name: gec-hbase-master
+        image: bde2020/hbase-master:1.0.0-hbase1.2.6
+        ports:
+        - containerPort: 30140
+          protocol: TCP
+        - containerPort: 30141
+          protocol: TCP
+        env:
+        - name: SERVICE_PRECONDITION
+          value: "namenode:50070 datanode:50075 gec-hbase-zookeeper-pvc:2181"
+        
+        - name: HBASE_CONF_hbase_rootdir
+          value: "hdfs://namenode:8020/hbase"
+        - name: HBASE_CONF_hbase_cluster_distributed
+          value: "true"
+        - name: HBASE_CONF_hbase_zookeeper_quorum
+          value: "gec-hbase-zookeeper-pvc"
+
+        - name: HBASE_CONF_hbase_master
+          value: "hbase-master:30140"
+        - name: HBASE_CONF_hbase_master_hostname
+          value: "hbase-master"
+        - name: HBASE_CONF_hbase_master_port
+          value: "30140"
+        - name: HBASE_CONF_hbase_master_info_port
+          value: "30141"
+
+        - name: HBASE_MANAGES_ZK
+          value: "false"
+
+        resources:
+          limits:
+            cpu: 10
+            memory: 8G
+          requests:
+            cpu: 100m
+            memory: 512Mi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gec-hbase-regionserver
+  namespace: gec-database
+  labels:
+    name: gec-hbase-regionserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: gec-hbase-regionserver
+  template:
+    metadata:
+      labels: 
+        name: gec-hbase-regionserver
+    spec:
+      hostname: hbase-regionserver
+      restartPolicy: Always
+      containers:
+      - name: gec-hbase-regionserver
+        image: bde2020/hbase-regionserver:1.0.0-hbase1.2.6
+        ports:
+        - containerPort: 30142
+          protocol: TCP
+        - containerPort: 30143
+          protocol: TCP
+        env:
+        - name: HBASE_CONF_hbase_regionserver_hostname
+          value: "hbase-regionserver"
+        - name: SERVICE_PRECONDITION
+          value: "namenode:50070 datanode:50075 gec-hbase-zookeeper-pvc:2181  gec-hbase-master:30141"
+        
+        - name: HBASE_CONF_hbase_rootdir
+          value: "hdfs://namenode:8020/hbase"
+        - name: HBASE_CONF_hbase_cluster_distributed
+          value: "true"
+        - name: HBASE_CONF_hbase_zookeeper_quorum
+          value: "gec-hbase-zookeeper-pvc"
+
+        - name: HBASE_CONF_hbase_master
+          value: "hbase-master:30140"
+        - name: HBASE_CONF_hbase_master_hostname
+          value: "hbase-master"
+        - name: HBASE_CONF_hbase_regionserver_port
+          value: "30142"
+        - name: HBASE_CONF_hbase_regionserver_info_port
+          value: "30143"
+
+        - name: HBASE_MANAGES_ZK
+          value: "false"
+        resources:
+          limits:
+            cpu: 10
+            memory: 8G
+          requests:
+            cpu: 100m
+            memory: 512Mi

@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gec-oceanbase
+  namespace: gec-database
+  labels:
+    name: gec-oceanbase
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: gec-oceanbase
+  template:
+    metadata:
+      labels: 
+        name: gec-oceanbase
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: gec-oceanbase
+        image: oceanbase/obce-mini
+        env:
+        - name: OB_ROOT_PASSWORD
+          value: qwer1234
+        ports:
+        - containerPort: 2881
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 8
+            memory: 10G
+          requests:
+            cpu: 1000m
+            memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gec-oceanbase-svc
+  namespace: gec-database
+  labels: 
+    name: gec-oceanbase
+spec:
+  type: NodePort
+  ports:
+    - name: oceanbase-2881
+      nodePort: 30104
+      port: 2881
+      protocol: TCP
+      targetPort: 2881
+  selector:
+    name: gec-oceanbase

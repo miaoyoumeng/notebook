@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gec-mariadb-pvc
+  namespace: gec-database
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: yrcloudfile-sc
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: gec-mariadb
+  name: gec-mariadb
+  namespace: gec-database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: gec-mariadb
+  template:
+    metadata:
+      labels:
+        name: gec-mariadb
+    spec:
+      containers:
+      - args:
+        - --character-set-server=utf8mb4
+        - --collation-server=utf8mb4_unicode_ci
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: qwer1234
+        - name: TZ
+          value: Asia/Shanghai
+        image: mariadb:10.7
+        imagePullPolicy: IfNotPresent
+        name: mariadb
+        ports:
+        - containerPort: 3306
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: gec-mariadb-pvc
+      volumes:
+      - name: gec-mariadb-pvc
+        persistentVolumeClaim:
+          claimName: gec-mariadb-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: gec-mariadb
+  name: gec-mariadb
+  namespace: gec-database
+spec:
+  ports:
+  - name: gec-mariadb-3306
+    nodePort: 30087
+    port: 3306
+    protocol: TCP
+    targetPort: 3306
+  selector:
+    name: gec-mariadb
+  type: NodePort

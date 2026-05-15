@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: {{ $.Values.apollo.name }}-apollo-mysql
+  name: {{ $.Values.apollo.name }}-apollo-mysql
+  namespace: {{ $.Release.Namespace }}

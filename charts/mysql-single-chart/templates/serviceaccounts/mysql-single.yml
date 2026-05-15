@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: {{ $.Values.mysql.name }}-mysql
+  name: {{ $.Values.mysql.name }}-mysql
+  namespace: {{ $.Release.Namespace }}

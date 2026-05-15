@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Grep",
+      "Bash(ls *)",
+      "Bash(grep *)",
+      "Bash(cat *)",
+      "Bash(find *)",
+      "Bash(git *)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(rm -rf ~/)",
+      "Bash(rm -r *)",
+      "Bash(rm -r ~/)",
+      "Bash(sudo *)",
+      "Bash(eval *)",
+      "Bash(git push --force *)",
+      "Bash(git reset --hard *)",
+      "Bash(pnpm publish *)",
+      "Bash(npm *)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./**/*.pem)",
+      "Read(./**/*.key)"
+    ]
+  },
+  "hooks": {
+    
+  },
+  "enabledPlugins": {
+      "painter@miaoyoumeng": true,
+      "firecrawl@claude-plugins-official": true,
+      "superpowers@claude-plugins-official": false
+  }
+}
+

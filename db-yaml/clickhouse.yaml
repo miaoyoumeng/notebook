@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gec-clickhouse-pvc
+  namespace: gec-database
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: yrcloudfile-sc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: gec-clickhouse
+  name: gec-clickhouse-svc
+  namespace: gec-database
+spec:
+  ports:
+  - name: gec-clickhouse-8123
+    nodePort: 30136
+    port: 8123
+    protocol: TCP
+    targetPort: 8123
+  - name: gec-clickhouse-9000
+    nodePort: 30137
+    port: 9000
+    protocol: TCP
+    targetPort: 9000
+  selector:
+    name: gec-clickhouse
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: gec-clickhouse
+  name: gec-clickhouse
+  namespace: gec-database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: gec-clickhouse
+  template:
+    metadata:
+      labels:
+        name: gec-clickhouse
+    spec:
+      containers:
+      - image: harbor.tsingj.local/gec/clickhouse-server:21.3.20
+        imagePullPolicy: IfNotPresent
+        name: gec-clickhouse
+        ports:
+        - containerPort: 9000
+          protocol: TCP
+        - containerPort: 8123
+          protocol: TCP
+        resources:
+          limits:
+            cpu: "4"
+            memory: 4G
+          requests:
+            cpu: 100m
+            memory: 512Mi
+        volumeMounts:
+        - mountPath: /var/lib/clickhouse
+          name: clickhouse
+      volumes:
+      - name: clickhouse
+        persistentVolumeClaim:
+          claimName: gec-clickhouse-pvc
+

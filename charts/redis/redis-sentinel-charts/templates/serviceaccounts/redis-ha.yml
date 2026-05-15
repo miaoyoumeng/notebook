@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: redis-ha
+  name: redis-ha
+  namespace: {{ $.Release.Namespace }}

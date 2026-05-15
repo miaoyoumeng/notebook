@@ -1,0 +1,53 @@
+{
+  "env":{
+      "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": 1
+  },
+  "context": {
+    "includeFiles": ["**/src/**/*.java"],
+    "excludeFiles": ["**/target/**.class"]
+  },
+  "language": "zh-CN",
+  "systemPrompt": "你是一位资深的Java架构师，专注于Spring Boot和微服务。你的回答需要包含详细的代码示例和设计考量。",
+  "cleanupPeriodDays": 14, 
+  "showTurnDuration": true, 
+  "features": {
+    "autoFormat": true,
+    "confirmFileWrites": false
+  },
+  "permissions": {
+    "allow": [
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Grep",
+      "Bash(ls *)",
+      "Bash(grep *)",
+      "Bash(cat *)",
+      "Bash(find *)",
+      "Bash(git *)",
+      "Bash(mvn *)",
+      "Bash(uv run python *)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(rm -rf ~/)",
+      "Bash(rm -r *)",
+      "Bash(rm -r ~/)",
+      "Bash(sudo *)",
+      "Bash(eval *)",
+      "Bash(git push --force *)",
+      "Bash(git reset --hard *)",
+      "Bash(pnpm publish *)",
+      "Bash(npm *)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./**/*.pem)",
+      "Read(./**/*.key)"
+    ]
+  },
+  "hooks": {},
+  "enabledPlugins": {
+    "java@miaoyoumeng": true
+  }
+}

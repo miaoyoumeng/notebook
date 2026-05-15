@@ -1,0 +1,36 @@
+{{- $replicas := int (toString .Values.replicas.redis_server_count) }}
+{{- range $i := until $replicas }}
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: redis-ha-announce-{{ $i }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: redis-ha
+spec:
+  selector:
+    app: redis-ha
+    statefulset.kubernetes.io/pod-name: redis-ha-server-{{ $i }}
+  # ports:
+  #   - name: server
+  #     protocol: TCP
+  #     port: 6379
+  #     targetPort: 6379
+  #   - name: sentinel
+  #     protocol: TCP
+  #     port: 26379
+  #     targetPort: 26379
+  # type: ClusterIP
+  ports:
+    - name: server
+      protocol: TCP
+      port: 6379
+      targetPort: 6379
+    - name: sentinel
+      protocol: TCP
+      port: 26379
+      targetPort: 26379
+  type: NodePort
+  
+{{- end }}

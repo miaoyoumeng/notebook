@@ -1,0 +1,78 @@
+# docker run -d -p 1521:1521 -e ORACLE_PASSWORD=tsingj \
+# -v /Users/miaoyoumeng/oracle-volume:/opt/oracle/oradata gvenzl/oracle-xe:18
+apiVersion: v1
+kind: Service
+metadata:
+  name: gec-oracle-svc
+  namespace: gec-database
+spec:
+  type: NodePort
+  ports:
+  - port: 1521
+    nodePort: 30147
+    targetPort: 1521
+    name: oracle-1521
+  selector:
+    app: gec-oracle
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gec-oracle-pvc
+  namespace: gec-database
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 30Gi
+  storageClassName: yrcloudfile-sc
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gec-oracle
+  namespace: gec-database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gec-oracle
+  template:
+    metadata:
+      labels:
+        app: gec-oracle
+    spec:
+      containers:
+      - image: truevoly/oracle-12c
+        name: oralce
+        # command: ["tail","-f","/var/log/lastlog"]
+        securityContext:
+          privileged: true
+        ports:
+        - containerPort: 1521
+          name: oralce-1521
+        - containerPort: 8080
+          name: oralce-8080
+        env:
+        - name: DBCA_TOTAL_MEMORY
+          value: "5096"
+        resources:
+          limits:
+            cpu: 4
+            memory: 10G
+          requests:
+            cpu: 1000m
+            memory: 512Mi
+        # volumeMounts:
+        # - mountPath: /u01/app/oracle
+        #   name: oracle-data
+      volumes:
+      - name: oracle-data
+        persistentVolumeClaim: 
+          claimName: gec-oracle-pvc
+      - name: sys
+        hostPath:
+          path: /sys

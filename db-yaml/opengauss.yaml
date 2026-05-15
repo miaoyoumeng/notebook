@@ -1,0 +1,79 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gre-opengauss-pvc
+  namespace: gec-database
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 30Gi
+  storageClassName: yrcloudfile-sc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gec-opengauss
+  namespace: gec-database
+  labels:
+    name: gec-opengauss
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: gec-opengauss
+  template:
+    metadata:
+      labels: 
+        name: gec-opengauss
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: gec-opengauss
+        image: enmotech/opengauss:2.1.0
+        securityContext:
+          privileged: true
+        ports:
+        - containerPort: 5432
+          protocol: TCP
+        env:
+        - name: GS_PASSWORD
+          value: "Qwer@1234"
+        - name: GS_USERNAME
+          value: "tsingj"
+        resources:
+          limits:
+            cpu: 8
+            memory: 10G
+          requests:
+            cpu: 1000m
+            memory: 512Mi
+        volumeMounts:
+        - mountPath: /var/lib/opengauss
+          name: dfos-opengauss-pvc
+      volumes:
+      - name: dfos-opengauss-pvc
+        persistentVolumeClaim:
+          claimName: gre-opengauss-pvc
+      - name: sys
+        hostPath:
+          path: /sys
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gec-opengauss-svc
+  namespace: gec-database
+  labels: 
+    name: gec-opengauss
+spec:
+  type: NodePort
+  ports:
+    - name: opengauss-5432
+      nodePort: 30093
+      port: 5432
+      protocol: TCP
+      targetPort: 5432
+  selector:
+    name: gec-opengauss

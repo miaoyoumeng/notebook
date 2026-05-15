@@ -1,0 +1,15 @@
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: {{ $.Release.Namespace }}
+  name: {{ $.Values.apollo.name }}-apollo-config-server
+  labels:
+    app: {{ $.Values.apollo.name }}-apollo-config-server
+spec:
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: {{ $.Values.apollo.name }}-apollo-config-server
+  type: NodePort

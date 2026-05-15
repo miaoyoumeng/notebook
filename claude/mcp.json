@@ -1,0 +1,28 @@
+{
+  "tdesign": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "tdesign-mcp-server"
+      ],
+      "description": "tdesign vue3 ui"
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "chrome-devtools-mcp"
+      ],
+      "env": {
+        "CHROME_PATH": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+      }
+    },
+    "firecrawl": {
+      "command": "npx",
+      "args": [
+        "firecrawl-mcp"
+      ],
+      "env": {
+        "FIRECRAWL_API_KEY": "fc-39596d92d82543978471403ce1363c2a"
+      }
+    }
+}

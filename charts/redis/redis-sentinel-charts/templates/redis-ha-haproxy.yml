@@ -1,0 +1,80 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: redis-ha-haproxy
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: redis-ha
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: redis-ha-haproxy
+  template:
+    metadata:
+      name: redis-ha-haproxy
+      labels:
+        app: redis-ha-haproxy
+    spec:
+      volumes:
+        - name: config-volume
+          configMap:
+            name: redis-ha-configmap
+            defaultMode: 420
+        - name: shared-socket
+          emptyDir: {}
+        - name: data
+          emptyDir: {}
+      initContainers:
+        - name: config-init
+          image: {{ $.Values.hub.repository | default "docker.io" }}/{{ $.Values.hub.images.redis_ha_proxy }}
+          command:
+            - sh
+          args:
+            - /readonly/haproxy_init.sh
+          env:
+            - name: AUTH
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: auth
+          resources: {}
+          volumeMounts:
+            - name: config-volume
+              readOnly: true
+              mountPath: /readonly
+            - name: data
+              mountPath: /data
+          imagePullPolicy: IfNotPresent
+      containers:
+        - name: haproxy
+          image: {{ $.Values.hub.repository | default "docker.io" }}/{{ $.Values.hub.images.redis_ha_proxy }}
+          ports:
+            - name: redis
+              containerPort: 6379
+              protocol: TCP
+          resources: {}
+          volumeMounts:
+            - name: data
+              mountPath: /usr/local/etc/haproxy
+            - name: shared-socket
+              mountPath: /run/haproxy
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8888
+              scheme: HTTP
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+            periodSeconds: 3
+            successThreshold: 1
+            failureThreshold: 3
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+      dnsPolicy: ClusterFirst
+      serviceAccountName: redis-ha-haproxy
+      serviceAccount: redis-ha-haproxy
+      securityContext:
+        runAsUser: 1000
+        runAsNonRoot: true
+        fsGroup: 1000

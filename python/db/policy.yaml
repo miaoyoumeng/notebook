@@ -1,0 +1,27 @@
+apiVersion: "dbscheduler/v1alpha1"
+kind: "dbschedulerPolicy"
+strategies:
+  - source:
+      type: mysql
+      host: 10.90.1.42
+      port: 31292
+      user: root
+      password: 'BvFH0O3XrH59DAny'
+      database: 'circulate_all'
+      data:
+        sql: 'select * from data_asset_catalogue'
+        primary: 'id'
+    target:
+      type: mysql
+      host: 10.90.1.42
+      port: 30948
+      user: root
+      password: 'BvFH0O3XrH59DAny'
+      database: 'operation_platform'
+      table: 
+        name: 'data_asset_catalogue_copy'
+        primary: 'id'
+        defaults:
+          - name: data_level
+            value: '公开级'
+

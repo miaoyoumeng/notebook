@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gre-db2-data-pvc-ds
+  namespace: gec-database
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 30Gi
+  storageClassName: yrcloudfile-sc
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db2
+  namespace: gec-database
+  labels:
+    name: db2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: db2
+  template:
+    metadata:
+      labels: 
+        name: db2
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: db2
+        image: ibmcom/db2
+        securityContext:
+          privileged: true
+        ports:
+        - containerPort: 50000
+          protocol: TCP
+        env:
+        - name: DB2INST1_PASSWORD
+          value: "qwer1234"
+        - name: DBNAME
+          value: "tsingjdb"
+        - name: LICENSE
+          value: "accept"
+        resources:
+          limits:
+            cpu: 3
+            memory: 1G
+          requests:
+            cpu: 1000m
+            memory: 512Mi
+        volumeMounts:
+        - mountPath: /database
+          name: dfos-db2-pvc
+      volumes:
+      - name: dfos-db2-pvc
+        persistentVolumeClaim:
+          claimName: gre-db2-data-pvc-ds
+      - name: sys
+        hostPath:
+          path: /sys
+          
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db2-svc
+  namespace: gec-database
+  labels: 
+    name: db2
+spec:
+  type: NodePort
+  ports:
+    - name: db2-50000
+      nodePort: 32505
+      port: 50000
+      protocol: TCP
+      targetPort: 50000
+  selector:
+    name: db2
+
+
+# docker run -d -p 50000:50000 --name db2 --privileged=true -e DB2INST1_PASSWORD=qwer1234 -e DBNAME=tsingjdb -e LICENSE=accept -v /db2data:/database ibmcom/db2

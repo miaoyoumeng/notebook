@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gre-kingbase-pvc
+  namespace: gec-database
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 30Gi
+  storageClassName: yrcloudfile-sc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gec-kingbase
+  namespace: gec-database
+  labels:
+    name: gec-kingbase
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: gec-kingbase
+  template:
+    metadata:
+      labels: 
+        name: gec-kingbase
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: gec-kingbase
+        image: harbor.tsingj.local/gec/kingbase:v8r4
+        securityContext:
+          privileged: true
+        ports:
+        - containerPort: 54321
+          protocol: TCP
+        env:
+        - name: SYSTEM_PWD
+          value: "qwer1234"
+        resources:
+          limits:
+            cpu: 8
+            memory: 10G
+          requests:
+            cpu: 1000m
+            memory: 512Mi
+        # volumeMounts:
+        # - mountPath: /opt/kingbase/data
+        #   name: dfos-kingbase-pvc
+      volumes:
+      - name: dfos-kingbase-pvc
+        persistentVolumeClaim:
+          claimName: gre-kingbase-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gec-kingbase-svc
+  namespace: gec-database
+  labels: 
+    name: gec-kingbase
+spec:
+  type: NodePort
+  ports:
+    - name: kingbase-54321
+      nodePort: 30108
+      port: 54321
+      protocol: TCP
+      targetPort: 54321
+  selector:
+    name: gec-kingbase

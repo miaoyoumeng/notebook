@@ -1,0 +1,16 @@
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: {{ $.Release.Namespace }}
+  name: {{ $.Values.apollo.name }}-apollo-admin-server-svc
+  labels:
+    app: {{ $.Values.apollo.name }}-apollo-admin-server
+spec:
+  ports:
+    - protocol: TCP
+      port: 8090
+      targetPort: 8090
+  selector:
+    app: {{ $.Values.apollo.name }}-apollo-admin-server
+  type: ClusterIP
+  sessionAffinity: ClientIP

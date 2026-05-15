@@ -1,0 +1,26 @@
+
+# k8s 配置
+
+k8s:
+  ## 存储
+  # storage_class_name: nfs-client
+  storage_class_name: yrcloudfile-sc
+  # 外部访问节点地址，nodePort方式使用
+  node_id: 172.16.113.30
+
+replicas:
+  apollo_config_server_count: 3
+
+# 指定对应组件的镜像地址
+hub:
+  repository: docker.io
+  images:
+    busybox: busybox:1.36.0
+    mysql_server: mysql:5.7
+    apollo_config_server: apolloconfig/apollo-configservice:2.0.1
+apollo:
+  name: miao
+
+# 指定mysql对外服务端口
+service:
+  mysql_port: 32336

@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gec-ftp-data-pvc
+  namespace: gec-database
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: yrcloudfile-sc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gec-ftp
+  namespace: gec-database
+  labels:
+    name: gec-ftp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: gec-ftp
+  template:
+    metadata:
+      labels: 
+        name: gec-ftp
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: gec-ftp
+        image: fauria/vsftpd:latest
+        env:
+        - name: FTP_USER
+          value: "tsingj"
+        - name: FTP_PASS
+          value: "qwer1234"
+        - name: PASV_ADDRESS
+          value: "172.16.113.30"
+        - name: PASV_MIN_PORT
+          value: "32503"
+        - name: PASV_MAX_PORT
+          value: "32504"
+        ports:
+        - containerPort: 21
+          protocol: TCP
+          name: "ftp-server"
+        - containerPort: 32503
+          protocol: TCP
+          name: "ftp-pasv-min"
+        - containerPort: 32504
+          protocol: TCP
+          name: "ftp-pasv-max"
+        resources:
+          limits:
+            cpu: 1
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        volumeMounts:
+        - mountPath: /home/vsftpd
+          name: gec-ftp-pvc
+      volumes:
+      - name: gec-ftp-pvc
+        persistentVolumeClaim:
+          claimName: gec-ftp-data-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gec-ftp-svc
+  namespace: gec-database 
+  labels: 
+    name: gec-ftp
+spec:
+  type: NodePort
+  ports:
+    - name: ftp-21
+      nodePort: 32502
+      port: 32502
+      protocol: TCP
+      targetPort: 21
+    - name: ftp-32503
+      nodePort: 32503
+      port: 32503
+      protocol: TCP
+      targetPort: 32503
+    - name: ftp-32504
+      nodePort: 32504
+      port: 32504
+      protocol: TCP
+      targetPort: 32504
+  selector:
+    name: gec-ftp

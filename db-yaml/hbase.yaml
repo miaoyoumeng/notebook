@@ -1,0 +1,94 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gec-hbase-pvc
+  namespace: gec-database
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: yrcloudfile-sc
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: gec-hbase
+  namespace: gec-database
+  labels: 
+    name: gec-hbase
+spec:
+  type: NodePort
+  ports:
+    - name: hbase-16010
+      port: 16010
+      nodePort: 30105
+      protocol: TCP
+      targetPort: 16010
+    - name: hbase-9095
+      port: 9095
+      nodePort: 30110
+      protocol: TCP
+      targetPort: 9095
+    - name: hbase-8085
+      port: 8085
+      nodePort: 30111
+      protocol: TCP
+      targetPort: 8085
+    - name: hbase-9090
+      port: 9090
+      nodePort: 30112
+      protocol: TCP
+      targetPort: 9090
+  selector:
+    name: gec-hbase
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gec-hbase
+  namespace: gec-database
+  labels:
+    name: gec-hbase
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: gec-hbase
+  template:
+    metadata:
+      labels: 
+        name: gec-hbase
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: gec-hbase
+        image: dajobe/hbase
+        ports:
+        - containerPort: 16010
+          protocol: TCP
+        - containerPort: 9095
+          protocol: TCP
+        - containerPort: 8085
+          protocol: TCP
+        env:
+        - name: HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check
+          value: "false"
+        resources:
+          limits:
+            cpu: 8
+            memory: 8G
+          requests:
+            cpu: 100m
+            memory: 512Mi
+        volumeMounts:
+        - mountPath: /data dajobe/hbase
+          name: gec-hbase-pvc
+      volumes:
+      - name: gec-hbase-pvc
+        persistentVolumeClaim:
+          claimName: gec-hbase-pvc

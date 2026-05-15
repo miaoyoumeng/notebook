@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gec-postgresql-pvc
+  namespace: gec-database
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: yrcloudfile-sc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: gec-postgresql
+  name: gec-postgresql
+  namespace: gec-database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: gec-postgresql
+  template:
+    metadata:
+      labels:
+        name: gec-postgresql
+    spec:
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: gec-postgres-config
+        image: postgres:13
+        imagePullPolicy: IfNotPresent
+        name: gec-postgresql
+        ports:
+        - containerPort: 5432
+          protocol: TCP
+        resources:
+          limits:
+            cpu: "4"
+            memory: 4G
+          requests:
+            cpu: 100m
+            memory: 512Mi
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: postgredb
+      volumes:
+      - name: postgredb
+        persistentVolumeClaim:
+          claimName: gec-postgresql-pvc
+      - configMap:
+          defaultMode: 420
+          name: gec-postgres-config
+        name: gec-postgres-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: gec-postgresql
+  name: gec-postgresql
+  namespace: gec-database
+spec:
+  ports:
+  - name: gec-postgre-5432
+    nodePort: 30086
+    port: 5432
+    protocol: TCP
+    targetPort: 5432
+  selector:
+    name: gec-postgresql
+  type: NodePort

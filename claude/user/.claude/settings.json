@@ -1,0 +1,47 @@
+{
+    "env": {
+        "ANTHROPIC_AUTH_TOKEN": "YOUR_API_KEY",
+        "ANTHROPIC_BASE_URL": "https://dashscope.aliyuncs.com/apps/anthropic",
+        "ANTHROPIC_MODEL": "qwen3.6-plus",
+        "ANTHROPIC_SMALL_FAST_MODEL": "qwen3.6-flash",
+        "ANTHROPIC_DEFAULT_HAIKU_MODEL": "qwen3.6-flash",
+        "ANTHROPIC_DEFAULT_SONNET_MODEL": "qwen3.6-plus",
+        "ANTHROPIC_DEFAULT_OPUS_MODEL": "qwen3.6-plus",
+        "CLAUDE_CODE_SUBAGENT_MODEL": "qwen3.6-plus"
+    },
+    "permissions": {
+        "allow": [
+            "Edit",
+            "Glob",
+            "Grep",
+            "Read",
+            "Write",
+            "Bash(git *)",
+            "Bash(cat *)",
+            "Bash(find *)",
+            "Bash(grep *)",
+            "Bash(head *)",
+            "Bash(ls *)",
+            "Bash(node *)",
+            "Bash(tail *)",
+            "Bash(wc *)",
+            "Bash(uv run python *)"
+        ],
+        "deny": [
+            "Bash(rm -rf *)",
+            "Bash(rm -rf ~/)",
+            "Bash(rm -r *)",
+            "Bash(rm -r ~/)",
+            "Bash(sudo *)",
+            "Bash(eval *)",
+            "Bash(git push --force *)",
+            "Bash(git reset --hard *)",
+            "Bash(pnpm publish *)",
+            "Bash(npm *)",
+            "Read(./.env)",
+            "Read(./.env.*)",
+            "Read(./**/*.pem)",
+            "Read(./**/*.key)"
+        ]
+    }
+}

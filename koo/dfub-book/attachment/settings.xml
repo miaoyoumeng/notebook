@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+  
+  <localRepository>/Users/miaoyoumeng/tools/maven-Respository</localRepository>
+  <pluginGroups>
+    <pluginGroup>org.mortbay.jetty</pluginGroup>
+  </pluginGroups>
+  <proxies>
+  </proxies>
+  <mirrors>
+  </mirrors>
+  <servers>
+    <server>
+    <id>releases</id>
+    <username>${自己名字}</username>
+    <password>${自己密码}</password>
+  </server>
+  <server>
+    <id>snapshots</id>
+    <username>${自己名字}</username>
+    <password>${自己密码}</password>
+  </server>
+  </servers>
+  <profiles>
+  
+    <profile>
+        <id>dev-nexus</id>
+        <repositories>
+            <repository>
+                <id>local-nexus</id>
+                <url>http://dfubnexus.test.xdf.cn/repository/maven-public/</url>
+                <releases>
+                    <enabled>true</enabled>
+                    <updatePolicy>daily</updatePolicy>
+                </releases>
+                <snapshots>
+                    <enabled>true</enabled>
+                    <updatePolicy>always</updatePolicy>
+                </snapshots>
+            </repository>
+        </repositories>
+        <pluginRepositories>
+            <pluginRepository>
+                <id>local-nexus</id>
+                <url>http://dfubnexus.test.xdf.cn/repository/maven-public/</url>
+                <releases>
+                    <enabled>true</enabled>
+                </releases>
+                <snapshots>
+                    <enabled>true</enabled>
+                </snapshots>
+            </pluginRepository>
+        </pluginRepositories>
+    </profile>
+    <profile>
+        <id>sonar</id>
+        <activation>
+           <activeByDefault>true</activeByDefault>
+        </activation>
+        <properties> 
+            <!-- SERVER ON A REMOTE HOST-->
+            <sonar.host.url>http://dfubnexus.test.xdf.cn</sonar.host.url>
+        </properties>
+    </profile>
+  </profiles>
+  
+  <activeProfiles>
+    <activeProfile>dev-nexus</activeProfile>
+  </activeProfiles>
+</settings>

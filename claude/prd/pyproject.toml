@@ -1,0 +1,12 @@
+[project]
+name = "personal-architect-planner"
+version = "1.0.0"
+description = "Personal knowledge base compiled from AI conversations - inspired by Karpathy's LLM KB architecture"
+requires-python = ">=3.12"
+dependencies = [
+    "claude-agent-sdk>=0.1.29",
+    "PyYAML>=6.0.2"
+]
+
+[tool.ruff]
+line-length = 100

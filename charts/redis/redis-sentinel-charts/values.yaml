@@ -1,0 +1,25 @@
+
+# k8s 配置
+
+k8s:
+  # storage_class_name: nfs-client
+  storage_class_name: yrcloudfile-sc
+
+# 指定副本数量
+replicas:
+  ha_proxy_count: 2
+  redis_server_count: 3
+
+# 指定对应组件的镜像地址
+hub:
+  repository: docker.io
+  images:
+    busybox: busybox:1.36.0
+    redis_server: redis:5.0.14-alpine
+    redis_ha_proxy: haproxy:2.0.25-alpine
+
+# 指定redis对外服务端口
+service:
+  ha_proxy_port: 32108
+  redis_server_port: 32336
+

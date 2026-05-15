@@ -1,0 +1,26 @@
+{
+  "skill_name": "java-review",
+  "evals": [
+    {
+      "id": 1,
+      "name": "空指针风险检查",
+      "prompt": "请审查这段 Java 代码的质量问题：\n\n```java\npublic class UserService {\n    public String getUserName(User user) {\n        return user.getName().trim();\n    }\n    \n    public void processUsers(List<User> users) {\n        for (int i = 0; i <= users.size(); i++) {\n            System.out.println(users.get(i).getName());\n        }\n    }\n}\n```",
+      "expected_output": "应指出空指针风险（未检查 user 和 name 是否为 null）和数组越界风险（i <= size 应为 i < size）",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "资源泄漏检查",
+      "prompt": "审查以下代码是否有资源泄漏问题：\n\n```java\npublic class FileProcessor {\n    public String readFile(String path) throws IOException {\n        FileInputStream fis = new FileInputStream(path);\n        byte[] data = new byte[fis.available()];\n        fis.read(data);\n        return new String(data);\n    }\n}\n```",
+      "expected_output": "应指出 FileInputStream 未关闭，存在资源泄漏，应使用 try-with-resources",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "性能问题检查",
+      "prompt": "请检查这段代码的性能问题：\n\n```java\npublic class DataBuilder {\n    public String buildData(List<String> items) {\n        String result = \"\";\n        for (String item : items) {\n            result = result + item + \",\";\n        }\n        return result;\n    }\n}\n```",
+      "expected_output": "应指出在循环中使用字符串拼接性能低下，应使用 StringBuilder",
+      "files": []
+    }
+  ]
+}
