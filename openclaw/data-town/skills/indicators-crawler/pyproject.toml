@@ -1,0 +1,13 @@
+[project]
+name = "indicators-crawler"
+version = "1.0.0"
+description = "政府官方网站数据抓取，并提取政府官方的指标"
+requires-python = ">=3.12"
+dependencies = [
+    "cpca>=0.5.5",
+    "setuptools<=80",
+    "claude-agent-sdk>=0.1.29"
+]
+
+[tool.ruff]
+line-length = 100

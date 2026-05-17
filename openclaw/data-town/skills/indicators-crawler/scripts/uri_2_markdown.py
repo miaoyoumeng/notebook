@@ -1,19 +1,28 @@
 #!/usr/bin/env python3
+
 """
-planning-with-files 会话恢复脚本
+从数据存储目录读取图片地址，提交给 claude_agent_sdk 识别成 markdown 文件，
+输出到 markdowns/${md5(url)}.md。
 
-分析上一个会话，查找在最后一次规划文件更新后未同步的上下文。
-设计为在 SessionStart 时运行。
+目录约定（--dir 为数据存储根目录）：
+    {dir}/markdowns/    — 输入的 markdown 文件
+    {dir}/logs/         — 运行日志
 
-用法：python3 crawler.py [项目路径]
+用法:
+    uv run python scripts/uri_2_markdown.py --dir /path/to/data
 """
 
 import json
+import time
+import random
 import sys
 import csv
 import argparse
 import asyncio
 import os
+import logging
+
+from config import setup_logger
 
 import hashlib
 from pathlib import Path
@@ -43,10 +52,9 @@ def process_todo_list(file_path: str):
                 "region": region,
                 "url": url
                 })
-            # print(f"年份: {year}, 区域: {region}, 地址: {url}")
     return data
 
-async def queryImage(data: Dict, project_dir: str):
+async def claudeQueryURI(data: Dict, project_dir: str):
     from claude_agent_sdk import (
         AssistantMessage,
         ClaudeAgentOptions,
@@ -62,13 +70,21 @@ async def queryImage(data: Dict, project_dir: str):
     prompt = f"""
 ## 识别图片内容
 
-- 图片地址：{data['url']}
-- 图片地址可能是一个url，也有可能是本地地址，根据具体url情况字段识别
+- 图片地址：{data['url']}。
+- 图片地址可能是一个url，也有可能是本地磁盘地址，根据具体url情况字段识别。
+- 识别远程url 图片过程中，如果需要下载图片，请把图片下载到 `/tmp/images/` 目录下。
 
 ## 识别规则
 
 如果识别不出有效内容，就直接输出空字符串，不要靠联想内容。
-   
+如果图片中的文字上下行之间内容明显是树形的，则输出对应数量的空格，保证树形关系成立，如下面情况。
+```
+就业人数       18034
+   第一产业    800
+   第二产业    500
+   第三产业    534
+```
+
 ## 内容输出
 
 - 以 markdown 格式输出。
@@ -95,15 +111,19 @@ async def queryImage(data: Dict, project_dir: str):
             elif isinstance(message, ResultMessage):
                 total_cost = message.total_cost_usd or 0.0
     except Exception as e:
-        print(f"Error querying knowledge base: {e}")
+        logger.error(f"Error claude querying base: {e}")
         answer = ""
-    markdown = f"""
-# `{data['region']} `地区 `{data['time']}` 的统计年鉴。
-- 这是 `{data['region']} `地区 `{data['time']}` 的数据。
-- 具体数据如下。
+    markdown = ""
+    if answer and answer.strip():
+        markdown = f"""
     
 {answer}
-    """
+
+# 上面内容是 `{data['region']} `地区 `{data['time']}` 的统计年鉴。
+- 这是 `{data['region']} `地区 `{data['time']}` 的数据。
+- 数据来源地址：{data['url']}
+
+        """
     return markdown, total_cost
 
 def markdown_writer(content: str, file_path: Union[str, Path]) -> None:
@@ -119,8 +139,8 @@ def markdown_writer(content: str, file_path: Union[str, Path]) -> None:
     """
     dir_path = Path(file_path).parent
     if not dir_path.exists():
-        print(f"{dir_path} 不存在")
-        exit(0)
+        logger.warning(f"{dir_path} 不存在, exit...")
+        sys.exit(0)
     # 以 UTF-8 编码写入
     file_path.write_text(content, encoding='utf-8')
 
@@ -138,11 +158,9 @@ def log_writer(content: str, log_file: Union[str, Path]) -> None:
     """
     log_path = Path(log_file)
     if not log_path.exists():
-        print(f"{log_path} 不存在")
-        exit(0)
+        log_path.touch(exist_ok=True)
     
     with log_path.open("a", encoding="utf-8") as f:
-        # f.write(content)
         print(content, file=f)
 
 
@@ -158,6 +176,8 @@ def is_line_match(file_path: str, match_str: str) -> bool:
         True  - 存在某一行与 match_str 完全相同
         False - 不存在完全匹配的行，或文件读取失败
     """
+    if not file_path.exists():
+        return False
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             for line in f:
@@ -167,13 +187,13 @@ def is_line_match(file_path: str, match_str: str) -> bool:
                     return True
         return False
     except FileNotFoundError:
-        print(f"错误：文件 '{file_path}' 不存在")
+        logger.error(f"错误：文件 '{file_path}' 不存在")
         return False
     except PermissionError:
-        print(f"错误：没有权限读取文件 '{file_path}'")
+        logger.error(f"错误：没有权限读取文件 '{file_path}'")
         return False
     except Exception as e:
-        print(f"读取文件时发生未知错误: {e}")
+        logger.error(f"读取文件时发生未知错误: {e}")
         return False
 
 def main():
@@ -192,8 +212,8 @@ def main():
     
     ROOT = Path(ROOT_DIR)
     if not ROOT.exists():
-        print(f"{ROOT} 不存在")
-        exit(0)
+        logger.warning(f"{ROOT} 不存在,  exit...")
+        sys.exit(0)
         
     MARKDOWNS_DIR:Path = Path(ROOT / "markdowns")
     if not MARKDOWNS_DIR.exists():
@@ -205,33 +225,49 @@ def main():
 
     TODO_LIST_FILE:Path = Path(ROOT / "todolist"/ "index.csv")
     if not TODO_LIST_FILE.exists():
-        print(f'{ROOT_DIR}/todolist/index.txt 文件不存在' )
-        exit(0)
+        logger.warning(f'{ROOT_DIR}/todolist/index.txt 文件不存在, exit....' )
+        sys.exit(0)
 
     todo_list = process_todo_list(str(TODO_LIST_FILE))
 
     total_cost = 0.0
+
+    total = 0
+    skipped = 0
+    errors = 0
+
+    logger.info(f"找到 {len(todo_list)} 个 URI 路径")
+
     for item in todo_list:
         md5_hash = hashlib.md5(json.dumps(item,ensure_ascii=True).encode('utf-8')).hexdigest()
 
         processed_urls_log = Path(LOGS_DIR / "processed_urls.log")
         if (is_line_match(processed_urls_log, md5_hash)):
-            print(f'{md5_hash} 已处理')
+            # logger.info(f'{md5_hash} 已处理， 跳过...')
+            skipped += 1
             continue
-
-        markdown, cost = asyncio.run(queryImage(item, ROOT_DIR))
+        
+        logger.info(f'处理文件 {md5_hash} ...')
+        markdown, cost = asyncio.run(claudeQueryURI(item, ROOT_DIR))
         total_cost = total_cost + cost
-
+        if not markdown:
+            logger.warning(f'无法获取 markdown, exit....')
+            errors += 1
+            time.sleep(120)
+            continue
         markdown_path = Path(MARKDOWNS_DIR / (md5_hash + ".md"))
 
-        markdown_writer(markdown, markdown_path)
         log_writer(md5_hash, processed_urls_log)
+        markdown_writer(markdown, markdown_path)
+        pause = random.randint(20, 25)
+        time.sleep(pause)
+        total += 1
+        logger.info(f"\n完成: 总数{len(todo_list)}个, 处理 {total} 个, 跳过 {skipped} 个, 错误 {errors} 个, 剩余 {len(todo_list) - total - skipped - errors} 个")
 
-        break;
-        
-    print(f'total_cost: {total_cost}')
+    logger.info(f"\n完成: 总数{len(todo_list)}个, 成功处理处理 {total + skipped} 个, 错误 {errors} 个, 剩余 {len(todo_list) - total - skipped - errors} 个")
 
 
 
 if __name__ == '__main__':
+    logger = setup_logger(level = logging.INFO)
     main()
