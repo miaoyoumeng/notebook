@@ -11,11 +11,6 @@
       "Glob",
       "Grep",
       "Git",
-      "Read",
-      "Write",
-      "Edit",
-      "Glob",
-      "Grep",
       "Bash(ls *)",
       "Bash(grep *)",
       "Bash(cat *)",
@@ -30,8 +25,9 @@
       "Bash(rm -r *)",
       "Bash(rm -r ~/)",
       "Bash(sudo *)",
+      "Bash(scp *)",
       "Bash(eval *)",
-      "Bash(git push --force *)",
+      "Bash(git push *)",
       "Bash(git reset --hard *)",
       "Bash(pnpm publish *)",
       "Bash(npm *)",
@@ -43,40 +39,16 @@
   },
   "hooks": {
     "SessionStart": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "uv run python ${CLAUDE_PROJECT_DIR}/.claude/hooks/claude-memory-compiler/hooks/session-start.py",
-            "timeout": 15
-          }
-        ]
-      }
+      
     ],
     "PreCompact": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "uv run python ${CLAUDE_PROJECT_DIR}/.claude/hooks/claude-memory-compiler/hooks/pre-compact.py",
-            "timeout": 10
-          }
-        ]
-      }
+      
     ],
     "SessionEnd": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "uv run python ${CLAUDE_PROJECT_DIR}/.claude/hooks/claude-memory-compiler/hooks/session-end.py",
-            "timeout": 10
-          }
-        ]
-      }
+      
     ]
+  },
+  "enabledPlugins": {
+    "nodejs@miaoyoumeng": true
   }
 }

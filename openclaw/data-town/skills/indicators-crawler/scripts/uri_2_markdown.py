@@ -113,6 +113,7 @@ async def claudeQueryURI(data: Dict, project_dir: str):
     except Exception as e:
         logger.error(f"Error claude querying base: {e}")
         answer = ""
+        sys.exit(0)
     markdown = ""
     if answer and answer.strip():
         markdown = f"""
@@ -262,9 +263,10 @@ def main():
         pause = random.randint(20, 25)
         time.sleep(pause)
         total += 1
-        logger.info(f"\n完成: 总数{len(todo_list)}个, 处理 {total} 个, 跳过 {skipped} 个, 错误 {errors} 个, 剩余 {len(todo_list) - total - skipped - errors} 个")
+        logger.info(f"完成: 总数{len(todo_list)}个, 处理 {total} 个, 跳过 {skipped} 个, 错误 {errors} 个, 剩余 {len(todo_list) - total - skipped - errors} 个")
+        print(f"完成: 总数{len(todo_list)}个, 处理 {total} 个, 跳过 {skipped} 个, 错误 {errors} 个, 剩余 {len(todo_list) - total - skipped - errors} 个")
 
-    logger.info(f"\n完成: 总数{len(todo_list)}个, 成功处理处理 {total + skipped} 个, 错误 {errors} 个, 剩余 {len(todo_list) - total - skipped - errors} 个")
+    logger.info(f"完成: 总数{len(todo_list)}个, 成功处理处理 {total + skipped} 个, 错误 {errors} 个, 剩余 {len(todo_list) - total - skipped - errors} 个")
 
 
 

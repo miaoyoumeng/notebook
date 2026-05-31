@@ -1,0 +1,19 @@
+{
+  "language": "java",
+  "framework": "junit5",
+  "buildTool": "maven",
+  "testPatterns": {
+    "unit": "*Test.java",
+    "integration": "*IT.java"
+  },
+  "coverage": {
+    "format": "jacoco-xml",
+    "reportPath": "target/site/jacoco/jacoco.xml"
+  },
+  "examples": {
+    "serviceTest": "UserServiceImplTest.java",
+    "controllerTest": "UserControllerTest.java",
+    "integrationTest": "UserServiceImplIT.java",
+    "mapperTest": "UserMapperIT.java"
+  }
+}

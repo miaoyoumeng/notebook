@@ -1,0 +1,29 @@
+{
+  "framework": "vitest",
+  "source_code": "export function formatPrice(amount: number, currency: string): string {\n  if (amount < 0) throw new Error('Amount must be non-negative');\n  return `${currency}${amount.toFixed(2)}`;\n}\n\nexport function validateEmail(email: string): boolean {\n  if (!email.includes('@')) return false;\n  const [local, domain] = email.split('@');\n  if (!local || !domain) return false;\n  if (!domain.includes('.')) return false;\n  return true;\n}\n\nexport interface User {\n  id: string;\n  email: string;\n  name: string;\n  age: number;\n  role: 'admin' | 'user' | 'guest';\n}",
+  "requirements": {
+    "user_stories": [
+      {
+        "description": "formatPrice 将金额格式化为带货币符号的价格字符串",
+        "action": "format_price",
+        "given": ["用户提供金额和货币符号"],
+        "when": "调用 formatPrice",
+        "then": "返回格式化的价格字符串"
+      },
+      {
+        "description": "validateEmail 验证邮箱地址格式",
+        "action": "validate_email",
+        "given": ["用户提供邮箱地址"],
+        "when": "调用 validateEmail",
+        "then": "返回布尔值表示是否有效"
+      }
+    ],
+    "acceptance_criteria": [
+      {"id": "AC1", "description": "formatPrice(10.5, '¥') 返回 '¥10.50'"},
+      {"id": "AC2", "description": "formatPrice(-1, '¥') 抛出异常"},
+      {"id": "AC3", "description": "validateEmail('user@example.com') 返回 true"},
+      {"id": "AC4", "description": "validateEmail('invalid') 返回 false"}
+    ]
+  },
+  "coverage_threshold": 80
+}
