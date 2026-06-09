@@ -1,0 +1,14 @@
+{
+  "name": "article",
+  "description": "Claude Code 各平台文章编辑工具需求",
+  "version": "1.0.0",
+  "author": {
+    "name": "miaoyoumeng",
+    "email": "miaoyoumeng@gmail.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "article"
+  ]
+}

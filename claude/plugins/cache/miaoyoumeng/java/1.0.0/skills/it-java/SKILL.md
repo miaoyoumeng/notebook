@@ -215,18 +215,20 @@ src/
 │       └── UserDO.java
 └── test/java/com/example/
     ├── controller/
-    │   ├── ……                          ← 单元测试（Mock）
-    │   └── UserControllerTest.java     ← 单元测试（Mock）
+    │   ├── UserControllerTest.java    ← 单元测试（Mock）
+    │   └── UserControllerIT.java     ← 集成测试
     ├── service/impl/
-    │   ├── UserServiceImplTest.java    ← 单元测试（Mock）
-    │   └── UserServiceImplTest.java    ← 单元测试（Mock）
-    ├── mapper/                         ← 数据层测试（无需写）
+    │   ├── UserServiceImplTest.java   ← 单元测试（Mock）
+    │   └── UserServiceImplIT.java    ← 集成测试
+    ├── mapper/
+    │   └── UserMapperIT.java         ← 数据层测试（集成）
     └── utils/
-        └── DateUtilsTest.java          ← 工具类测试
+        └── DateUtilsTest.java        ← 工具类测试
 ```
 
 **命名规则：**
 - 单元测试（mock 外部依赖）：`xxxTest.java`
+- 集成测试（真实 Spring 容器）：`xxxIT.java`
 - 测试类放在 `src/test/java` 下，目录结构镜像业务代码
 
 ---
@@ -403,7 +405,7 @@ PASS
 
 ---
 
-## 调试
+## 调试集成
 
 **发现 bug？写一个失败测试复现它。走 TDD 循环。**
 
@@ -454,7 +456,7 @@ PASS
 
 | 范围 | 细节 |
 |------|------|
-| 单元测试重点 | mock单元测试 和 E2E 测试需要不同模式 |
+| 单元测试重点 | 集成和 E2E 测试需要不同模式 |
 | 静态分析 | 不能运行测试或测量运行时行为 |
 | 语言支持 | 专注于 Java 17 + Spring Boot |
 | 测试框架 | JUnit 5 + Mockito + Spring Boot Test |
@@ -476,6 +478,7 @@ PASS
 - **Mock 框架**: Mockito 5+
 - **断言库**: AssertJ（推荐）/ JUnit Jupiter Assertions
 - **覆盖率**: JaCoCo
+- **测试数据库**: H2 In-Memory（集成测试）/ Testcontainers
 
 ---
 

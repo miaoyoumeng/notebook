@@ -197,8 +197,4 @@ mvn verify
 mvn clean test jacoco:report
 open target/site/jacoco/index.html
 
-# 提交
-git add src/test/java/.../UserServiceTest.java
-git add src/main/java/.../UserServiceImpl.java
-git commit -m "feat: add user query by id with cache"
 ```
