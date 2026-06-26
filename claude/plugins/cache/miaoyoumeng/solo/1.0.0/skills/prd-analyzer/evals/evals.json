@@ -4,52 +4,288 @@
     {
       "id": 1,
       "prompt": "请帮我分析这个电商订单系统的 PRD 文档，从用户视角梳理操作旅程和功能地图，并输出业务领域和系统事件。",
-      "expected_output": "包含产品愿景(FOR/WHO模板)、用户操作旅程、领域事件时间线(领域事件/命令/角色)、领域对象清单、聚合清单、限界上下文划分、领域状态机、领域间关系的结构化分析报告"
+      "expected_output": "包含产品愿景(FOR/WHO模板)、用户操作旅程、领域事件时间线(领域事件/命令/角色)、领域对象清单、聚合清单、限界上下文划分、领域状态机、领域间关系的结构化分析报告",
+      "assertions": [
+        {
+          "type": "regex",
+          "text": "has_product_vision_table",
+          "pattern": "产品愿景.*FOR.*WHO|FOR.*WHO.*PRODUCT.*THAT"
+        },
+        {
+          "type": "regex",
+          "text": "has_ascii_timeline",
+          "pattern": "\\[.+\\].*\\|.*\\|.*\\|"
+        },
+        {
+          "type": "regex",
+          "text": "has_past_tense_events",
+          "pattern": "OrderCreated|PaymentCompleted|OrderShipped|OrderReceived|Created|Completed|Shipped|Paid"
+        },
+        {
+          "type": "regex",
+          "text": "has_event_table",
+          "pattern": "\\|.*事件.*\\|.*触发.*\\||\\|.*Event.*\\|.*Command.*\\|"
+        },
+        {
+          "type": "regex",
+          "text": "has_aggregate_table",
+          "pattern": "\\|.*聚合.*\\|.*聚合根.*\\||\\|.*Aggregate.*\\|.*Root.*\\|"
+        },
+        {
+          "type": "regex",
+          "text": "has_bounded_contexts",
+          "pattern": "限界上下文|Bounded.*Context"
+        }
+      ]
     },
     {
       "id": 2,
       "prompt": "帮我做 PRD 分析，重点梳理用户操作旅程和业务领域。",
-      "expected_output": "包含用户角色的操作旅程、功能地图、业务领域（领域列表、领域间关系、领域事件清单）"
+      "expected_output": "包含用户角色的操作旅程、功能地图、业务领域（领域列表、领域间关系、领域事件清单）",
+      "assertions": [
+        {
+          "type": "regex",
+          "text": "has_user_journey_table",
+          "pattern": "用户.*旅程|操作旅程|User.*Journey"
+        },
+        {
+          "type": "regex",
+          "text": "has_feature_map",
+          "pattern": "功能地图|功能模块|功能.*列表"
+        },
+        {
+          "type": "regex",
+          "text": "has_domain_list_table",
+          "pattern": "\\|.*领域.*\\|.*\\|"
+        },
+        {
+          "type": "regex",
+          "text": "has_event_table_with_trigger",
+          "pattern": "\\|.*事件.*\\|.*触发.*\\||\\|.*Event.*\\|.*Command.*\\|"
+        }
+      ]
     },
     {
       "id": 3,
       "prompt": "这个需求文档里，用户下单后到完成收货的整个流程是什么样的？帮我从用户角度走一遍，顺便列一下涉及的功能模块。",
-      "expected_output": "从用户视角梳理下单→支付→发货→收货的完整旅程，同时列出涉及的功能模块和领域事件"
+      "expected_output": "从用户视角梳理下单→支付→发货→收货的完整旅程，同时列出涉及的功能模块和领域事件",
+      "assertions": [
+        {
+          "type": "regex",
+          "text": "has_order_flow_steps",
+          "pattern": "下单.*支付.*发货.*收货|Order.*Payment.*Ship"
+        },
+        {
+          "type": "regex",
+          "text": "has_function_modules",
+          "pattern": "功能模块|功能.*列表|模块"
+        },
+        {
+          "type": "regex",
+          "text": "has_past_tense_events",
+          "pattern": "Created|Completed|Shipped|Paid|Generated|Confirmed"
+        },
+        {
+          "type": "regex",
+          "text": "has_ascii_timeline",
+          "pattern": "\\[.+\\].*\\|.*\\|.*\\|"
+        }
+      ]
     },
     {
       "id": 4,
       "prompt": "我有个保险投保系统的 PRD，需要做 DDD 领域建模，帮我划分一下限界上下文，设计聚合根和状态机。",
-      "expected_output": "包含领域对象清单（聚合根/实体/值对象/领域事件/命令）、聚合清单、限界上下文划分（核心域/支撑域/通用域）、上下文映射关系、投保单状态机（状态转换表）"
+      "expected_output": "包含领域对象清单（聚合根/实体/值对象/领域事件/命令）、聚合清单、限界上下文划分（核心域/支撑域/通用域）、上下文映射关系、投保单状态机（状态转换表）",
+      "assertions": [
+        {
+          "type": "regex",
+          "text": "has_domain_objects_table",
+          "pattern": "\\|.*聚合根.*\\|.*实体.*\\||\\|.*领域对象.*\\|.*类型.*\\|"
+        },
+        {
+          "type": "regex",
+          "text": "has_core_domain_label",
+          "pattern": "核心域|支撑域|通用域"
+        },
+        {
+          "type": "regex",
+          "text": "has_context_mapping_type",
+          "pattern": "Partnership|Customer.*Supplier|ACL|防腐层|开放主机|OHS|Conformist"
+        },
+        {
+          "type": "regex",
+          "text": "has_state_transition_table",
+          "pattern": "\\|.*当前状态.*\\|.*触发命令.*\\|.*目标状态.*\\||\\|.*Current.*\\|.*Trigger.*\\|.*Target.*\\|"
+        },
+        {
+          "type": "regex",
+          "text": "has_guard_conditions",
+          "pattern": "守卫条件|前置条件|Guard.*Condition"
+        }
+      ]
     },
     {
       "id": 5,
       "prompt": "这份 PRD 写得比较粗略，只写了正常流程，你帮我分析一下看看有没有遗漏的异常场景和边界情况。",
-      "expected_output": "识别 PRD 中的需求缺口，补充异常流程领域事件（取消/退款/超时/失败），在分析建议部分列出缺失项和补充建议"
+      "expected_output": "识别 PRD 中的需求缺口，补充异常流程领域事件（取消/退款/超时/失败），在分析建议部分列出缺失项和补充建议",
+      "assertions": [
+        {
+          "type": "regex",
+          "text": "has_exception_events",
+          "pattern": "取消|退款|超时|失败|Cancelled|Refunded|Timeout|Failed"
+        },
+        {
+          "type": "regex",
+          "text": "has_gap_list",
+          "pattern": "缺口|缺失|遗漏|Gap|遗漏"
+        },
+        {
+          "type": "regex",
+          "text": "has_severity_ranking",
+          "pattern": "阻塞|重要|建议|严重|高|中|低|Critical|High|Medium|Low"
+        },
+        {
+          "type": "regex",
+          "text": "has_boundary_conditions",
+          "pattern": "边界|最大值|最小值|过期|延迟|并发"
+        }
+      ]
     },
     {
       "id": 6,
       "prompt": "这个 SaaS 后台管理系统的技术方案写得很技术化，帮我从业务角度重新梳理一下，提取领域模型。",
-      "expected_output": "将技术导向的描述转换为业务视角，提取领域对象、聚合、限界上下文，避免技术实现细节"
+      "expected_output": "将技术导向的描述转换为业务视角，提取领域对象、聚合、限界上下文，避免技术实现细节",
+      "assertions": [
+        {
+          "type": "regex",
+          "text": "has_business_vision",
+          "pattern": "产品愿景|业务愿景|产品定位"
+        },
+        {
+          "type": "regex",
+          "text": "has_domain_model_table",
+          "pattern": "\\|.*领域.*\\|.*聚合.*\\||\\|.*Domain.*\\|.*Aggregate.*\\|"
+        },
+        {
+          "type": "regex",
+          "text": "has_bounded_contexts",
+          "pattern": "限界上下文|Bounded.*Context"
+        },
+        {
+          "type": "regex",
+          "text": "no_http_details",
+          "pattern": "HTTP|REST|API.*接口|数据库|SQL|MySQL",
+          "negated": true
+        }
+      ]
     },
     {
       "id": 7,
       "prompt": "帮我看看这个 PRD 的领域划分合不合理，聚合设计有没有问题，顺便给个优化建议。",
-      "expected_output": "评估现有领域划分和聚合设计，检查聚合根选择是否合理、限界上下文是否正交，给出优化建议"
+      "expected_output": "评估现有领域划分和聚合设计，检查聚合根选择是否合理、限界上下文是否正交，给出优化建议",
+      "assertions": [
+        {
+          "type": "regex",
+          "text": "has_aggregate_assessment",
+          "pattern": "\\|.*聚合.*\\|.*合理.*\\||聚合.*根.*选择|聚合.*评估"
+        },
+        {
+          "type": "regex",
+          "text": "has_boundary_check",
+          "pattern": "边界|职责|重叠|正交"
+        },
+        {
+          "type": "regex",
+          "text": "has_optimization_list",
+          "pattern": "优化|建议|改进"
+        },
+        {
+          "type": "regex",
+          "text": "has_orthogonality_analysis",
+          "pattern": "正交|职责分离|边界清晰|重叠|耦合"
+        }
+      ]
     },
     {
       "id": 8,
       "prompt": "我想梳理一下我们系统的业务流程，PRD 在这里，帮我提取一下所有的业务事件和触发角色。",
-      "expected_output": "提取完整的领域事件清单，为每个领域事件标注触发命令和触发角色（用户/系统/定时器/外部系统）"
+      "expected_output": "提取完整的领域事件清单，为每个领域事件标注触发命令和触发角色（用户/系统/定时器/外部系统）",
+      "assertions": [
+        {
+          "type": "regex",
+          "text": "has_event_table",
+          "pattern": "\\|.*事件.*\\|.*触发.*\\||\\|.*Event.*\\|.*Trigger.*\\|"
+        },
+        {
+          "type": "regex",
+          "text": "has_role_labels",
+          "pattern": "用户|系统|定时|外部|User|System|Timer|External"
+        },
+        {
+          "type": "regex",
+          "text": "has_command_event_pair",
+          "pattern": "命令.*事件|Command.*Event|触发命令.*产生事件"
+        },
+        {
+          "type": "regex",
+          "text": "has_event_count",
+          "pattern": "\\|.*\\d+.*\\|.*Created|\\|.*\\d+.*\\|.*Completed|共.*个.*事件"
+        }
+      ]
     },
     {
       "id": 9,
       "prompt": "这个多角色审批流的 PRD 太复杂了，帮我用事件时间线的方式可视化一下，标注清楚谁在什么时候做了什么。",
-      "expected_output": "使用 ASCII 时序图可视化领域事件时间线，标注角色(🟡)、命令(🔵)、领域事件(🟠)，区分主流程和异常流程"
+      "expected_output": "使用 ASCII 时序图可视化领域事件时间线，标注角色(🟡)、命令(🔵)、领域事件(🟠)，区分主流程和异常流程",
+      "assertions": [
+        {
+          "type": "regex",
+          "text": "has_ascii_sequence_diagram",
+          "pattern": "\\[.+\\].*\\|.*\\|.*\\|"
+        },
+        {
+          "type": "regex",
+          "text": "has_color_markers",
+          "pattern": "🟠|🔵|🟡|ORANGE|BLUE|YELLOW"
+        },
+        {
+          "type": "regex",
+          "text": "has_exception_branch",
+          "pattern": "拒绝|驳回|异常|失败|Reject|Error|Exception"
+        },
+        {
+          "type": "regex",
+          "text": "has_multi_role",
+          "pattern": "\\[.+\\].*\\[.+\\].*\\[.+\\]"
+        }
+      ]
     },
     {
       "id": 10,
       "prompt": "PRD 里提到了好几个子系统，帮我划分一下限界上下文，标注一下它们之间的映射关系。",
-      "expected_output": "划分限界上下文并标注类型（核心域/支撑域/通用域），标注上下文间映射关系（Partnership/Customer-Supplier/ACL/OHS 等）"
+      "expected_output": "划分限界上下文并标注类型（核心域/支撑域/通用域），标注上下文间映射关系（Partnership/Customer-Supplier/ACL/OHS 等）",
+      "assertions": [
+        {
+          "type": "regex",
+          "text": "has_bc_table",
+          "pattern": "\\|.*限界上下文.*\\|.*类型.*\\||\\|.*Bounded.*Context.*\\|.*Type.*\\|"
+        },
+        {
+          "type": "regex",
+          "text": "has_core_supporting_generic",
+          "pattern": "核心域.*支撑域|支撑域.*通用域|Core.*Supporting.*Generic"
+        },
+        {
+          "type": "regex",
+          "text": "has_mapping_type",
+          "pattern": "Partnership|Customer.*Supplier|ACL|防腐层|OHS|开放主机|Conformist|Published.*Language"
+        },
+        {
+          "type": "regex",
+          "text": "has_context_diagram",
+          "pattern": "──.*──→|──.*──│|映射.*关系|上下文.*关系"
+        }
+      ]
     }
   ]
 }
