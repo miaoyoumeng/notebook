@@ -1,0 +1,13 @@
+[project]
+name = "you-sole"
+version = "1.0.0"
+description = "claude code 插件市场"
+requires-python = ">=3.12"
+dependencies = [
+    # "cpca>=0.5.5"
+    # "setuptools<=80",
+    # "claude-agent-sdk>=0.2.83"
+]
+
+[tool.ruff]
+line-length = 100

@@ -94,6 +94,7 @@ async def extract_indicators(data: Dict, project_dir: str) -> str:
             prompt=prompt,
             options=ClaudeAgentOptions(
                 cwd=project_dir,
+                model = "haiku",
                 system_prompt={"type": "preset", "preset": "claude_code"},
                 allowed_tools=["Read", "Glob", "Grep", "WebFetch", "Bash"],
                 permission_mode="bypassPermissions",

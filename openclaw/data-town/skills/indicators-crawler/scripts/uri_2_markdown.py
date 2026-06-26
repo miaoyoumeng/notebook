@@ -21,6 +21,7 @@ import argparse
 import asyncio
 import os
 import logging
+import subprocess
 
 from config import setup_logger
 
@@ -61,6 +62,8 @@ async def claudeQueryURI(data: Dict, project_dir: str):
         ResultMessage,
         TextBlock,
         query,
+        CLIConnectionError, 
+        ProcessError,
     )
 
     if not data or not data['url'] or not data['time'] or not data['region']:
@@ -91,17 +94,25 @@ async def claudeQueryURI(data: Dict, project_dir: str):
 - 仅输出识别出来的内容，禁止添加而外的话语。
 - 识别不出内容，直接输出空字符串
     """
+
     answer = ""
+
     total_cost = 0.0
+
+    # model="haiku"      # 某些版本不支持
+    # model="sonnet"     # 某些版本不支持
+    # model="opus"       # 某些版本不支持
+    
     try:
         async for message in query(
             prompt = prompt,
             options = ClaudeAgentOptions(
                 cwd = project_dir,
+                model = "haiku",
                 system_prompt = {"type": "preset", "preset": "claude_code"},
                 allowed_tools = tools,
                 permission_mode = "bypassPermissions",
-                max_turns = 15,
+                max_turns = 10,
             ),
         ):
             if isinstance(message, AssistantMessage):
@@ -110,11 +121,17 @@ async def claudeQueryURI(data: Dict, project_dir: str):
                         answer += block.text
             elif isinstance(message, ResultMessage):
                 total_cost = message.total_cost_usd or 0.0
+    except CLIConnectionError as e:
+        print(f"连接Claude Code CLI失败: {e}")
+    except ProcessError as e:
+        print(f"Claude Code进程运行时出错 (退出码: {e.exit_code}): {e.stderr}")
     except Exception as e:
-        logger.error(f"Error claude querying base: {e}")
+        logger.error(f"类型：{e.__class__.__name__}，内容：{e}")
         answer = ""
         sys.exit(0)
+
     markdown = ""
+    
     if answer and answer.strip():
         markdown = f"""
     
@@ -125,6 +142,7 @@ async def claudeQueryURI(data: Dict, project_dir: str):
 - 数据来源地址：{data['url']}
 
         """
+
     return markdown, total_cost
 
 def markdown_writer(content: str, file_path: Union[str, Path]) -> None:
@@ -203,7 +221,7 @@ def main():
         formatter_class = argparse.RawDescriptionHelpFormatter,
         epilog = "示例: %(prog)s --dir /tmp/myfolder"
     )
-    parser.add_argument('--dir', required = False,
+    parser.add_argument('--dir', required = True,
                         help = '目标目录的路径（必需）')
     
     # 支持 --dir=xx/yy 或 --dir xx/yy 两种写法
@@ -239,6 +257,7 @@ def main():
 
     logger.info(f"找到 {len(todo_list)} 个 URI 路径")
 
+    
     for item in todo_list:
         md5_hash = hashlib.md5(json.dumps(item,ensure_ascii=True).encode('utf-8')).hexdigest()
 
@@ -249,12 +268,13 @@ def main():
             continue
         
         logger.info(f'处理文件 {md5_hash} ...')
+
         markdown, cost = asyncio.run(claudeQueryURI(item, ROOT_DIR))
         total_cost = total_cost + cost
         if not markdown:
             logger.warning(f'无法获取 markdown, exit....')
             errors += 1
-            time.sleep(120)
+            # time.sleep(120)
             continue
         markdown_path = Path(MARKDOWNS_DIR / (md5_hash + ".md"))
 
@@ -265,6 +285,7 @@ def main():
         total += 1
         logger.info(f"完成: 总数{len(todo_list)}个, 处理 {total} 个, 跳过 {skipped} 个, 错误 {errors} 个, 剩余 {len(todo_list) - total - skipped - errors} 个")
         print(f"完成: 总数{len(todo_list)}个, 处理 {total} 个, 跳过 {skipped} 个, 错误 {errors} 个, 剩余 {len(todo_list) - total - skipped - errors} 个")
+        # break
 
     logger.info(f"完成: 总数{len(todo_list)}个, 成功处理处理 {total + skipped} 个, 错误 {errors} 个, 剩余 {len(todo_list) - total - skipped - errors} 个")
 

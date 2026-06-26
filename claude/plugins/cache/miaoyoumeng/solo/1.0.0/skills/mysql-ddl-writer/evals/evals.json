@@ -1,0 +1,364 @@
+{
+  "skill_name": "mysql-ddl-writer",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "这份 PRD 在 /data/prd/points-mall.md，主要功能：积分商城，用户能浏览商品列表（商品名、积分、库存、分类），选择商品兑换（扣积分、减库存、生成兑换记录），查看我的兑换记录。帮我生成 DDL，输出到 /data/ddl/points-mall.sql。",
+      "expected_output": "读取 PRD 后生成 MySQL DDL，包含商品表、兑换记录表等，遵循阿里巴巴规范：snake_case 命名、id BIGINT 自增主键、审计字段（created_at/updated_at/is_deleted）、表注释、字段注释、InnoDB 引擎、utf8mb4 字符集。",
+      "should_trigger": true,
+      "expectations": [
+        "读取了指定的 PRD 文件 /data/prd/points-mall.md",
+        "读取了 references/alibaba.md 设计规范",
+        "生成的 DDL 至少包含商品表和兑换记录表，覆盖 PRD 中的核心实体",
+        "每张表使用 id BIGINT UNSIGNED AUTO_INCREMENT 作为主键",
+        "每张表包含 created_at、updated_at、is_deleted 审计字段",
+        "表名和字段名使用 snake_case 命名",
+        "每张表和每个字段都有 COMMENT 注释",
+        "使用 InnoDB 引擎、utf8mb4 字符集",
+        "DDL 写入到指定的输出文件 /data/ddl/points-mall.sql"
+      ],
+      "assertions": [
+        {
+          "name": "output_file_exists",
+          "description": "输出文件 /data/ddl/points-mall.sql 存在且非空",
+          "check": "file_exists('/data/ddl/points-mall.sql') and file_size > 0"
+        },
+        {
+          "name": "contains_create_table",
+          "description": "DDL 包含至少两个 CREATE TABLE 语句",
+          "check": "count('CREATE TABLE IF NOT EXISTS') >= 2"
+        },
+        {
+          "name": "snake_case_naming",
+          "description": "所有表名和字段名使用 snake_case 命名",
+          "check": "all table names and column names match ^[a-z][a-z0-9_]*$"
+        },
+        {
+          "name": "bigint_auto_increment_pk",
+          "description": "每张表使用 id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT 主键",
+          "check": "each CREATE TABLE contains `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT"
+        },
+        {
+          "name": "audit_fields_present",
+          "description": "每张表包含 is_deleted、created_at、updated_at 审计字段",
+          "check": "each CREATE TABLE contains is_deleted, created_at, updated_at fields"
+        },
+        {
+          "name": "comments_on_tables_and_columns",
+          "description": "每张表和每个字段都有 COMMENT 注释",
+          "check": "no table or column without COMMENT clause"
+        },
+        {
+          "name": "innodb_utf8mb4",
+          "description": "使用 InnoDB 引擎和 utf8mb4 字符集",
+          "check": "ENGINE=InnoDB and CHARSET=utf8mb4 present in each CREATE TABLE"
+        },
+        {
+          "name": "no_physical_foreign_keys",
+          "description": "没有使用物理外键约束（FOREIGN KEY）",
+          "check": "count('FOREIGN KEY') == 0"
+        },
+        {
+          "name": "soft_delete_field",
+          "description": "包含软删除字段 is_deleted",
+          "check": "each CREATE TABLE contains is_deleted TINYINT(1) or similar"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "帮我生成一份用户管理系统的数据库 DDL。不用 PRD，就这么几个表：用户表（昵称、手机号、邮箱、注册时间）、角色表（角色名、权限列表）、用户角色关联表。输出到 ddl.sql。",
+      "expected_output": "即使没有 PRD 文档，也能根据描述生成 DDL。包含用户表、角色表、用户角色关联表，遵循阿里巴巴规范。使用软删除、审计字段，禁止物理外键。",
+      "should_trigger": true,
+      "expectations": [
+        "生成的 DDL 包含用户表、角色表、用户角色关联表",
+        "没有使用物理外键约束（FOREIGN KEY）",
+        "所有字段设置为 NOT NULL，有合理的 DEFAULT 值",
+        "手机号和邮箱字段设置了唯一索引或普通索引",
+        "多对多关系（用户-角色）使用中间关联表",
+        "DDL 写入到指定的输出文件 ddl.sql"
+      ],
+      "assertions": [
+        {
+          "name": "output_file_exists",
+          "description": "输出文件 ddl.sql 存在且非空",
+          "check": "file_exists('ddl.sql') and file_size > 0"
+        },
+        {
+          "name": "three_tables_present",
+          "description": "DDL 包含用户表、角色表、用户角色关联表（至少 3 个 CREATE TABLE）",
+          "check": "count('CREATE TABLE IF NOT EXISTS') >= 3"
+        },
+        {
+          "name": "no_foreign_key_constraint",
+          "description": "没有使用 FOREIGN KEY 物理外键约束",
+          "check": "count('FOREIGN KEY') == 0"
+        },
+        {
+          "name": "all_fields_not_null_with_default",
+          "description": "所有字段 NOT NULL 且有 DEFAULT 值",
+          "check": "no column defined as NULL without DEFAULT"
+        },
+        {
+          "name": "phone_email_indexed",
+          "description": "手机号和/或邮箱字段设置了 UNIQUE KEY 或 KEY 索引",
+          "check": "UNIQUE KEY or KEY exists on phone/email related columns"
+        },
+        {
+          "name": "many_to_many_bridge_table",
+          "description": "用户-角色多对多关系使用中间关联表",
+          "check": "a bridge table containing both user_id and role_id exists"
+        },
+        {
+          "name": "innodb_utf8mb4",
+          "description": "使用 InnoDB 引擎和 utf8mb4 字符集",
+          "check": "ENGINE=InnoDB and CHARSET=utf8mb4 present"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "这份 PRD 在 /data/prd/member-level.md，功能：会员等级体系（Lv1-Lv5，每级有不同权益、升级所需积分阈值）、用户等级变更记录、权益使用记录。帮我生成对应的 DDL。",
+      "expected_output": "读取 PRD 后生成会员等级相关表的 DDL，包含等级配置表、用户等级表、等级变更日志表、权益使用记录表等。遵循阿里巴巴规范，状态字段使用 TINYINT 配合注释说明枚举值。",
+      "should_trigger": true,
+      "expectations": [
+        "读取了指定的 PRD 文件",
+        "读取了 references/alibaba.md 设计规范",
+        "生成的 DDL 至少包含等级配置表、用户等级表、等级变更日志表",
+        "状态/类型字段使用 TINYINT 类型，COMMENT 中说明枚举值",
+        "所有字段 NOT NULL，字符串默认空串，数值默认 0"
+      ],
+      "assertions": [
+        {
+          "name": "level_config_table_exists",
+          "description": "DDL 包含等级配置表",
+          "check": "CREATE TABLE with name containing 'level' or 'grade' exists"
+        },
+        {
+          "name": "user_level_table_exists",
+          "description": "DDL 包含用户等级表",
+          "check": "CREATE TABLE with name containing 'user' and 'level' exists"
+        },
+        {
+          "name": "level_change_log_exists",
+          "description": "DDL 包含等级变更日志表",
+          "check": "CREATE TABLE with name containing 'log' or 'history' and 'level' exists"
+        },
+        {
+          "name": "tinyint_for_status",
+          "description": "状态/等级字段使用 TINYINT 类型",
+          "check": "level/status columns use TINYINT, not INT or ENUM"
+        },
+        {
+          "name": "enum_comment_on_tinyint",
+          "description": "TINYINT 字段的 COMMENT 中说明了各枚举值含义",
+          "check": "TINYINT columns have COMMENT listing value meanings (e.g., 0-xx, 1-xx)"
+        },
+        {
+          "name": "no_enum_type",
+          "description": "没有使用 MySQL ENUM 类型",
+          "check": "count('ENUM') == 0"
+        },
+        {
+          "name": "innodb_utf8mb4",
+          "description": "使用 InnoDB 引擎和 utf8mb4 字符集",
+          "check": "ENGINE=InnoDB and CHARSET=utf8mb4 present"
+        },
+        {
+          "name": "audit_fields_present",
+          "description": "每张表包含 created_at、updated_at、is_deleted 审计字段",
+          "check": "each CREATE TABLE contains created_at, updated_at, is_deleted"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "帮我看看这个 Python 项目里的 SQLAlchemy model，把对应的 DDL 导出来。model 文件在 app/models/ 目录下。",
+      "expected_output": "不应使用 mysql-ddl-writer skill。这是从已有 ORM 模型导出 DDL 的任务，不是从 PRD 需求文档生成 DDL。",
+      "should_trigger": false,
+      "expectations": [
+        "没有调用 mysql-ddl-writer skill（这是从 ORM 模型导出 DDL，不是从需求生成）"
+      ],
+      "assertions": [
+        {
+          "name": "skill_not_triggered",
+          "description": "mysql-ddl-writer skill 没有被触发（这是 ORM 导出任务，不是从需求生成 DDL）",
+          "check": "no mysql-ddl-writer skill was consulted during execution"
+        },
+        {
+          "name": "no_ddl_generated",
+          "description": "没有生成完整的 DDL 建表语句",
+          "check": "no CREATE TABLE statements in output"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "这份产品需求文档在 /data/prd/order-system.md，功能：订单管理（创建订单、支付、发货、确认收货、退款）、商品快照、订单状态流转、物流信息跟踪、用户评价。输出 DDL 到 /data/ddl/order-system.sql。",
+      "expected_output": "读取 PRD 后生成订单系统相关表的 DDL，包含订单表、订单商品快照表、物流信息表、评价表等。遵循阿里巴巴规范，金额字段使用 DECIMAL，状态字段使用 TINYINT。",
+      "should_trigger": true,
+      "expectations": [
+        "读取了指定的 PRD 文件",
+        "生成的 DDL 至少包含订单表、订单商品快照表、物流表、评价表",
+        "金额相关字段使用 DECIMAL 类型，不使用 FLOAT/DOUBLE",
+        "订单状态字段使用 TINYINT，COMMENT 说明各状态值",
+        "订单号等唯一键设置了唯一索引"
+      ],
+      "assertions": [
+        {
+          "name": "order_table_exists",
+          "description": "DDL 包含订单表",
+          "check": "CREATE TABLE with name containing 'order' exists"
+        },
+        {
+          "name": "order_item_snapshot_exists",
+          "description": "DDL 包含订单商品快照/明细表",
+          "check": "CREATE TABLE with name containing 'order' and ('item' or 'snapshot') exists"
+        },
+        {
+          "name": "decimal_for_amount",
+          "description": "金额字段使用 DECIMAL 类型，不使用 FLOAT/DOUBLE",
+          "check": "amount/price columns use DECIMAL, not FLOAT or DOUBLE"
+        },
+        {
+          "name": "tinyint_for_order_status",
+          "description": "订单状态字段使用 TINYINT 类型",
+          "check": "status/state columns on order table use TINYINT"
+        },
+        {
+          "name": "unique_key_on_order_no",
+          "description": "订单号字段设置了 UNIQUE KEY",
+          "check": "UNIQUE KEY exists on order number related column"
+        },
+        {
+          "name": "no_float_double",
+          "description": "DDL 中没有 FLOAT 或 DOUBLE 类型",
+          "check": "count('FLOAT') + count('DOUBLE') == 0"
+        },
+        {
+          "name": "innodb_utf8mb4",
+          "description": "使用 InnoDB 引擎和 utf8mb4 字符集",
+          "check": "ENGINE=InnoDB and CHARSET=utf8mb4 present"
+        },
+        {
+          "name": "audit_fields_present",
+          "description": "每张表包含 created_at、updated_at、is_deleted 审计字段",
+          "check": "each CREATE TABLE contains created_at, updated_at, is_deleted"
+        },
+        {
+          "name": "no_physical_foreign_keys",
+          "description": "没有使用物理外键约束（FOREIGN KEY）",
+          "check": "count('FOREIGN KEY') == 0"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "线上数据库有个表要加个字段，帮我写个 ALTER TABLE 语句。表名是 user，加个 phone_verified 字段，TINYINT 类型。",
+      "expected_output": "不应使用 mysql-ddl-writer skill。这是简单的 ALTER TABLE 操作，不是从 PRD 生成完整数据库设计。mysql-ddl-writer 适用于从需求文档创建完整 DDL。",
+      "should_trigger": false,
+      "expectations": [
+        "没有调用 mysql-ddl-writer skill（这是简单的 ALTER TABLE，不是完整建表设计）"
+      ],
+      "assertions": [
+        {
+          "name": "skill_not_triggered",
+          "description": "mysql-ddl-writer skill 没有被触发（这是简单的 ALTER TABLE 加字段，不是完整建表设计）",
+          "check": "no mysql-ddl-writer skill was consulted during execution"
+        },
+        {
+          "name": "simple_alter_only",
+          "description": "输出仅为 ALTER TABLE 语句，没有创建完整表结构",
+          "check": "output contains ALTER TABLE but no CREATE TABLE"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "这份 PRD 在 /data/prd/content-platform.md，功能：内容平台（文章发布、分类标签、评论回复、点赞收藏、作者粉丝关系、内容审核状态）。帮我设计数据库并生成 DDL。",
+      "expected_output": "读取 PRD 后生成内容平台相关表的 DDL，包含文章表、分类表、标签表、文章标签关联表、评论表、点赞收藏表、粉丝关系表等。遵循阿里巴巴规范，多对多关系使用中间表。",
+      "should_trigger": true,
+      "expectations": [
+        "读取了指定的 PRD 文件",
+        "生成的 DDL 至少包含文章表、评论表、标签表、粉丝关系表等核心实体",
+        "多对多关系（文章-标签）使用中间关联表",
+        "评论回复场景使用了自关联或合理的嵌套设计",
+        "粉丝关系表包含粉丝 ID 和关注对象 ID"
+      ],
+      "assertions": [
+        {
+          "name": "article_table_exists",
+          "description": "DDL 包含文章表",
+          "check": "CREATE TABLE with name containing 'article' or 'post' or 'content' exists"
+        },
+        {
+          "name": "comment_table_exists",
+          "description": "DDL 包含评论表",
+          "check": "CREATE TABLE with name containing 'comment' exists"
+        },
+        {
+          "name": "tag_table_exists",
+          "description": "DDL 包含标签表",
+          "check": "CREATE TABLE with name containing 'tag' exists"
+        },
+        {
+          "name": "article_tag_bridge_table",
+          "description": "文章-标签多对多关系使用中间关联表",
+          "check": "bridge table containing both article_id and tag_id exists"
+        },
+        {
+          "name": "follower_relation_table",
+          "description": "粉丝关系表包含 follower_id 和 followee/target_id",
+          "check": "follower table has both follower/fan and followee/target columns"
+        },
+        {
+          "name": "multiple_tables_created",
+          "description": "DDL 包含至少 5 个 CREATE TABLE 语句（内容平台涉及多个实体）",
+          "check": "count('CREATE TABLE IF NOT EXISTS') >= 5"
+        },
+        {
+          "name": "innodb_utf8mb4",
+          "description": "使用 InnoDB 引擎和 utf8mb4 字符集",
+          "check": "ENGINE=InnoDB and CHARSET=utf8mb4 present"
+        },
+        {
+          "name": "audit_fields_present",
+          "description": "每张表包含 created_at、updated_at、is_deleted 审计字段",
+          "check": "each CREATE TABLE contains created_at, updated_at, is_deleted"
+        },
+        {
+          "name": "no_physical_foreign_keys",
+          "description": "没有使用物理外键约束（FOREIGN KEY）",
+          "check": "count('FOREIGN KEY') == 0"
+        },
+        {
+          "name": "snake_case_naming",
+          "description": "所有表名和字段名使用 snake_case 命名",
+          "check": "all table names and column names match ^[a-z][a-z0-9_]*$"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "帮我把这份 MySQL 数据库里的表结构导出来，我要做数据迁移。数据库连接信息在 .env 文件里。",
+      "expected_output": "不应使用 mysql-ddl-writer skill。这是从已有数据库导出表结构（反向工程）的任务，不是从 PRD 生成 DDL。",
+      "should_trigger": false,
+      "expectations": [
+        "没有调用 mysql-ddl-writer skill（这是从已有数据库导出结构，不是从需求生成 DDL）"
+      ],
+      "files": [],
+      "assertions": [
+        {
+          "name": "skill_not_triggered",
+          "description": "mysql-ddl-writer skill 没有被触发（这是从已有数据库导出表结构，不是从需求生成 DDL）",
+          "check": "no mysql-ddl-writer skill was consulted during execution"
+        },
+        {
+          "name": "no_ddl_generated",
+          "description": "没有生成完整的 DDL 建表语句",
+          "check": "no CREATE TABLE statements in output"
+        }
+      ]
+    }
+  ]
+}

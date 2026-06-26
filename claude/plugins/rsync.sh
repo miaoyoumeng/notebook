@@ -45,7 +45,7 @@ rsync -av --delete "${SOURCE_DIR}/marketplaces/miaoyoumeng/" "${USER_CLAUDE_PLUG
 
 
 echo "正在将 ${SOURCE_DIR}/cache/miaoyoumeng/ 同步到 ${USER_CLAUDE_PLUGIN_DIR}/cache/miaoyoumeng ..."
-rsync -av --delete "${SOURCE_DIR}/cache/miaoyoumeng/" "${USER_CLAUDE_PLUGIN_DIR}/cache/miaoyoumeng" --exclude="rsync.sh" --exclude=".DS_Store" --exclude="*__pycache__*"
+rsync -av --delete "${SOURCE_DIR}/cache/miaoyoumeng/" "${USER_CLAUDE_PLUGIN_DIR}/cache/miaoyoumeng" --exclude="rsync.sh" --exclude=".venv" --exclude=".DS_Store" --exclude="*__pycache__*" --exclude=".in_use" --exclude=".orphaned_at"
 
 for arg in "$@"; do
     case $arg in
@@ -66,8 +66,8 @@ if [ "X" != "${DEST_DIR}X" -a  -d "${DEST_DIR}" ]; then
     echo "--dir 参数: ${DEST_DIR}"
     echo "用法: $0 --dir=/目标路径"
     rsync -av --delete "${SCRIPT_DIR}/pyproject.toml" "${DEST_DIR}/" 
-else 
-    echo "没有有效目录"
+#else 
+#    echo "没有有效目录"
 fi
 
 

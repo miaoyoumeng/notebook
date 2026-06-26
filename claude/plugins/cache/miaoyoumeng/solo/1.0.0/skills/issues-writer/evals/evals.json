@@ -1,0 +1,169 @@
+{
+  "skill_name": "issues-writer",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "这份产品需求文档在 /data/prd/points-mall-v2.md，规划了积分商城改版：新增商品搜索、筛选排序、积分+现金混合支付。帮我按 vertical slices 拆成开发团队能并行领取的 issues。",
+      "expected_output": "按 vertical slices 拆分积分商城改版功能，每个 issue 是一条完整功能路径（如 '用户能在积分商城搜索商品并看到搜索结果'），而非按技术层拆分。每个 issue 标注 type=task、HITL/AFK 类型、验收标准和依赖关系。",
+      "should_trigger": true,
+      "assertions": [
+        {
+          "id": "eval1-task-read-file",
+          "text": "读取了指定路径 /data/prd/points-mall-v2.md 的文件内容"
+        },
+        {
+          "id": "eval1-task-vertical-slices",
+          "text": "每个 issue 描述的是 end-to-end 功能路径，而非单一技术层（如不出现 '设计商品搜索表'、'写搜索 API' 等纯层拆分）"
+        },
+        {
+          "id": "eval1-task-type-label",
+          "text": "每个 issue 标注了 type=task"
+        },
+        {
+          "id": "eval1-task-hitl-afk",
+          "text": "每个 issue 都标注了 HITL 或 AFK 类型"
+        },
+        {
+          "id": "eval1-task-acceptance-criteria",
+          "text": "每个 issue 都包含至少 3 条可验证的验收标准"
+        },
+        {
+          "id": "eval1-task-dependency",
+          "text": "存在合理的 Blocked by 依赖标注"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "帮我写一份积分商城的产品需求文档，要包含用户画像、功能清单、竞品分析和积分兑换流程设计。",
+      "expected_output": "不应使用 issues-writer skill。这是从零撰写 PRD 的任务，应使用 prd-writer。issues-writer 的输入必须是已有的计划/文档，输出是拆分后的 issues。",
+      "should_trigger": false,
+      "assertions": [
+        {
+          "id": "eval2-task-not-trigger",
+          "text": "没有调用 issues-writer skill（这是从零写 PRD，不是拆分已有文档）"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "测试团队提交了这轮积分商城的 bug 列表，文档在 /data/reports/points-mall-bug-report.md，里面有 12 个缺陷：兑换后积分未扣减、签到重复发放、库存显示负数等。帮我拆成修复 tasks，按优先级排好。",
+      "expected_output": "按 vertical slices 拆分 bug 修复任务，每个 issue 是一条完整的修复路径（复现 → 定位 → 修复 → 验证 + 回归）。每个 issue 标注 type=bug、复现路径、影响范围、验收标准包含修复验证和回归防护。",
+      "should_trigger": true,
+      "assertions": [
+        {
+          "id": "eval3-bug-read-file",
+          "text": "读取了指定的 bug 报告文件"
+        },
+        {
+          "id": "eval3-bug-type-label",
+          "text": "每个 issue 标注了 type=bug"
+        },
+        {
+          "id": "eval3-bug-repro-path",
+          "text": "每个 issue 包含复现路径和影响范围说明"
+        },
+        {
+          "id": "eval3-bug-acceptance",
+          "text": "每个 issue 的验收标准包含修复验证和回归防护"
+        },
+        {
+          "id": "eval3-bug-priority",
+          "text": "issues 按优先级（P0/P1/P2）排序展示"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "线上紧急 bug！积分兑换接口挂了，用户兑换后积分没扣减，库存也没减少。快帮我看看代码哪里出问题修一下！",
+      "expected_output": "不应使用 issues-writer skill。这是紧急 bug fix 任务，需要直接定位和修复代码。issues-writer 适用于把已有 bug 报告拆成修复 tasks，不适用于紧急排查和修复。",
+      "should_trigger": false,
+      "assertions": [
+        {
+          "id": "eval4-bug-not-trigger",
+          "text": "没有调用 issues-writer skill（这是紧急 bug 修复，不是拆分已有报告）"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "这是积分商城的功能增强计划 /data/plans/points-mall-enhancement.md：现有兑换记录页面新增时间筛选、商品关键词搜索、导出 Excel，以及新增积分到期提醒功能。帮我拆成 feature issues。",
+      "expected_output": "按 vertical slices 拆分功能增强任务，每个 issue 是在已有功能基础上的增强路径（如 '用户能在兑换记录页面按时间范围筛选记录'）。每个 issue 标注 type=feature、依赖已有功能说明、验收标准覆盖新旧功能兼容性。",
+      "should_trigger": true,
+      "assertions": [
+        {
+          "id": "eval5-feature-read-file",
+          "text": "读取了指定的增强计划文件"
+        },
+        {
+          "id": "eval5-feature-type-label",
+          "text": "每个 issue 标注了 type=feature"
+        },
+        {
+          "id": "eval5-feature-existing",
+          "text": "每个 issue 说明了依赖的已有功能"
+        },
+        {
+          "id": "eval5-feature-vertical",
+          "text": "每个 issue 是完整功能路径而非技术层拆分"
+        },
+        {
+          "id": "eval5-feature-compatibility",
+          "text": "验收标准覆盖了新功能与已有功能的兼容性"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "积分商城这个 sprint 有 15 个 issues，帮我重新排下优先级，把有阻塞关系的标出来，没依赖的尽量往前排。",
+      "expected_output": "不应使用 issues-writer skill。这是已有 issue 的管理和排序任务。issues-writer 负责从文档创建新 issues，不负责重排已有 issue 优先级。",
+      "should_trigger": false,
+      "assertions": [
+        {
+          "id": "eval6-feature-not-trigger",
+          "text": "没有调用 issues-writer skill（这是已有 issue 的优先级管理，不是创建新 issues）"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "我们计划引入积分+现金混合支付，涉及积分抵扣比例、退款策略、税务合规等问题。决策文档在 /data/plans/mixed-payment-decision.md。帮我拆成调研和咨询 tasks，每项 task 产出对比文档和推荐方案。",
+      "expected_output": "按 vertical slices 拆分技术调研/咨询任务，每个 issue 是一条完整的决策路径（问题定义 → 方案对比 → 推荐结论 → 相关方确认）。每个 issue 标注 type=question、产出是文档/决策而非代码、验收标准面向文档质量和决策完整性。",
+      "should_trigger": true,
+      "assertions": [
+        {
+          "id": "eval7-question-read-file",
+          "text": "读取了指定的决策文档文件"
+        },
+        {
+          "id": "eval7-question-type-label",
+          "text": "每个 issue 标注了 type=question"
+        },
+        {
+          "id": "eval7-question-output",
+          "text": "每个 issue 的产出是文档/决策而非代码"
+        },
+        {
+          "id": "eval7-question-acceptance",
+          "text": "验收标准面向文档质量和决策完整性（如 '列出至少 3 种方案的优缺点'、'给出明确推荐结论'）"
+        },
+        {
+          "id": "eval7-question-stakeholders",
+          "text": "issues 标注了相关方（如财务、法务、CTO）"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "积分扣减应该用本地事务还是分布式事务？直接给我一个结论。",
+      "expected_output": "不应使用 issues-writer skill。这是单一的技术咨询问答，用户要的是一个结论而非任务拆分。issues-writer 适用于把技术决策需求拆成多个调研 tasks，不适用于直接回答单一问题。",
+      "should_trigger": false,
+      "assertions": [
+        {
+          "id": "eval8-question-not-trigger",
+          "text": "没有调用 issues-writer skill（这是单一技术问答，不是拆分调研任务）"
+        }
+      ]
+    }
+  ]
+}

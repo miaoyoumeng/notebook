@@ -26,7 +26,7 @@ description: |
 - 菜单结构在可读取的文件中。
 - 通过主动提问，或者对话，识别产品 `prd` 的需要的左侧导航菜单。
 
-2. 调用本插件下的`admin-layout-writer` skill，完成后台系统 prd 的编写任务。
+2. 调用本插件下的`admin-prd-writer` skill，完成后台系统 prd 的编写任务。
 3. 生成的文档要求统一放在：`${CLAUDE_PROJECT_DIR}/prds/admin-layout` 中
 
 

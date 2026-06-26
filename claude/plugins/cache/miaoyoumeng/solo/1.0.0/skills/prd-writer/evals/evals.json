@@ -1,0 +1,172 @@
+{
+  "skill_name": "prd-writer",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "/prd-writer 电商后台的用户管理页面，需要支持用户注册、登录、个人信息编辑和账号注销",
+      "expected_output": "Agent 以资深 PM 身份响应，先进行信息收集（询问业务背景、目标用户、核心目标等），而非直接生成 PRD 文档",
+      "assertions": [
+        {
+          "id": "eval0-asks-questions-first",
+          "text": "Agent 在第一轮回复中提出信息收集问题（如业务背景、目标用户、核心目标等），而非直接输出 PRD 文档"
+        },
+        {
+          "id": "eval0-no-technical-details",
+          "text": "Agent 的回复中不包含技术实现细节，如 API、数据库表、框架名称、接口设计、SQL 等关键词"
+        },
+        {
+          "id": "eval0-max-five-questions",
+          "text": "Agent 单轮提问数量不超过 5 个"
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "/prd-writer SaaS 客户管理系统的销售跟进页面，角色有管理员、销售人员、客服人员，核心功能是客户列表、跟进记录录入、销售漏斗看板",
+      "expected_output": "信息收集后进入范围梳理，明确识别三个角色，使用 P0/P1/P2 分级，最终 PRD 中权限矩阵覆盖三个角色",
+      "assertions": [
+        {
+          "id": "eval1-role-identification",
+          "text": "Agent 在范围梳理或 PRD 中明确识别出管理员、销售人员、客服人员三个用户角色"
+        },
+        {
+          "id": "eval1-priority-levels",
+          "text": "Agent 在范围梳理或 PRD 中将功能点明确标注为 P0、P1 或 P2 级别，且每个功能都有对应标注"
+        },
+        {
+          "id": "eval1-permission-matrix",
+          "text": "生成的 PRD 中包含权限设计模块，矩阵覆盖管理员、销售人员、客服人员三个角色"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "/prd-writer 做一个内容审核流程",
+      "expected_output": "面对模糊需求，Agent 进行澄清性追问（审核什么类型内容？审核角色？审核标准？），将不确定性标记为 [待确认]，不直接生成完整 PRD",
+      "assertions": [
+        {
+          "id": "eval2-asks-clarifying-questions",
+          "text": "Agent 针对模糊需求提出至少 2 个澄清性问题（如审核内容类型、审核流程、审核角色、审核标准等）"
+        },
+        {
+          "id": "eval2-no-premature-prd",
+          "text": "Agent 在信息不足时不直接生成完整 PRD 文档"
+        },
+        {
+          "id": "eval2-marks-uncertainty",
+          "text": "Agent 在回复中使用 [待确认] 标记不确定信息，或明确列出需要用户补充的具体信息项"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "帮我想想管理系统的侧边栏该怎么设计好看，配色和图标怎么选",
+      "expected_output": "识别出这是 UI/视觉设计问题而非 PRD 文档需求，不启动 6 步 PRD 工作流，告知用户这不在 PRD 范围内",
+      "assertions": [
+        {
+          "id": "eval3-no-prd-workflow",
+          "text": "Agent 不启动 PRD 工作流（不生成 PRD 文档文件，不进行信息收集提问）"
+        },
+        {
+          "id": "eval3-recognizes-out-of-scope",
+          "text": "Agent 识别出这是 UI 设计问题，并在回复中说明这与 PRD 文档编写的区别"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "/prd-writer 商品详情页。业务背景：我们是一个垂直电商，目前商品详情只有简单图文，转化率很低。目标用户：C端消费者，主要是25-35岁女性。核心目标：提升商品详情页转化率至少15%。参考资料在 docs/research/conversion-report.pdf",
+      "expected_output": "用户已提供完整信息（功能、背景、用户、目标、参考资料），Agent 减少或跳过信息收集，直接进入范围梳理或 PRD 编写，PRD 使用 page-template.md 的模板结构",
+      "assertions": [
+        {
+          "id": "eval4-minimal-questions",
+          "text": "Agent 不再重复询问用户已明确提供的信息（业务背景、目标用户、核心目标），最多追问 1-2 个补充问题"
+        },
+        {
+          "id": "eval4-uses-template-structure",
+          "text": "生成的 PRD 包含 page-template.md 中的核心章节：需求背景（一）、页面大致布局（二）、页面使用用户角色（三）、页面目标（四）、功能详细说明（五）"
+        },
+        {
+          "id": "eval4-generates-todolist",
+          "text": "Agent 同时生成遗留问题 todolist 文档，使用 todolist-template.md 的分类结构（需求确认类/业务规则类/交互细节类/后续规划类）"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "/prd-writer 帮我做一个企业级 ERP 系统，包括采购管理、库存管理、生产管理、销售管理、财务管理、人力资源、项目管理、客户管理、供应商管理、报表中心、系统设置，一共11个模块",
+      "expected_output": "触发范围检查：识别出多个独立产品模块，建议拆分为多个 PRD 分别编写，聚焦 MVP，拒绝一次性生成全部",
+      "assertions": [
+        {
+          "id": "eval5-scope-check-triggered",
+          "text": "Agent 识别出需求涵盖多个独立产品模块，明确建议拆分处理而非一次性生成"
+        },
+        {
+          "id": "eval5-mvp-focus",
+          "text": "Agent 建议用户确定优先级，聚焦 MVP（如先做 P0 核心模块），而非接受全部 11 个模块一起编写"
+        },
+        {
+          "id": "eval5-rejects-scope-creep",
+          "text": "Agent 不直接开始为全部 11 个模块逐一编写 PRD，而是先引导用户做优先级排序"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "/prd-writer 我想做个后台，但是还没想好具体要什么功能，你帮我想想",
+      "expected_output": "面对极度模糊的需求，Agent 通过信息收集阶段逐步引导用户明确方向，提供常见后台类型的选项供参考，不凭空设计功能",
+      "assertions": [
+        {
+          "id": "eval6-asks-multiple-questions",
+          "text": "Agent 在信息收集阶段提出至少 2 个澄清性问题（如系统类型、业务领域、目标用户等）"
+        },
+        {
+          "id": "eval6-provides-options",
+          "text": "Agent 为用户提供可选的常见方案或方向建议（如列举常见后台类型），而非直接替用户做决定"
+        },
+        {
+          "id": "eval6-no-premature-scope",
+          "text": "在用户未明确业务方向前，Agent 不直接进入范围梳理或 PRD 编写阶段"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "/prd-writer 订单管理页面。业务背景和需求都在 docs/order-research.md 里了，你看看然后帮我写",
+      "expected_output": "Agent 主动读取用户指定的文件 docs/order-research.md，提取关键信息后减少信息收集轮次，基于文件内容编写 PRD，并在需求背景中引用文件中的信息",
+      "assertions": [
+        {
+          "id": "eval7-reads-context-file",
+          "text": "Agent 使用 Read 工具读取用户指定的文件 docs/order-research.md"
+        },
+        {
+          "id": "eval7-reduces-questions",
+          "text": "Agent 在读取文件后减少信息收集提问，最多追问 1-2 个文件中未覆盖的维度"
+        },
+        {
+          "id": "eval7-references-source",
+          "text": "生成的 PRD 需求背景章节中体现了从文件中提取的业务信息"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "/prd-writer 用户管理页面的 PRD 已经写好了，在 output/prds/用户管理.md。现在需要在功能详细说明里增加一个"批量冻结"功能，支持勾选多个用户后一键冻结，其他内容不要动",
+      "expected_output": "Agent 读取已存在的 PRD 文件，仅在功能详细说明章节新增批量冻结功能描述，保持其他章节不变，并告知用户修改了哪些内容",
+      "assertions": [
+        {
+          "id": "eval8-reads-existing-prd",
+          "text": "Agent 使用 Read 工具读取 output/prds/用户管理.md 文件，而非从零开始重新生成"
+        },
+        {
+          "id": "eval8-targeted-modification",
+          "text": "Agent 仅在功能详细说明章节新增批量冻结相关内容，需求背景、页面布局、用户角色等其他章节保持不变"
+        },
+        {
+          "id": "eval8-reports-changes",
+          "text": "Agent 在修改完成后明确告知用户本次修改了哪些章节和具体变更内容"
+        }
+      ]
+    }
+  ]
+}
