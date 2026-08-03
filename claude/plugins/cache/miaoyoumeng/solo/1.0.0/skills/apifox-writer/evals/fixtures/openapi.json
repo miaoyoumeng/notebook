@@ -1,0 +1,266 @@
+{
+  "openapi": "3.2.0",
+  "info": {
+    "title": "E-commerce API",
+    "version": "1.0.0",
+    "description": "电商系统 API，JSON 格式，需要先转换为 YAML 再导入"
+  },
+  "paths": {
+    "/api/v1/users": {
+      "get": {
+        "summary": "获取用户列表",
+        "operationId": "listUsers",
+        "tags": ["用户管理"],
+        "responses": {
+          "200": {
+            "description": "用户列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/User"}
+                    },
+                    "total": {"type": "integer"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "创建用户",
+        "operationId": "createUser",
+        "tags": ["用户管理"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/CreateUserRequest"}
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "创建成功",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/User"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{id}": {
+      "get": {
+        "summary": "获取用户详情",
+        "operationId": "getUser",
+        "tags": ["用户管理"],
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}
+        ],
+        "responses": {
+          "200": {
+            "description": "用户详情",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/User"}
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "更新用户",
+        "operationId": "updateUser",
+        "tags": ["用户管理"],
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/UpdateUserRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "更新成功",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/User"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/products": {
+      "get": {
+        "summary": "商品列表",
+        "operationId": "listProducts",
+        "tags": ["商品管理"],
+        "responses": {
+          "200": {
+            "description": "商品列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/Product"}
+                    },
+                    "total": {"type": "integer"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "创建商品",
+        "operationId": "createProduct",
+        "tags": ["商品管理"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/CreateProductRequest"}
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "创建成功",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Product"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/products/{id}": {
+      "get": {
+        "summary": "获取商品详情",
+        "operationId": "getProduct",
+        "tags": ["商品管理"],
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}
+        ],
+        "responses": {
+          "200": {
+            "description": "商品详情",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Product"}
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "更新商品",
+        "operationId": "updateProduct",
+        "tags": ["商品管理"],
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/UpdateProductRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "更新成功",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Product"}
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "删除商品",
+        "operationId": "deleteProduct",
+        "tags": ["商品管理"],
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}
+        ],
+        "responses": {"204": {"description": "删除成功"}}
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "integer"},
+          "name": {"type": "string"},
+          "email": {"type": "string", "format": "email"},
+          "phone": {"type": "string"}
+        }
+      },
+      "CreateUserRequest": {
+        "type": "object",
+        "required": ["name", "email"],
+        "properties": {
+          "name": {"type": "string"},
+          "email": {"type": "string", "format": "email"},
+          "phone": {"type": "string"}
+        }
+      },
+      "UpdateUserRequest": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "phone": {"type": "string"}
+        }
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "integer"},
+          "name": {"type": "string"},
+          "price": {"type": "number", "format": "float"},
+          "description": {"type": "string"},
+          "status": {"type": "string", "enum": ["active", "inactive"]}
+        }
+      },
+      "CreateProductRequest": {
+        "type": "object",
+        "required": ["name", "price"],
+        "properties": {
+          "name": {"type": "string"},
+          "price": {"type": "number", "format": "float"},
+          "description": {"type": "string"}
+        }
+      },
+      "UpdateProductRequest": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "price": {"type": "number", "format": "float"},
+          "description": {"type": "string"},
+          "status": {"type": "string", "enum": ["active", "inactive"]}
+        }
+      }
+    }
+  }
+}

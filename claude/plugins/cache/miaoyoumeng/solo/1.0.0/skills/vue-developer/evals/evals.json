@@ -1,0 +1,275 @@
+{
+  "skill_name": "vue-developer",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "阅读 outputs/prds/admin/user-management.md 和 outputs/ui/admin/user-list.html，开发用户管理列表页面。",
+      "expected_output": "使用 tdesign-vue-next 组件完成列表布局，调用 rest-api-writer 定义用户查询/删除接口，用 tdd-typescript 实现搜索和删除交互，最终 pnpm run build 通过",
+      "assertions": [
+        {
+          "text": "页面布局使用 tdesign-vue-next 组件，未使用其他 UI 库",
+          "type": "with_skill"
+        },
+        {
+          "text": "API 接口通过 rest-api-writer skill 定义，未手动编辑接口代码",
+          "type": "with_skill"
+        },
+        {
+          "text": "交互逻辑通过 tdd-typescript skill 实现",
+          "type": "with_skill"
+        },
+        {
+          "text": "pnpm run build 编译通过，无错误",
+          "type": "with_skill"
+        },
+        {
+          "text": "用户列表包含搜索、分页、删除操作功能",
+          "type": "with_skill"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "阅读 outputs/prds/admin/login.md 和 outputs/ui/admin/login.html，开发登录页面。",
+      "expected_output": "使用 TDesign 表单组件完成登录页布局，定义登录 API 接口，实现表单验证和提交逻辑，构建通过",
+      "assertions": [
+        {
+          "text": "登录页面布局完全使用 tdesign-vue-next 组件",
+          "type": "with_skill"
+        },
+        {
+          "text": "登录 API 接口定义由 rest-api-writer 完成",
+          "type": "with_skill"
+        },
+        {
+          "text": "表单验证和提交逻辑通过 tdd-typescript 实现",
+          "type": "with_skill"
+        },
+        {
+          "text": "pnpm run build 编译通过",
+          "type": "with_skill"
+        },
+        {
+          "text": "表单包含用户名、密码验证，提交后调用登录接口",
+          "type": "with_skill"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "开发一个数据管理模块，包含数据列表、新增、编辑、删除功能。PRD 在 outputs/prds/admin/data-manage.md，UI 在 outputs/ui/admin/data-manage.html。",
+      "expected_output": "完整走通 6 步流程，页面使用 TDesign 表格和表单组件，API 接口已定义，交互功能完整，构建通过",
+      "assertions": [
+        {
+          "text": "页面布局使用 tdesign-vue-next 的 Table 和 Form 组件",
+          "type": "with_skill"
+        },
+        {
+          "text": "新增/编辑/删除 API 通过 rest-api-writer 定义",
+          "type": "with_skill"
+        },
+        {
+          "text": "新增弹窗、编辑表单、删除确认交互通过 tdd-typescript 实现",
+          "type": "with_skill"
+        },
+        {
+          "text": "pnpm run build 编译通过",
+          "type": "with_skill"
+        },
+        {
+          "text": "页面文件放置在 src/views/ 目录下，API 文件在 src/api/ 下",
+          "type": "with_skill"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "阅读 outputs/prds/admin/dashboard.md 和 outputs/ui/admin/dashboard.html，开发首页仪表盘，包含统计卡片、图表区域和快捷操作。",
+      "expected_output": "使用 TDesign 布局组件完成仪表盘排版，定义统计数据 API，实现数据加载和展示逻辑，构建通过",
+      "assertions": [
+        {
+          "text": "页面布局使用 tdesign-vue-next 组件，未使用其他 UI 库",
+          "type": "with_skill"
+        },
+        {
+          "text": "API 接口通过 rest-api-writer skill 定义",
+          "type": "with_skill"
+        },
+        {
+          "text": "交互逻辑通过 tdd-typescript skill 实现",
+          "type": "with_skill"
+        },
+        {
+          "text": "pnpm run build 编译通过",
+          "type": "with_skill"
+        },
+        {
+          "text": "页面包含统计卡片、图表区域、快捷操作三个区域",
+          "type": "without_skill"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "为系统添加消息通知模块，包含消息列表、标记已读、批量删除功能。PRD 在 outputs/prds/admin/message.md，UI 在 outputs/ui/admin/message.html。",
+      "expected_output": "使用 TDesign 完成消息列表页面，定义消息相关 API，实现标记已读和批量删除交互，构建通过",
+      "assertions": [
+        {
+          "text": "页面布局使用 tdesign-vue-next 组件，未使用其他 UI 库",
+          "type": "with_skill"
+        },
+        {
+          "text": "API 接口通过 rest-api-writer skill 定义",
+          "type": "with_skill"
+        },
+        {
+          "text": "交互逻辑通过 tdd-typescript skill 实现",
+          "type": "with_skill"
+        },
+        {
+          "text": "pnpm run build 编译通过",
+          "type": "with_skill"
+        },
+        {
+          "text": "消息列表支持多选、批量操作、状态筛选",
+          "type": "without_skill"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "阅读 outputs/prds/admin/role.md 和 outputs/ui/admin/role.html，开发角色管理页面，支持角色列表展示、新增角色、编辑角色权限。",
+      "expected_output": "使用 TDesign 表格和弹窗组件完成角色管理页面，通过 rest-api-writer 定义角色 API，通过 tdd-typescript 实现新增编辑交互，构建通过",
+      "assertions": [
+        {
+          "text": "角色列表页面使用 tdesign-vue-next Table 组件",
+          "type": "with_skill"
+        },
+        {
+          "text": "角色 CRUD API 通过 rest-api-writer 定义",
+          "type": "with_skill"
+        },
+        {
+          "text": "新增/编辑角色弹窗和权限选择通过 tdd-typescript 实现",
+          "type": "with_skill"
+        },
+        {
+          "text": "pnpm run build 编译通过",
+          "type": "with_skill"
+        },
+        {
+          "text": "页面文件在 src/views/ 下，API 在 src/api/ 下，类型在 src/typings/ 下",
+          "type": "with_skill"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "开发系统设置页面，包含基础信息设置、菜单权限配置、操作日志查看三个 tab。PRD 在 outputs/prds/admin/settings.md，UI 在 outputs/ui/admin/settings.html。",
+      "expected_output": "使用 TDesign Tabs 组件完成多 tab 页面，每个 tab 内用 TDesign 表单/表格组件，定义设置相关 API，实现保存和查询逻辑，构建通过",
+      "assertions": [
+        {
+          "text": "页面布局使用 tdesign-vue-next 组件，未使用其他 UI 库",
+          "type": "with_skill"
+        },
+        {
+          "text": "API 接口通过 rest-api-writer skill 定义",
+          "type": "with_skill"
+        },
+        {
+          "text": "交互逻辑通过 tdd-typescript skill 实现",
+          "type": "with_skill"
+        },
+        {
+          "text": "pnpm run build 编译通过",
+          "type": "with_skill"
+        },
+        {
+          "text": "页面包含基础设置、权限配置、操作日志三个 tab 页签",
+          "type": "without_skill"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "阅读 outputs/prds/admin/menu.md 和 outputs/ui/admin/menu.html，开发菜单管理页面，支持树形展示、拖拽排序、新增/编辑/删除菜单。",
+      "expected_output": "使用 TDesign 树形组件完成菜单管理页面，定义菜单 API，实现拖拽排序和增删改交互，构建通过",
+      "assertions": [
+        {
+          "text": "菜单树形展示使用 tdesign-vue-next Tree 组件",
+          "type": "with_skill"
+        },
+        {
+          "text": "菜单 CRUD 和排序 API 通过 rest-api-writer 定义",
+          "type": "with_skill"
+        },
+        {
+          "text": "拖拽排序和增删改交互通过 tdd-typescript 实现",
+          "type": "with_skill"
+        },
+        {
+          "text": "pnpm run build 编译通过",
+          "type": "with_skill"
+        },
+        {
+          "text": "支持树形展示、节点展开/收起、拖拽调整菜单顺序",
+          "type": "with_skill"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "根据 outputs/prds/admin/approval.md 和 outputs/ui/admin/approval.html，开发审批流程列表页面，支持审批状态筛选、查看详情、通过/驳回操作。",
+      "expected_output": "使用 TDesign 完成审批列表页，定义审批 API，实现筛选和审批操作交互，构建通过",
+      "assertions": [
+        {
+          "text": "页面布局使用 tdesign-vue-next 组件，未使用其他 UI 库",
+          "type": "with_skill"
+        },
+        {
+          "text": "API 接口通过 rest-api-writer skill 定义",
+          "type": "with_skill"
+        },
+        {
+          "text": "交互逻辑通过 tdd-typescript skill 实现",
+          "type": "with_skill"
+        },
+        {
+          "text": "pnpm run build 编译通过",
+          "type": "with_skill"
+        },
+        {
+          "text": "列表支持按状态筛选，支持查看详情弹窗和通过/驳回操作",
+          "type": "without_skill"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "开发文件管理模块，包含文件列表、上传、下载、删除功能。PRD 在 outputs/prds/admin/file-manage.md，UI 在 outputs/ui/admin/file-manage.html。",
+      "expected_output": "使用 TDesign 完成文件列表页和上传组件，定义文件操作 API，实现上传下载删除交互，构建通过",
+      "assertions": [
+        {
+          "text": "文件列表页面使用 tdesign-vue-next 组件",
+          "type": "with_skill"
+        },
+        {
+          "text": "文件上传/下载/删除 API 通过 rest-api-writer 定义",
+          "type": "with_skill"
+        },
+        {
+          "text": "文件上传进度和删除确认通过 tdd-typescript 实现",
+          "type": "with_skill"
+        },
+        {
+          "text": "pnpm run build 编译通过",
+          "type": "with_skill"
+        },
+        {
+          "text": "支持文件上传（含进度）、下载、删除操作",
+          "type": "with_skill"
+        }
+      ]
+    }
+  ]
+}

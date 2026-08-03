@@ -1,0 +1,76 @@
+# 项目路由定义
+# 用于从代码库生成 OpenAPI spec 的示例
+
+routes:
+  # 用户模块
+  - method: GET
+    path: /api/v1/users
+    handler: UserHandler.List
+    description: 用户列表
+
+  - method: POST
+    path: /api/v1/users
+    handler: UserHandler.Create
+    description: 创建用户
+
+  - method: GET
+    path: /api/v1/users/:id
+    handler: UserHandler.Get
+    description: 获取用户详情
+
+  - method: PUT
+    path: /api/v1/users/:id
+    handler: UserHandler.Update
+    description: 更新用户
+
+  - method: DELETE
+    path: /api/v1/users/:id
+    handler: UserHandler.Delete
+    description: 删除用户
+
+  # 商品模块
+  - method: GET
+    path: /api/v1/products
+    handler: ProductHandler.List
+    description: 商品列表
+
+  - method: POST
+    path: /api/v1/products
+    handler: ProductHandler.Create
+    description: 创建商品
+
+  - method: GET
+    path: /api/v1/products/:id
+    handler: ProductHandler.Get
+    description: 获取商品详情
+
+  - method: PUT
+    path: /api/v1/products/:id
+    handler: ProductHandler.Update
+    description: 更新商品
+
+  - method: DELETE
+    path: /api/v1/products/:id
+    handler: ProductHandler.Delete
+    description: 删除商品
+
+  # 订单模块
+  - method: GET
+    path: /api/v1/orders
+    handler: OrderHandler.List
+    description: 订单列表
+
+  - method: POST
+    path: /api/v1/orders
+    handler: OrderHandler.Create
+    description: 创建订单
+
+  - method: GET
+    path: /api/v1/orders/:id
+    handler: OrderHandler.Get
+    description: 获取订单详情
+
+  - method: PUT
+    path: /api/v1/orders/:id
+    handler: OrderHandler.Cancel
+    description: 取消订单

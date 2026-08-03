@@ -1,0 +1,267 @@
+openapi: 3.2.0
+info:
+  title: E-commerce API
+  version: 2.0.0
+  description: 电商 API 示例，包含完整的 request/response schema
+paths:
+  /api/v2/users:
+    get:
+      summary: 获取用户列表
+      operationId: listUsers
+      tags:
+        - 用户管理
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: 用户列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  total:
+                    type: integer
+    post:
+      summary: 创建用户
+      operationId: createUser
+      tags:
+        - 用户管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /api/v2/users/{id}:
+    get:
+      summary: 获取用户详情
+      operationId: getUser
+      tags:
+        - 用户管理
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 用户详情
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    put:
+      summary: 更新用户
+      operationId: updateUser
+      tags:
+        - 用户管理
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    delete:
+      summary: 删除用户
+      operationId: deleteUser
+      tags:
+        - 用户管理
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 删除成功
+  /api/v2/orders:
+    get:
+      summary: 获取订单列表
+      operationId: listOrders
+      tags:
+        - 订单管理
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, paid, shipped, completed, cancelled]
+      responses:
+        '200':
+          description: 订单列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Order'
+                  total:
+                    type: integer
+    post:
+      summary: 创建订单
+      operationId: createOrder
+      tags:
+        - 订单管理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+      responses:
+        '201':
+          description: 创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+  /api/v2/orders/{id}:
+    get:
+      summary: 获取订单详情
+      operationId: getOrder
+      tags:
+        - 订单管理
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 订单详情
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+components:
+  schemas:
+    User:
+      type: object
+      required: [id, name, email]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        avatar:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CreateUserRequest:
+      type: object
+      required: [name, email]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        avatar:
+          type: string
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        avatar:
+          type: string
+    Order:
+      type: object
+      required: [id, userId, totalAmount, status]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        totalAmount:
+          type: number
+          format: float
+        status:
+          type: string
+          enum: [pending, paid, shipped, completed, cancelled]
+        shippingAddress:
+          type: string
+        remark:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        paidAt:
+          type: string
+          format: date-time
+    CreateOrderRequest:
+      type: object
+      required: [items, shippingAddress]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              productId:
+                type: integer
+              quantity:
+                type: integer
+              price:
+                type: number
+                format: float
+        shippingAddress:
+          type: string
+        remark:
+          type: string

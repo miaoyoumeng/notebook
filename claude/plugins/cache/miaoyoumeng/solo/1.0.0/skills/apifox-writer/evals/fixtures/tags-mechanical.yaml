@@ -1,0 +1,132 @@
+openapi: 3.2.0
+info:
+  title: Auto-generated API
+  version: 1.0.0
+  description: |
+    自动生成器产出的 spec，tags 按 URL 路径机械分组。
+    所有 tags 都是 api、v1、<resource> 形式，不适合直接导入 Apifox。
+paths:
+  /api/v1/users:
+    get:
+      summary: 用户列表
+      operationId: getUsers
+      tags: [api, v1, users]
+      responses: {'200': {description: OK}}
+  /api/v1/auth/login:
+    post:
+      summary: 用户登录
+      operationId: login
+      tags: [api, v1, auth]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses: {'200': {description: OK}}
+  /api/v1/auth/logout:
+    post:
+      summary: 用户登出
+      operationId: logout
+      tags: [api, v1, auth]
+      responses: {'200': {description: OK}}
+  /api/v1/products:
+    get:
+      summary: 商品列表
+      operationId: getProducts
+      tags: [api, v1, products]
+      responses: {'200': {description: OK}}
+    post:
+      summary: 创建商品
+      operationId: createProduct
+      tags: [api, v1, products]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses: {'201': {description: Created}}
+  /api/v1/products/{id}:
+    get:
+      summary: 获取商品
+      operationId: getProduct
+      tags: [api, v1, products]
+      responses: {'200': {description: OK}}
+    put:
+      summary: 更新商品
+      operationId: updateProduct
+      tags: [api, v1, products]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses: {'200': {description: OK}}
+  /api/v1/orders:
+    get:
+      summary: 订单列表
+      operationId: getOrders
+      tags: [api, v1, orders]
+      responses: {'200': {description: OK}}
+    post:
+      summary: 创建订单
+      operationId: createOrder
+      tags: [api, v1, orders]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses: {'201': {description: Created}}
+  /api/v1/orders/{id}:
+    get:
+      summary: 获取订单
+      operationId: getOrder
+      tags: [api, v1, orders]
+      responses: {'200': {description: OK}}
+    put:
+      summary: 更新订单
+      operationId: updateOrder
+      tags: [api, v1, orders]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses: {'200': {description: OK}}
+  /api/v1/notifications:
+    get:
+      summary: 通知列表
+      operationId: getNotifications
+      tags: [api, v1, notifications]
+      responses: {'200': {description: OK}}
+  /api/v1/notifications/{id}/read:
+    post:
+      summary: 标记已读
+      operationId: markNotificationRead
+      tags: [api, v1, notifications]
+      responses: {'200': {description: OK}}
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        price:
+          type: number

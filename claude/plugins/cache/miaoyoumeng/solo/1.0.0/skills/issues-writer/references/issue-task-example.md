@@ -43,5 +43,15 @@
 无阻塞，无依赖 - 立刻可以开始执行
 ```
 
+#### 引用资料
+
+- /path/to/prd 1
+- /path/to/prd ……
+- /path/to/prd n
+
+- /path/to/html 1
+- /path/to/html ……
+- /path/to/html n
+
 ---
 

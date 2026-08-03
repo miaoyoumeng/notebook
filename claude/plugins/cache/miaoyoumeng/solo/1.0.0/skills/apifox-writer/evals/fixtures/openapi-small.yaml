@@ -1,0 +1,62 @@
+openapi: 3.2.0
+info:
+  title: Health Check API
+  version: 1.0.0
+  description: 小型健康检查 API，只有 3 个 GET 接口
+paths:
+  /health:
+    get:
+      summary: 整体健康检查
+      operationId: getHealth
+      tags:
+        - 基础设施
+      responses:
+        '200':
+          description: 服务正常
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+  /health/ready:
+    get:
+      summary: 就绪检查
+      operationId: getReadiness
+      tags:
+        - 基础设施
+      responses:
+        '200':
+          description: 服务已就绪
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ready:
+                    type: boolean
+                  checks:
+                    type: object
+  /health/live:
+    get:
+      summary: 存活探针
+      operationId: getLiveness
+      tags:
+        - 基础设施
+      responses:
+        '200':
+          description: 服务存活
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  alive:
+                    type: boolean
+components:
+  schemas: {}

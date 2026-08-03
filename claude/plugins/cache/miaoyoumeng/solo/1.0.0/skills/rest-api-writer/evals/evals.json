@@ -1,0 +1,184 @@
+{
+  "skill_name": "rest-api-writer",
+  "_comment": "Balanced eval set: 5 with_skill (anti-pattern detection) + 5 without_skill (normal API generation). Each eval has 4-8 assertions.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "user-management-crud",
+      "mode": "without_skill",
+      "prompt": "帮我设计一个用户管理模块的 REST API，需要支持用户的增删改查和状态变更。用户字段：用户名、邮箱、手机号、角色（admin/user/guest）、状态（启用/禁用）。列表查询需要分页和支持关键字搜索。",
+      "expected_output": "输出符合 REST 规范的 OpenAPI YAML：路径使用 /api/users，GET /api/users 支持 page/pageSize/keyword 参数，POST/PUT/PATCH/DELETE 完整，User Schema 包含所有字段，状态变更用 PATCH /api/users/{userId}/status",
+      "files": [],
+      "expectations": [
+        "yaml_contains_openapi_version_3.2",
+        "path_contains_api_users",
+        "get_list_has_page_parameter",
+        "get_list_has_pageSize_parameter",
+        "get_list_has_keyword_parameter",
+        "user_schema_has_role_field_with_enum",
+        "user_schema_has_status_field_with_enum",
+        "status_change_uses_patch_method",
+        "response_format_has_code_field",
+        "response_format_has_displayMsg_field"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "order-management-crud",
+      "mode": "without_skill",
+      "prompt": "设计一个订单管理系统的 REST API。包含功能：订单列表（按订单号、状态、时间范围筛选）、订单详情、创建订单、取消订单、确认收货。订单字段：订单号、商品列表（商品ID、商品名、单价、数量）、总金额、收货地址、订单状态（待支付/已支付/已发货/已完成/已取消）。",
+      "expected_output": "订单作为核心资源，路径 /api/orders。GET 支持 status/startTime/endTime/page/pageSize 参数。创建订单 POST 返回 201。取消订单和确认收货用 PATCH 变更状态。OrderItem 作为嵌套 Schema。响应格式包含分页结构。",
+      "files": [],
+      "expectations": [
+        "yaml_contains_openapi_version_3.2",
+        "path_contains_api_orders",
+        "get_list_has_status_parameter",
+        "get_list_has_startTime_parameter",
+        "get_list_has_endTime_parameter",
+        "order_schema_has_status_enum",
+        "cancel_order_uses_patch_method",
+        "confirm_receipt_uses_patch_method",
+        "post_create_returns_201_status",
+        "response_has_pagination_structure"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "product-sku-management",
+      "mode": "without_skill",
+      "prompt": "帮我设计一个商品管理模块的 REST API。包含：商品列表（按关键词、分类、品牌、价格区间筛选）、商品详情、新增商品、编辑商品、上架/下架、库存调整。商品字段：名称、描述、分类ID、品牌ID、价格、库存量、SKU列表（规格名、规格值、库存、价格）。",
+      "expected_output": "Product 和 SKU 两个资源，路径 /api/products 和 /api/products/{productId}/skus。库存调整用 PATCH /api/products/{productId}/stock。上架下架用 PATCH /api/products/{productId}/status。枚举字段用 enum 定义。",
+      "files": [],
+      "expectations": [
+        "yaml_contains_openapi_version_3.2",
+        "path_contains_api_products",
+        "sku_defined_as_subresource_with_nested_path",
+        "stock_adjustment_uses_patch_method",
+        "status_change_uses_patch_method",
+        "product_schema_has_price_field_as_number",
+        "product_schema_has_quantity_field_as_integer",
+        "sku_schema_has_spec_name_field"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "file-upload-management",
+      "mode": "without_skill",
+      "prompt": "设计一个文件管理系统的 REST API。功能：单文件上传、多文件批量上传、文件列表、文件删除、按文件类型筛选。文件分类：图片、文档、视频。文件字段：文件名、文件类型、文件大小、文件URL、上传时间。",
+      "expected_output": "POST /api/files（Content-Type: multipart/form-data）上传单文件，POST /api/files/batch 批量上传。GET /api/files 支持 fileType 筛选。DELETE /api/files/{fileId} 返回 204。File Schema 包含 fileName/fileType/fileSize/fileUrl。",
+      "files": [],
+      "expectations": [
+        "yaml_contains_openapi_version_3.2",
+        "single_upload_uses_post_method",
+        "single_upload_has_multipart_form_data",
+        "batch_upload_path_contains_batch",
+        "file_list_has_fileType_query_parameter",
+        "file_delete_uses_delete_method",
+        "file_schema_has_fileUrl_field",
+        "fileType_field_has_enum_constraint"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "content-management-blog",
+      "mode": "without_skill",
+      "prompt": "帮我设计一个内容管理系统的 REST API。包含：文章管理（创建、编辑、发布、删除、详情、列表）、评论管理（发表、删除、列表）。文章字段：标题、正文、作者ID、分类、标签、状态（草稿/已发布/已归档）、发布时间。评论字段：内容、作者ID、文章ID、状态（待审核/已通过/已拒绝）。列表需要分页和关键词搜索。",
+      "expected_output": "Article 和 Comment 两个资源，路径 /api/articles 和 /api/articles/{articleId}/comments。状态变更用 PATCH。评论作为文章的子资源。Schema 包含 enum 和 required。",
+      "files": [],
+      "expectations": [
+        "yaml_contains_openapi_version_3.2",
+        "path_contains_api_articles",
+        "comments_defined_as_subresource_of_articles",
+        "article_status_change_uses_patch",
+        "comment_schema_has_status_enum",
+        "list_endpoints_have_pagination_parameters",
+        "list_endpoints_have_keyword_parameter",
+        "response_format_has_standard_fields"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "anti-pattern-verb-urls",
+      "mode": "with_skill",
+      "prompt": "帮我设计一个API，需要以下几个接口：/getUserList 获取用户列表、/getUserDetail 获取用户详情、/addUser 新增用户、/updateUser 修改用户、/deleteUser 删除用户、/changeUserStatus 变更用户状态。用户的字段有：id、用户名、邮箱、手机号、角色、状态。",
+      "expected_output": "技能应指出用户提交的 URL 设计不符合 REST 规范（URL 中包含动词），应按照 RESTful 原则重新设计为：GET/POST/PUT/DELETE /api/users，状态变更为 PATCH /api/users/{userId}/status。",
+      "files": [],
+      "expectations": [
+        "points_out_verb_url_anti_pattern",
+        "suggests_restful_naming_noun_plural",
+        "maps_getUserList_to_get_users",
+        "maps_addUser_to_post_users",
+        "maps_deleteUser_to_delete_users",
+        "maps_changeUserStatus_to_patch_users_status",
+        "does_not_use_verb_urls_in_generated_paths"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "anti-pattern-vague-requirements",
+      "mode": "with_skill",
+      "prompt": "帮我写个 API 接口，我需要一个简单的功能。",
+      "expected_output": "技能应指出需求描述过于模糊，无法设计出具体的 API 接口。应追问用户的核心业务领域是什么、需要操作哪些数据实体、需要哪些功能（列表、详情、新增等）、以及涉及哪些数据字段。",
+      "files": [],
+      "expectations": [
+        "states_requirements_too_vague",
+        "asks_about_business_domain",
+        "asks_about_data_entities",
+        "asks_about_required_operations",
+        "asks_about_data_fields",
+        "does_not_generate_concrete_api_endpoints"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "anti-pattern-http-method-misuse",
+      "mode": "with_skill",
+      "prompt": "帮我设计一个 REST API：需要支持通过 GET 方法创建用户、通过 GET 方法删除订单、用 POST 方法查询商品列表。",
+      "expected_output": "技能应指出 GET 请求不应有副作用（创建、删除），应严格按照 HTTP 方法规范：用 POST 创建用户、DELETE 删除订单、GET 查询商品列表。",
+      "files": [],
+      "expectations": [
+        "explains_get_should_be_safe_and_idempotent",
+        "suggests_post_for_user_creation",
+        "suggests_delete_for_order_deletion",
+        "suggests_get_for_product_list_query",
+        "does_not_use_get_for_creation_or_deletion",
+        "does_not_use_post_for_list_query"
+      ]
+    },
+    {
+      "id": 9,
+      "name": "anti-pattern-verb-urls-inventory",
+      "mode": "with_skill",
+      "prompt": "设计一个库存管理系统的 API，接口如下：/getInventoryList 查询库存列表、/addInventory 新增库存记录、/updateInventory 更新库存、/deleteInventory 删除库存、/adjustStock 调整库存数量。库存字段：商品ID、仓库ID、库存数量、锁定数量、可用数量。",
+      "expected_output": "技能应指出 URL 中包含动词不符合 REST 规范。应重新设计为：GET /api/inventories 查询列表，POST /api/inventories 新增，PUT/PATCH /api/inventories/{inventoryId} 更新，DELETE /api/inventories/{inventoryId} 删除，PATCH /api/inventories/{inventoryId}/stock 调整库存。",
+      "files": [],
+      "expectations": [
+        "points_out_verb_url_anti_pattern",
+        "maps_getInventoryList_to_get_inventories",
+        "maps_addInventory_to_post_inventories",
+        "maps_deleteInventory_to_delete_inventories",
+        "maps_adjustStock_to_patch_inventories_stock",
+        "does_not_use_verb_urls_in_generated_paths"
+      ]
+    },
+    {
+      "id": 10,
+      "name": "anti-pattern-mixed-verb-urls",
+      "mode": "with_skill",
+      "prompt": "设计一个商城系统的 API。我们现有接口是这样的：/product.list（商品列表）、/product.detail（商品详情）、/cart.add（加入购物车）、/cart.remove（移除购物车商品）、/order.submit（提交订单）、/order.pay（支付订单）、/getUserAddress（获取收货地址）。请帮我写成 API 文档。",
+      "expected_output": "技能应指出 URL 中包含动词和点号的问题。将 product 操作映射为 /api/products，cart 操作映射为 /api/cart 或 /api/cart/items，order 操作映射为 /api/orders，address 映射为 /api/addresses 或 /api/users/{userId}/addresses。支付订单属于状态变更，应使用 PATCH。",
+      "files": [],
+      "expectations": [
+        "points_out_verb_and_dot_notation_urls",
+        "maps_product_list_to_rest_get_products",
+        "maps_product_detail_to_rest_get_product_by_id",
+        "maps_cart_add_to_rest_post_cart_items",
+        "maps_cart_remove_to_rest_delete_cart_item",
+        "maps_order_submit_to_rest_post_orders",
+        "maps_order_pay_to_rest_patch_order_status",
+        "maps_getUserAddress_to_rest_get_addresses_or_nested",
+        "does_not_use_dot_notation_or_verb_paths"
+      ]
+    }
+  ]
+}

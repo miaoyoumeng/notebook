@@ -1,0 +1,336 @@
+{
+  "skill_name": "apifox-writer",
+  "evals": [
+    {
+      "id": 1,
+      "name": "generate-spec-from-project-and-import",
+      "prompt": "我们项目的代码在 /Users/miaoyoumeng/apps/myproject，帮我生成 API spec 并导入到 Apifox 项目",
+      "expected_output": "先搜索项目内已有生成器（如 openapi、swagger、route-gen 等），运行生成器产出 spec，执行导入前质量指标统计（paths/operations/schemas/writes/withBody/emptyObjectBodies），判断 spec 完整性后选择合适的导入项目执行导入",
+      "files": ["evals/fixtures/sample-project/routes.yaml"],
+      "assertions": [
+        {
+          "name": "搜索项目内生成器",
+          "type": "text_match",
+          "pattern": "(openapi|swagger|routegen|route-gen|docs generator|api docs|schema generator)",
+          "description": "应先搜索项目内已有生成器，而非手写提取脚本"
+        },
+        {
+          "name": "输出质量指标统计",
+          "type": "text_match",
+          "pattern": "(paths|operations|schemas|writes|withBody|emptyObjectBodies)",
+          "description": "导入前必须输出质量指标统计表"
+        },
+        {
+          "name": "spec 完整性判断",
+          "type": "text_match",
+          "pattern": "(路由骨架|骨架 spec|完整性|完整度|requestBody)",
+          "description": "应对 spec 完整性做出判断，而非盲目导入"
+        },
+        {
+          "name": "YAML 格式确认",
+          "type": "text_match",
+          "pattern": "(yaml|yml|YAML|转换为 YAML)",
+          "description": "导入文件必须为 YAML 格式"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "reject-json-direct-import",
+      "prompt": "把这份 openapi.json 文件导入到 Apifox",
+      "expected_output": "识别文件格式为 JSON，必须先转换为 YAML 格式后再导入，执行导入前质量门禁检查",
+      "files": ["evals/fixtures/openapi.json"],
+      "assertions": [
+        {
+          "name": "拒绝 JSON 直接导入",
+          "type": "text_match",
+          "pattern": "(转换为 YAML|JSON 格式.*转换|先转换为.*YAML|不能直接导入.*JSON)",
+          "description": "不应直接导入 JSON 格式文件，必须先转换为 YAML"
+        },
+        {
+          "name": "执行质量门禁",
+          "type": "text_match",
+          "pattern": "(paths.*\\d|operations.*\\d|schemas.*\\d|质量指标.*统计|统计.*结果)",
+          "description": "转换后仍需执行导入前质量指标统计，需包含具体数值"
+        },
+        {
+          "name": "不依赖扩展名判断",
+          "type": "text_match",
+          "pattern": "(实际内容.*格式|读取.*确认.*格式|不要.*扩展名|根据内容.*判断)",
+          "description": "不应仅根据文件扩展名判断格式"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "add-mock-data-to-openapi",
+      "prompt": "帮我给这些 API 接口添加 Mock 数据，然后导入 Apifox",
+      "expected_output": "读取 OpenAPI 3.2 YAML 文件，为 response schema 的属性添加 x-apifox-mock 扩展字段，按照字段类型映射规则生成 Mock 数据，然后导入",
+      "files": ["evals/fixtures/openapi-with-mock.yaml"],
+      "assertions": [
+        {
+          "name": "添加 x-apifox-mock 扩展",
+          "type": "text_match",
+          "pattern": "x-apifox-mock",
+          "description": "必须为 schema 属性添加 x-apifox-mock 扩展字段"
+        },
+        {
+          "name": "Mock 规则使用 Mock.js 语法",
+          "type": "text_match",
+          "pattern": "(@integer|@string|@email|@cname|@boolean|@datetime|@uuid|@url|@phone|@float|@pick|@cword|@cparagraph|@image|@id|@ctitle)",
+          "description": "Mock 值应使用 Mock.js 语法或动态值表达式"
+        },
+        {
+          "name": "属性级别添加",
+          "type": "text_match",
+          "pattern": "(属性|properties|递归|嵌套|items)",
+          "description": "x-apifox-mock 必须添加到 schema 属性级别，不是顶层"
+        },
+        {
+          "name": "保持 OpenAPI 结构不变",
+          "type": "text_match",
+          "pattern": "(结构不变|保持.*paths|不修改.*operations)",
+          "description": "转换时应保持 OpenAPI 结构不变，只添加 Mock 扩展"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "detect-route-skeleton",
+      "prompt": "这个 openapi.yaml 有 50 个接口，但 schemas 只有 2 个，能直接导入到生产项目吗？",
+      "expected_output": "识别为大项目 schema 极少的风险信号，判断为疑似路由骨架 spec，不建议直接导入生产项目，应继续查找 DTO、handler schema 或项目内生成器",
+      "files": ["evals/fixtures/openapi-large-skeleton.yaml"],
+      "assertions": [
+        {
+          "name": "识别路由骨架风险",
+          "type": "text_match",
+          "pattern": "(路由骨架|骨架 spec|疑似.*不完整|接口.*schemas.*少)",
+          "description": "接口多但 schemas 极少应判定为路由骨架风险"
+        },
+        {
+          "name": "不建议导入生产项目",
+          "type": "text_match",
+          "pattern": "(不要.*导入|不建议|风险|临时.*项目|干净.*项目)",
+          "description": "不应建议将疑似骨架 spec 导入生产/已有项目"
+        },
+        {
+          "name": "建议查找更完整来源",
+          "type": "text_match",
+          "pattern": "(DTO|handler|生成器|schema|request.*struct|response.*struct)",
+          "description": "应建议继续查找更完整的 spec 来源"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "backup-project-with-module-matching",
+      "prompt": "把一个 Apifox 项目备份到另一个项目，模块名要保持一致",
+      "expected_output": "使用 Apifox 原生格式导入，选择合适的 module-import-mode（如 match-name），导入后验证模块数量和资源数量",
+      "assertions": [
+        {
+          "name": "使用 Apifox 原生格式",
+          "type": "text_match",
+          "pattern": "(apifox.*format|--format apifox|原生格式|原生.*格式)",
+          "description": "项目迁移/备份应使用 Apifox 原生格式"
+        },
+        {
+          "name": "设置模块导入策略",
+          "type": "text_match",
+          "pattern": "(module-import-mode|module-map|match-name|模块.*策略|模块.*模式)",
+          "description": "应指定合适的模块导入模式"
+        },
+        {
+          "name": "导入后验证",
+          "type": "text_match",
+          "pattern": "(验证|确认|模块.*数量|资源.*数量|API.*数量|Schema.*数量)",
+          "description": "导入后必须验证模块和资源数量"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "generate-from-prd-and-import",
+      "prompt": "从 PRD 文档生成 API 文档然后导入到 Apifox 项目 ID 12345",
+      "expected_output": "先搜索项目内是否有生成器，若无则从 PRD 生成 spec，执行完整质量门禁流程（统计、完整性判断、tags 检查），选择导入项目后执行导入并验证",
+      "files": ["evals/fixtures/prd-example.md"],
+      "assertions": [
+        {
+          "name": "搜索项目生成器",
+          "type": "text_match",
+          "pattern": "(openapi|swagger|routegen|route-gen|生成器)",
+          "description": "即使从 PRD 生成，也应先搜索项目内是否有生成器"
+        },
+        {
+          "name": "tags 分组检查",
+          "type": "text_match",
+          "pattern": "(tags|业务.*分组|目录|导航|operationId|summary|description)",
+          "description": "应检查 tags 是否按业务域分组，而非技术路径"
+        },
+        {
+          "name": "指定目标项目导入",
+          "type": "text_match",
+          "pattern": "(12345|project.*12345|目标项目|指定.*项目)",
+          "description": "应使用用户指定的项目 ID 导入"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "detect-high-ignore-count",
+      "prompt": "导入后 ignoreCount 有 30 个，这正常吗？之前已经在这个项目导入过一次了",
+      "expected_output": "识别 ignoreCount 偏高为风险信号，判断可能是旧 spec 与新 spec 混杂或接口匹配策略问题，建议在干净项目重新导入",
+      "assertions": [
+        {
+          "name": "识别 ignoreCount 风险",
+          "type": "text_match",
+          "pattern": "(ignoreCount.*30|30.*ignoreCount|ignoreCount.*偏高|风险信号)",
+          "description": "应将高 ignoreCount 识别为风险信号，需引用具体数值"
+        },
+        {
+          "name": "判断污染可能",
+          "type": "text_match",
+          "pattern": "(旧.*spec.*混杂|新.*spec.*混杂|已有项目.*污染|接口匹配.*策略)",
+          "description": "应判断可能是已有项目被污染或匹配策略问题"
+        },
+        {
+          "name": "建议干净项目",
+          "type": "text_match",
+          "pattern": "(干净.*项目.*重新.*导入|新建.*项目.*验证|临时.*项目.*重导)",
+          "description": "应建议在干净项目中重新导入验证"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "import-postman-yaml",
+      "prompt": "帮我把这个 Postman collection 的 YAML 导入到 Apifox，tags 按现在的就行不用改",
+      "expected_output": "识别 Postman 格式文件，执行导入前质量检查，即使用户说 tags 不用改也应检查 tags 是否按业务域分组合理",
+      "assertions": [
+        {
+          "name": "识别 Postman 格式",
+          "type": "text_match",
+          "pattern": "(Postman.*format|postman.*collection|识别.*Postman|Postman.*格式)",
+          "description": "应识别并正确处理 Postman 格式的 YAML 文件"
+        },
+        {
+          "name": "质量指标统计",
+          "type": "text_match",
+          "pattern": "(paths.*\\d.*operations.*\\d|质量指标.*统计.*\\d|paths.*operations.*schemas)",
+          "description": "无论用户是否要求，都应输出带具体数值的质量指标"
+        },
+        {
+          "name": "tags 合理性检查",
+          "type": "text_match",
+          "pattern": "(tags.*业务.*分组|tags.*分组.*合理|目录.*业务.*导航)",
+          "description": "即使用户说 tags 不用改，也应检查 tags 分组是否按业务域"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "small-get-project-acceptable",
+      "prompt": "我们的项目是纯健康检查接口，就 3 个 GET，没有 schema，这种正常吗？",
+      "expected_output": "识别为小型纯 GET 项目的正常情况，schemas=0 或极少在此场景下是合理的，可以导入",
+      "files": ["evals/fixtures/openapi-small.yaml"],
+      "assertions": [
+        {
+          "name": "识别小型 GET 场景",
+          "type": "text_match",
+          "pattern": "(健康检查.*合理|纯 GET.*接受|小型.*schemas.*少.*正常|可以.*导入)",
+          "description": "应识别小型纯 GET 项目特点，schemas 少可接受"
+        },
+        {
+          "name": "不强制要求 schemas",
+          "type": "text_match",
+          "pattern": "(不强制.*schemas|schemas.*0.*可接受|无需.*schema.*合理)",
+          "description": "不应强制要求此类项目必须有 schemas"
+        },
+        {
+          "name": "结合业务形态判断",
+          "type": "text_match",
+          "pattern": "(结合.*业务形态|业务.*特点.*判断|综合.*场景.*判断)",
+          "description": "应结合业务形态综合判断，而非仅看 schema 数量"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "configure-auto-import",
+      "prompt": "配置 Apifox 自动导入，让代码仓库更新后自动同步到 Apifox 项目",
+      "expected_output": "读取当前 CLI help 和 schema，创建自动导入配置，明确触发条件、目标项目、同步策略",
+      "assertions": [
+        {
+          "name": "查询 CLI help",
+          "type": "text_match",
+          "pattern": "(cli.*help|help|auto-import|自动.*导入.*配置|参数)",
+          "description": "配置自动导入前应查询 CLI help 确认参数"
+        },
+        {
+          "name": "创建自动导入配置",
+          "type": "text_match",
+          "pattern": "(auto-import|自动.*导入|配置.*文件|config|yaml|触发)",
+          "description": "应创建自动导入配置文件"
+        },
+        {
+          "name": "明确目标项目和策略",
+          "type": "text_match",
+          "pattern": "(project|项目.*id|目标.*项目|同步.*策略)",
+          "description": "配置中应明确目标项目和同步策略"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "detect-mechanical-tags",
+      "prompt": "这个 openapi.yaml 里面 tags 都是按 api/v1/user 这种路径分的，能直接导入吗？",
+      "expected_output": "识别 tags 按技术路径机械分组的问题，建议重写 tags 为业务域分组后，导入到干净的临时项目",
+      "files": ["evals/fixtures/tags-mechanical.yaml"],
+      "assertions": [
+        {
+          "name": "识别 tags 机械分组",
+          "type": "text_match",
+          "pattern": "(tags.*机械|技术.*路径.*分组|按.*URL.*分组|按.*path.*分组|tags.*不合理)",
+          "description": "应识别 tags 按技术路径机械分组的问题"
+        },
+        {
+          "name": "建议重写 tags",
+          "type": "text_match",
+          "pattern": "(重写.*tags.*业务域|修正.*tags.*业务|tags.*改为.*业务.*分组)",
+          "description": "应明确建议将 tags 重写为业务域分组"
+        },
+        {
+          "name": "建议导入干净项目",
+          "type": "text_match",
+          "pattern": "(导入.*临时.*项目.*验证|导入.*干净.*项目|不要.*导入.*已有.*项目)",
+          "description": "修正版 spec 应导入临时/干净项目验证"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "extract-routes-from-source-and-import",
+      "prompt": "从代码仓库的路由文件中提取所有 API 路径，生成 OpenAPI spec 并导入 Apifox",
+      "expected_output": "先搜索项目内生成器，若没有则从路由文件提取路径生成 spec（不仅是路由，还要推断 requestBody 和 response），执行质量门禁后导入",
+      "assertions": [
+        {
+          "name": "搜索项目生成器",
+          "type": "text_match",
+          "pattern": "(openapi|swagger|routegen|生成器|搜索|查找)",
+          "description": "应优先搜索项目内已有生成器"
+        },
+        {
+          "name": "提取完整 spec 而非仅路由",
+          "type": "text_match",
+          "pattern": "(requestBody|response|schema|body|DTO|完整)",
+          "description": "应提取完整 spec，不只提取 method+path"
+        },
+        {
+          "name": "执行质量门禁",
+          "type": "text_match",
+          "pattern": "(paths|operations|schemas|质量|统计|完整性)",
+          "description": "生成后必须执行完整质量门禁"
+        }
+      ]
+    }
+  ]
+}

@@ -210,9 +210,9 @@ When identifying trigger conditions from the Complex triggers table, must:
 ### Installation
 
 ```bash
-npm install tdesign-vue-next
+pnpm install tdesign-vue-next
 # Icon library
-npm install tdesign-icons-vue-next
+pnpm install tdesign-icons-vue-next
 ```
 
 ### Full Import

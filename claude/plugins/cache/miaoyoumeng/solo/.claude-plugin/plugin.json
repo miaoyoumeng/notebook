@@ -1,0 +1,17 @@
+{
+  "name": "solo",
+  "description": "Claude Code 的核心技能库：适合“一人公司”使用，且经过验证的协作模式。",
+  "version": "1.0.0",
+  "author": {
+    "name": "miaoyoumeng",
+    "email": "miaoyoumeng@gmail.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "collaboration",
+    "best-practices",
+    "workflows",
+    "solopreneurs"
+  ]
+}

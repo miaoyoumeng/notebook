@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+              "type": "command",
+              "command": "sh ${CLAUDE_PLUGIN_ROOT}/scripts/command-git-version.sh --dir=${CLAUDE_PROJECT_DIR}/outputs"
+          }
+        ]
+      }
+    ]
+  }
+}

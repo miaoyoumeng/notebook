@@ -1,0 +1,356 @@
+openapi: 3.2.0
+info:
+  title: Large API - Route Skeleton
+  version: 1.0.0
+  description: |
+    包含 50 个接口但只有 2 个 schema 的路由骨架 spec。
+    这是自动生成或只提取路由的结果，缺少 requestBody 和 response schema。
+paths:
+  /api/v1/users:
+    get:
+      summary: 用户列表
+      operationId: listUsers
+      tags: [api, v1]
+      responses: {'200': {description: OK}}
+    post:
+      summary: 创建用户
+      operationId: createUser
+      tags: [api, v1]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses: {'201': {description: Created}}
+  /api/v1/users/{id}:
+    get:
+      summary: 获取用户
+      operationId: getUser
+      tags: [api, v1]
+      responses: {'200': {description: OK}}
+    put:
+      summary: 更新用户
+      operationId: updateUser
+      tags: [api, v1]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses: {'200': {description: OK}}
+    delete:
+      summary: 删除用户
+      operationId: deleteUser
+      tags: [api, v1]
+      responses: {'204': {description: No Content}}
+  /api/v1/orders:
+    get:
+      summary: 订单列表
+      operationId: listOrders
+      tags: [api, v1]
+      responses: {'200': {description: OK}}
+    post:
+      summary: 创建订单
+      operationId: createOrder
+      tags: [api, v1]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses: {'201': {description: Created}}
+  /api/v1/orders/{id}:
+    get:
+      summary: 获取订单
+      operationId: getOrder
+      tags: [api, v1]
+      responses: {'200': {description: OK}}
+    put:
+      summary: 更新订单
+      operationId: updateOrder
+      tags: [api, v1]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses: {'200': {description: OK}}
+  /api/v1/products:
+    get:
+      summary: 商品列表
+      operationId: listProducts
+      tags: [api, v1]
+      responses: {'200': {description: OK}}
+    post:
+      summary: 创建商品
+      operationId: createProduct
+      tags: [api, v1]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses: {'201': {description: Created}}
+  /api/v1/products/{id}:
+    get:
+      summary: 获取商品
+      operationId: getProduct
+      tags: [api, v1]
+      responses: {'200': {description: OK}}
+    put:
+      summary: 更新商品
+      operationId: updateProduct
+      tags: [api, v1]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses: {'200': {description: OK}}
+    delete:
+      summary: 删除商品
+      operationId: deleteProduct
+      tags: [api, v1]
+      responses: {'204': {description: No Content}}
+  /api/v1/categories:
+    get:
+      summary: 分类列表
+      operationId: listCategories
+      tags: [api, v1]
+      responses: {'200': {description: OK}}
+    post:
+      summary: 创建分类
+      operationId: createCategory
+      tags: [api, v1]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses: {'201': {description: Created}}
+  /api/v1/categories/{id}:
+    get:
+      summary: 获取分类
+      operationId: getCategory
+      tags: [api, v1]
+      responses: {'200': {description: OK}}
+    put:
+      summary: 更新分类
+      operationId: updateCategory
+      tags: [api, v1]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses: {'200': {description: OK}}
+    delete:
+      summary: 删除分类
+      operationId: deleteCategory
+      tags: [api, v1]
+      responses: {'204': {description: No Content}}
+  /api/v1/addresses:
+    get:
+      summary: 地址列表
+      operationId: listAddresses
+      tags: [api, v1]
+      responses: {'200': {description: OK}}
+    post:
+      summary: 创建地址
+      operationId: createAddress
+      tags: [api, v1]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses: {'201': {description: Created}}
+  /api/v1/addresses/{id}:
+    get:
+      summary: 获取地址
+      operationId: getAddress
+      tags: [api, v1]
+      responses: {'200': {description: OK}}
+    put:
+      summary: 更新地址
+      operationId: updateAddress
+      tags: [api, v1]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses: {'200': {description: OK}}
+    delete:
+      summary: 删除地址
+      operationId: deleteAddress
+      tags: [api, v1]
+      responses: {'204': {description: No Content}}
+  /api/v1/payments:
+    get:
+      summary: 支付记录列表
+      operationId: listPayments
+      tags: [api, v1]
+      responses: {'200': {description: OK}}
+    post:
+      summary: 创建支付
+      operationId: createPayment
+      tags: [api, v1]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses: {'201': {description: Created}}
+  /api/v1/payments/{id}:
+    get:
+      summary: 获取支付记录
+      operationId: getPayment
+      tags: [api, v1]
+      responses: {'200': {description: OK}}
+  /api/v1/shipping:
+    get:
+      summary: 物流列表
+      operationId: listShipping
+      tags: [api, v1]
+      responses: {'200': {description: OK}}
+    post:
+      summary: 创建物流
+      operationId: createShipping
+      tags: [api, v1]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses: {'201': {description: Created}}
+  /api/v1/shipping/{id}:
+    get:
+      summary: 获取物流
+      operationId: getShipping
+      tags: [api, v1]
+      responses: {'200': {description: OK}}
+    put:
+      summary: 更新物流
+      operationId: updateShipping
+      tags: [api, v1]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses: {'200': {description: OK}}
+  /api/v1/reviews:
+    get:
+      summary: 评价列表
+      operationId: listReviews
+      tags: [api, v1]
+      responses: {'200': {description: OK}}
+    post:
+      summary: 创建评价
+      operationId: createReview
+      tags: [api, v1]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses: {'201': {description: Created}}
+  /api/v1/reviews/{id}:
+    get:
+      summary: 获取评价
+      operationId: getReview
+      tags: [api, v1]
+      responses: {'200': {description: OK}}
+    put:
+      summary: 更新评价
+      operationId: updateReview
+      tags: [api, v1]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses: {'200': {description: OK}}
+    delete:
+      summary: 删除评价
+      operationId: deleteReview
+      tags: [api, v1]
+      responses: {'204': {description: No Content}}
+  /api/v1/coupons:
+    get:
+      summary: 优惠券列表
+      operationId: listCoupons
+      tags: [api, v1]
+      responses: {'200': {description: OK}}
+    post:
+      summary: 创建优惠券
+      operationId: createCoupon
+      tags: [api, v1]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses: {'201': {description: Created}}
+  /api/v1/coupons/{id}:
+    get:
+      summary: 获取优惠券
+      operationId: getCoupon
+      tags: [api, v1]
+      responses: {'200': {description: OK}}
+    put:
+      summary: 更新优惠券
+      operationId: updateCoupon
+      tags: [api, v1]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses: {'200': {description: OK}}
+    delete:
+      summary: 删除优惠券
+      operationId: deleteCoupon
+      tags: [api, v1]
+      responses: {'204': {description: No Content}}
+  /api/v1/notifications:
+    get:
+      summary: 通知列表
+      operationId: listNotifications
+      tags: [api, v1]
+      responses: {'200': {description: OK}}
+    post:
+      summary: 创建通知
+      operationId: createNotification
+      tags: [api, v1]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses: {'201': {description: Created}}
+  /api/v1/notifications/{id}:
+    get:
+      summary: 获取通知
+      operationId: getNotification
+      tags: [api, v1]
+      responses: {'200': {description: OK}}
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
