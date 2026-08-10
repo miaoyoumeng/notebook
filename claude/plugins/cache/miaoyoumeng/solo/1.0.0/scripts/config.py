@@ -38,7 +38,7 @@ def user_story_dir(project_dir: Path,  sysName: str)-> Path:
 
 def outputs_dir(project_dir: Path) -> Path:
 
-    output_dir = Path(project_dir / "outputs")
+    output_dir = Path(project_dir)
     if not output_dir.exists() or not output_dir.is_dir():
         print(f"outputs 目录：{output_dir} 不存在...")
         sys.exit()

@@ -2,11 +2,11 @@
   "hooks": {
     "Stop": [
       {
-        "matcher": "",
+        "matcher": "/solo:commander-admin develop",
         "hooks": [
           {
               "type": "command",
-              "command": "sh ${CLAUDE_PLUGIN_ROOT}/scripts/command-git-version.sh --dir=${CLAUDE_PROJECT_DIR}/outputs"
+              "command": "uv run ${CLAUDE_PLUGIN_ROOT}/scripts/git-commit.py --workspace=${CLAUDE_PROJECT_DIR}"
           }
         ]
       }

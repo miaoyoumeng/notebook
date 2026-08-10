@@ -13,13 +13,211 @@ argument-hint: <subcommand>
 | 子命令 | 功能 |
 |--------|------|
 | `init` | 初始化 PRD 页面树和 prompt |
-| `features` | PRD 中 features 人工评估确认 |
 | `prd` | PRD 中 功能修复 |
 | `journey` | PRD 中用户旅程自动修复 |
 | `task` | PRD 拆分为 Issues |
-| `ui` | 设计 UI 页面 |
+| `ui` | 设计 ui 页面 |
+| `prd-ui` | 验证 prd 需求与 ui 页面一致性 |
+| `ui-vue` | 验证 ui 页面与 vue 页面 布局是否一致，需求是否一致|
 | `api` | 根据 PRD 文档 和 ui 页面设计 REST API |
 | `develop` | 用 typescript 和 vue3 开发后台管理页面 |
+| `vue-format` | vue页面代码结构格式化|
+
+---
+
+## 子命令：`init` — 初始化
+
+执行 shell 命令：
+
+```bash
+uv run python ${CLAUDE_PLUGIN_ROOT}/scripts/menus-2-prompt.py --workspace=<当前工作目录> --name=admin --pages=<上文的页面树>
+```
+
+功能说明：
+- 从 markdown 文档中抽取菜单。
+- 根据菜单名称生成对应的 prd prompt 内容。
+- 利用 python 脚本辅助：*${CLAUDE_PLUGIN_ROOT}/scripts/menus-2-prompt.py*
+
+*预期结果*
+- 生成针对系统导航菜单树，识别对应的 user-story 目录。
+- 为每个菜单生成对应的`prd-<页面名称>.prompt.md` 文件。
+
+---
+
+## 子命令：`journey` — PRD 用户旅程自动修复
+
+- 读取 prd 文档。
+- 根据 `${CLAUDE_PLUGIN_ROOT}/knowledges/dimensions/dimensions-of-scenario.md` 梳理出"常见问题诊断"。要严格按照文档清单，不要自行推断。
+- 每个问题调用 Skill 工具 `/solo:issues-writer`，生成 feature 类型的 issue 文档。禁止自己手写 issue 文件，必须通过 skill 生成 issue 文件。
+- 将新生成`feature`类型的 issue 按照模板写成 markdown 文档，并保存到`<当前工作目录>/issues/admin`目录下。此处是记录`prd feature`变更的`issue`，不是将`prd`拆分为`issue`。
+- 一个 issue 文档生成一个 markdown 文档，**禁止**将多个 issue 合并到一个文档中。
+- 在更新文档中约定的需要更新的 prd 文档路径，禁止直接更新`<当前工作目录>/prds/admin`下的 prd 文档。
+
+---
+
+## 子命令：`prd` - PRD 中 功能修复
+
+- 从用户输入中识别 `@路径/文件名.md` 格式的 PRD 文档路径，解析出目标 PRD 文件的绝对路径。
+- 读取该 PRD 文档内容，结合用户的修改描述，识别用户的修改意图。
+- 将识别到的修改意图整理为清晰的修改清单（包括修改位置、修改前内容、修改后内容），展示给用户确认。
+- 用户确认后，按照修改清单直接编辑目标 PRD 文档，完成修改后告知用户修改结果。
+- 如果未识别到 `@路径/文件名.md` 格式的 PRD 文档路径，提示用户通过 `@路径/文件名.md` 指定要修改的 PRD 文档。
+
+---
+
+## 子命令：`task` — PRD 拆分为 Issues
+
+读取用户提供的 PRD（产品需求文档），将其拆解为具体的开发任务，并为每个任务创建 Issue。
+
+请严格按照以下步骤执行：
+1. **需求理解**：仔细阅读通过 `@` 引入的 PRD 文档，提炼核心业务背景、功能目标和技术约束。
+2. **读取 ui 页面**：首先，请阅读 `<当前工作目录>/ui/admin` 下的 对应的 html 设计稿。
+3. **任务拆解**：将整体需求拆解为多个独立、可执行的原子化任务（Issue）。每个任务需包含清晰的标题、详细描述、验收标准以及受影响的文件路径。
+4. **去重校验**：检索`<当前工作目录>/issues/admin`目录中已有的 Issue，确保新拆解的任务不会与现有任务重复。
+5. **创建 Issue**：确认无误后，使用 skill `/solo:issues-writer`逐一创建 Issue。禁止自己手写 issue 文件，必须通过 skill 生成 issue 文件。
+
+### ⚠️ Issue 固定模板要求
+
+创建 Issue 时，使用`/solo:issues-writer` 时必须引用 `issue-task-template.md` 创建拆分出来的 task 类型 issues。不能用其他模板。
+
+- 将新生成`task`类型的 issue 按照模板写成 markdown 文档，并保存到`<当前工作目录>/issues/admin`目录下。此处将`prd`拆分为`task issue`。
+- 一个 issue 文档生成一个 markdown 文档，**禁止**将多个 issue 合并到一个文档中。
+- issue 的 markdown 文件以 task 为前缀。例如：`task-xxxx.md`。
+
+---
+
+## 子命令：`ui` — 设计 UI 页面
+
+这个工作流用于模拟团队讨论，设计出符合 PRD 的 UI 页面。
+
+### 执行步骤
+
+1. **找到本地 git 仓库**：执行 shell 命令：`find <当前工作目录>  -type d -name ".git"`，找到 `本地 git 仓库目录`。如果找不到，则终止这个命令执行。
+
+2. **读取 git 记录**：读取记录文件 `<当前工作目录>/.claude/logs/command-git.txt`，查找匹配 `commander-admin = <git_hash>` 的行（注意使用合并后的命令名），提取 `<git_hash>` 赋值给 `last_git`。如果文件不存在或未找到匹配行，则 `last_git` 为空。
+
+   文件格式示例：
+   ```text
+   commander-admin = 31146af3b40b3145a09a4f13ad2f914aca3c4f80
+   ```
+
+3. **获取当前最新 git 版本**：进入<本地 git 仓库目录>， 执行 `git log -1 --format="%H"` 获取当前仓库最新 commit hash（记为 `current_git`）。
+
+4. **判断 `prds/admin` 是否变化**：
+
+   - 如果 `last_git` 为空（首次执行），视为有变化，继续后续步骤。
+   - 如果 `last_git` == `current_git`，说明自上次执行以来没有任何新 commit，**终止执行**，输出提示：`自上次 UI 设计后无新的 commit，无需重新设计。`
+   - 如果 `last_git` != `current_git`，进入<本地 git 仓库目录>，执行 `git diff --name-only <last_git> <current_git> -- prds/admin`：
+     - 如果输出为空，说明 `<本地 git 仓库目录>/prds/admin` 无变化，**终止执行**，输出提示：`prds/admin 自上次 UI 设计后无变化，无需重新设计。`并**终止执行**。
+     - 如果输出非空，说明 `<本地 git 仓库目录>/prds/admin` 有变化，继续后续步骤。
+
+5. **读取变化的 PRD 范围**：
+
+   - 执行 `git diff --name-only <last_git> <current_git> --prds/admin`，获取变更的 diff 内容。只需关注 `<当前工作目录>/prds/admin` 目录，不关心其他目录的内容变化记录。
+   - 如果 `last_git` 为空，则直接读取 `<git 仓库目录>/prds/admin` 下所有 PRD 文件作为全量输入。
+   - 根据 diff 结果，确定哪些 PRD 页面/模块发生了变更，记录变更范围。
+
+6. **读取 PRD**：阅读 `<当前工作目录>/prds/admin` 下的 PRD 文件，结合步骤 4 的变更范围，聚焦变更部分。
+
+7. **前端视角**：调用 `vuer` Agent，让它基于 PRD 和变更范围提出 UI 设计初稿。
+
+9. **后端视角**：调用 `javaer` Agent，让它基于 PRD 和前端建议，提出 UI 设计建议。
+
+9. **前端最终决策**：调用 `vuer` Agent，让它综合 PRD 和各方建议，确定最终 UI 设计方案。
+
+10. **输出 ui html**：在 `<当前工作目录>/ui/admin` 输出最终的 `ui-<system-name>.html` 文件。
+
+   其中 `<system-name>` 参考文档 *${CLAUDE_PLUGIN_ROOT}/knowledges/microservices.md*
+
+   **产出文档**：基于 PRD 和各方建议，调用 `/solo:ui-ux-writer` skill 编写一份符合需求及技术规范的 UI 页面文档，禁止自己编写，只能调用 `/solo:ui-ux-writer` skill。
+
+   - 每个页面独立一个 html 文件。不要合并写。
+   - 文件命名：`<prd-name>-ui.html`，中间不要有空格，连接符用 '-'。
+
+11. **输出 ui 页面索引**：在 `<当前工作目录>/ui/index.md` 文件中输出索引。
+
+12. **保存 git 版本记录**：
+
+    - 确保 `<当前工作目录>/.claude/logs/` 目录存在。
+    - 执行 `git log -1 --format="%H"` 获取当前最新 commit hash。
+    - 更新 `<当前工作目录>/.claude/logs/command-git.txt` 文件中的 `commander-admin` 行（注意使用合并后的命令名），格式：`commander-admin = <git_hash>`。如果该行已存在则覆盖，不存在则追加。
+---
+
+## 子命令：`prd-ui` — 验证 PRD 需求与 UI 页面一致性
+
+这个工作流用于校验 PRD 文档与 HTML UI 设计稿的一致性。
+
+### 执行步骤
+
+1. **读取 PRD**：阅读 `<当前工作目录>/prds/admin` 下的 PRD 文件。如果用户通过 `@路径/文件名.md` 指定了 PRD 文档，则以该文档为准。
+2. **读取 ui 页面**：阅读 `<当前工作目录>/ui/admin` 下的 HTML 设计稿，设计稿的文件名与 prd 文件名相似，类似：`用户管理-今日用户.prd.md` 与`用户管理-今日用户-ui.html`。
+3. **校验一致性**：调用 `/solo:prd-ui-validator` skill 校验 PRD 需求与 HTML 设计稿的一致性，生成验证报告。禁止自己编写校验逻辑，只能调用 `/solo:prd-ui-validator` skill。
+4. **验证闭环**：验证报告存在「不一致」或「部分一致」项时，由 `/solo:prd-ui-validator` skill 调用 `/solo:ui-ux-writer` 修改 HTML 设计稿并重新验证，直到全部一致或达到重验轮次上限。
+
+*预期结果*
+- 生成验证报告，逐条列出需求项与设计稿元素的一致性状态（一致 / 部分一致 / 不一致 / 待确认）。
+- 不一致项附带具体修改建议，由 skill 闭环修复后重新验证。
+
+---
+
+## 子命令：`ui-vue` — 验证 UI 页面与 Vue 页面布局是否一致，需求是否一致
+
+这个工作流用于校验 HTML UI 设计稿与 Vue 开发实现的一致性。
+
+### 执行步骤
+
+1. **读取 UI 设计稿**：读取 `<当前工作目录>/ui/admin` 下的 HTML 设计稿。如果用户通过 `@路径/文件名.html` 指定了设计稿，则以该文档为准。
+2. **定位 Vue 项目**：定位 `<当前工作目录>` 下的 Vue 项目根目录（包含 `package.json`）。
+3. **调用验证 skill**：调用 `/solo:ui-vue-validator` skill 执行完整验证流程（端口检测 → 功能点拆分 → HTML/Vue 配对截图 → AI 视觉对比 → 验证报告）。禁止自己编写校验逻辑，只能调用 `/solo:ui-vue-validator` skill。
+
+**验证过程中产生的文件请严格按照 skill 约定的路径存储，如果没有约定的，则存储在 `<当前工作目录>/.claude/logs` 目录下。**
+
+*预期结果*
+- 生成验证报告，逐条列出每个功能点的视觉差异状态（通过 / 未通过）及严重程度。
+- 未通过项附带具体差异描述和修改建议，由 skill 闭环重新验证。
+- 顽固问题自动生成 bug issue。
+
+---
+
+## 子命令：`api` — 设计 REST API
+
+这个工作流用于模拟团队讨论，设计出符合 PRD 的 REST API。
+
+### 执行步骤
+
+1. **读取 PRD**：首先，请阅读 `<当前工作目录>/prds/admin` 下的 prd 文件。
+2. **读取 ui 页面**：首先，请阅读 `<当前工作目录>/ui/admin` 下的 html 设计稿。
+3. **前端视角**：调用 `vuer` Agent，让它基于 PRD 提出 API 设计建议。
+4. **后端视角**：调用 `javaer` Agent，让它基于 PRD 和前端建议，提出 API 设计建议。
+5. **架构师决策**：调用 `architecter` Agent，让它综合 PRD 和前后端建议。
+6. **输出 api 文档**：在 `<当前工作目录>/apis/admin` 输出最终的 `api-<system-name>.yaml` 文件。
+
+   其中 `<system-name>` 参考文档 *${CLAUDE_PLUGIN_ROOT}/knowledges/microservices.md*
+
+   **产出文档**：基于 PRD 和各方建议，调用 `/solo:rest-api-writer` skill 编写一份符合需求及技术规范的 REST API 文档，禁止自己编写，只能调用 `/solo:rest-api-writer` skill。
+
+   - 每个 api 独立一个 yaml 文件。不要合并写。
+   - 文件命名：`<system-name>-<module-name>-<api name>.yaml`，中间不要有空格，连接符用'-'。
+
+6. **输出 api 索引**：在 `<当前工作目录>/apis/index.md` 文件中输出索引。
+
+---
+
+## 子命令：`develop` — 用 typescript 和 vue3 开发后台管理页面
+
+这个工作流用于用 typescript 和 vue3 开发后台管理页面。
+
+### 执行步骤，严格执行不能跳步
+
+- 执行 shell 命令`touch <当前工作目录>/.claude/logs/develop_command.md`。
+- 将子命令`develop`后的内容覆盖写到`<当前工作目录>/.claude/logs/develop_command.md` 文件中。
+- **解析 prompt 内容**: 解析用户提交的 prompt。
+- **读取 PRD**：从 prompt 中解析出 prd 文档路径，仔细阅读 prd 文件，禁止在`<当前工作目录>`中备份 prd 文档。
+- **读取 UI 页面**：从 prompt 中解析出 ui html 文档路径，仔细阅读 ui html 设计稿，禁止在<当前工作目录>中备份 ui html 设计稿。
+- **页面开发**：调用`/solo:vue-developer` skill实现页面布局和 UI 交互，代码开发过程只能使用 `/solo:vue-developer` 组件，禁止自己编辑逻辑。
+- **代码 format**：在`<当前工作目录>`下执行命令:`pnpm run lint:format`。
+- **代码 builid**：在`<当前工作目录>`下执行命令:`pnpm run build`，如果有错误，自动修复。
+- 禁止执行命令`pnpm run serve`。
 
 ---
 
@@ -29,13 +227,12 @@ argument-hint: <subcommand>
 ┌─────────────────────────────────────────────┐
 │               顶部导航栏 Header               │
 ├────────────┬────────────────────────────────┤
-│   侧边菜单  │              主内容区域          │
-│   Sidebar  │             Content            │
+│   侧边菜单  │            主内容区域            │
+│   Sidebar  │           Content              │
 │            ├────────────────────────────────┤
-│            │        页脚 Footer              │
+│            │          页脚 Footer            │
 └────────────┴────────────────────────────────┘
 ```
-
 - **Header**（顶部导航栏）：通用页头，包含系统 Logo 和名称、登录用户的信息（头像，姓名，个人中心，退出）、消息。
 - **Sidebar**（侧边菜单）：定义系统的导航菜单。
 - **Footer**（页脚）：通用页脚，包含 Copyright、系统版本号。
@@ -50,34 +247,25 @@ argument-hint: <subcommand>
 ├── 📄 1. 首页
 ├── 📂 2. 用户管理
 │   ├── 📄 今日用户
-│   │   ├──  🗂️ 今日注册用户
-│   │   │    └── 🗓️ 今日注册用户列表
-│   │   ├──  🗂️ 今日活跃会员
-│   │   │    └── 🗓️ 今日活跃用户列表
-│   │   ├──  🗂️ 今日下单用户列表
-│   │   │    └── 🗓️ 今日下单用户列表
-│   │   └─── 💠 用户详情
+│   │   ├── 🗂️ 今日注册用户
+│   │   │   └── 🗓️ 列表
+│   │   ├── 🗂️ 今日活跃会员
+│   │   │   └── 🗓️ 列表
+│   │   └── 🗂️ 今日下单用户
+│   │       └── 🗓️ 列表
 │   ├── 📄 用户列表
-│   │   └─── 💠 用户详情
-│   │   ├──  🗂️ 今日下单会员
-│   │   ├──  🗂️ 今日活跃会员
-│   │   ├─── 💠 会员详情
-│   │   └── 📋 今日下单用户列表
-│   └── 📄 会员列表
-│       ├─── 💠 会员详情
-│       └─── 💠 会员信息编辑
-├── 📂 3. 营销管理
-│       ├── 🗓️ SKU营销规则列表
-│       │   ├──➕ 新建营销规则
-│       │   ├──➖ 删除营销规则
-│       │   ├──✏️ 修改营销规则
-│       │   └──✅ 生效 / ❌ 失效
-│       └── 📄 优惠券管理
-│           ├──➕ 新建营销优惠券
-│           ├──➖ 删除营销优惠券
-│           ├──✏️ 修改营销优惠券
-│           └──✅ 生效 / ❌ 失效
-├── 📂 4. 商品管理
+│   │   ├── 🗂️ 有效用户
+│   │   │   └── 🗓️ 列表
+│   │   └── 🗂️ 注销用户
+│   │       └── 🗓️ 列表
+│   ├── 📄 会员列表
+│   │   ├── 🗂️ 年活跃会员
+│   │   │   └── 🗓️ 列表
+│   │   └── 🗂️ 全量会员
+│   │       └── 🗓️ 列表
+│   └── 💠 会员详情
+│       └── ✏️ 编辑会员备注
+├── 📂 3. 商品管理
 │   ├── 📄 SPU管理
 │   │   ├── 🗓️ SPU列表
 │   │   │   ├──➕ 新建SPU
@@ -103,17 +291,28 @@ argument-hint: <subcommand>
 │   │   │   ├──✏️ 修改SKU
 │   │   │   └──🔘 SKU库存
 │   │   └── 💠 SKU详情
-│   ├── 📄 SKU价格管理
-│   │   ├── 🗓️ 价格规则列表
-│   │   │   ├──➕ 新建价格规则
-│   │   │   ├──➖ 删除价格规则
-│   │   │   ├──✏️ 修改价格规则
-│   │   │   ├──✅ 生效 / ❌ 失效
-│   │   │   ├── 📋 商品价格明细
-│   │   ├── 🗓️ SKU营销列表
-│   │   │   ├──✏️ 绑定sku营销规则
-│   │   │   └──✅ 生效 / ❌ 失效
-│   │   └── 📋 商品价格明细
+│   └── 📄 SKU价格管理
+│       ├── 🗓️ 价格规则列表
+│       │   ├──➕ 新建价格规则
+│       │   ├──➖ 删除价格规则
+│       │   ├──✏️ 修改价格规则
+│       │   ├──✅ 生效 / ❌ 失效
+│       │   ├── 📋 商品价格明细
+│       ├── 🗓️ SKU营销列表
+│       │   ├──✏️ 绑定sku营销规则
+│       │   └──✅ 生效 / ❌ 失效
+│       └── 📋 商品价格明细
+├── 📂 4. 营销管理
+│       ├── 🗓️ SKU营销规则列表
+│       │   ├──➕ 新建营销规则
+│       │   ├──➖ 删除营销规则
+│       │   ├──✏️ 修改营销规则
+│       │   └──✅ 生效 / ❌ 失效
+│       └── 📄 优惠券管理
+│           ├──➕ 新建营销优惠券
+│           ├──➖ 删除营销优惠券
+│           ├──✏️ 修改营销优惠券
+│           └──✅ 生效 / ❌ 失效
 ├── 📂 5. 订单管理
 │   ├── 📄 未支付订单列表
 │   │   └── 💠 订单详情-(待支付，支付超时， 取消支付）
@@ -124,8 +323,8 @@ argument-hint: <subcommand>
 │   ├── 📄 交易完成订单列表
 │   │   └── 💠 订单详情-交易完成(支付金额已完全确收，已退单)
 │   ├── 🪟 订单备注
-│   └─ 📄 退款
-│           🗓️ 退款记录
+│   └── 📄 退款
+│       └── 🗓️ 退款记录
 │           ├── 💠 退款详情
 │           └── ✏️ 退款审核
 │
@@ -142,7 +341,7 @@ argument-hint: <subcommand>
 │   │   └── 🗓️ 交易流水列表
 │   │       ├──🔘 支付成功流水数据
 │   │       ├──🔘 退单成功流水数据
-│   │       └── 💠流水订单详情
+│   │       └── 💠 流水订单详情
 │   ├── 📄 确收流水
 │   │   ├── 🗓️ 确收策略列表
 │   │   │    ├── 🕹️ 确收策略配置
@@ -177,15 +376,7 @@ argument-hint: <subcommand>
 │   │   └── 🔘 转化漏斗（曝光→注册→付费）
 │   └── 📄 渠道营收分析
 │       └── 🔘 各渠道 ROI 对比
-├── 📂 9. 内容管理
-│   ├── 📄 协议/政策管理
-│   │   ├── 🗓️ app协议/政策`列表`显示
-│   │   ├── ✏️ 隐私政策编辑
-│   │   └── ✏️ 用户协议编辑
-│   └── 📄 App版本信息
-│       ├── ✏️ 管理版本变更
-│       └── ✏️ App描述配置
-├── 📂 10. 消息管理
+├── 📂 9. 消息管理
 │   ├── 📄 消息渠道管理
 │   │   ├── 🗂️ 微信服务号消息
 │   │   ├── 🗂️ app push
@@ -202,7 +393,7 @@ argument-hint: <subcommand>
 │   │       └──✏️ 修改消息模板绑定渠道
 │   └── 📄 消息列表
 │        └── 💠 消息详情
-└── 📂 11. 系统设置
+└── 📂 10. 系统设置
     ├── 📄 日志与审计列表
     ├── 📄 员工列表
     ├── 📄 字典
@@ -241,191 +432,5 @@ argument-hint: <subcommand>
 其中 `<system-name>` 参考文档 *${CLAUDE_PLUGIN_ROOT}/knowledges/microservices.md*
 
 ---
-
-## 子命令：`init` — 初始化
-
-执行 shell 命令：
-
-```bash
-uv run python ${CLAUDE_PLUGIN_ROOT}/scripts/menus-2-prompt.py --workspace=<当前工作目录> --name=admin --pages=<上文的页面树>
-```
-
-功能说明：
-- 从 markdown 文档中抽取菜单。
-- 根据菜单名称生成对应的 prd prompt 内容。
-- 利用 python 脚本辅助：*${CLAUDE_PLUGIN_ROOT}/scripts/menus-2-prompt.py*
-
-*预期结果*
-- 生成针对系统导航菜单树，识别对应的 user-story 目录。
-- 为每个菜单生成对应的`prd-<页面名称>.prompt.md` 文件。
-
----
-
-## 子命令：`features` — PRD features 人工评估确认
-
-- 检查 `<当前工作目录>/logs/prd-progress-feature-2-issues-admin.txt` 是否存在，如果不存在则创建（空文件即可）。
-- 按字母顺序列出 `<当前工作目录>/outputs/prds/admin/*.md`，与`<当前工作目录>/logs/prd-progress-feature-2-issues-admin.txt`内容对比缺失文档。
-- 将缺失的文档，按照文档名称字典序插入对应的位置，并将状态设置为`[文件名] 🟡 待处理` 。
-- 依次读取当前目录下 `<当前工作目录>/outputs/prds/admin` 中的 PRD 文档。
-- 读取 PRD 文档中的"功能需求"，显示在交互界面上，让用户选择确认。"非功能需求"不用确认。
-- ⚠️  严禁直接修改 `<当前工作目录>/outputs/prds/admin/` 下的任何 PRD 文档。所有 PRD 修改意见必须通过 issue 文档描述。
-- 用户在确认过程中提出的修改意见（如字段调整、名称变更等），仅作为 issue 的"描述"和"验收标准"内容，不可立即写入 PRD。
-- PRD 文档的更新只能在后续执行 issue 时进行（如 `task` 子命令或独立开发流程）。
-- 将需要修改的功能，调用 Skill 工具 `/solo:issues-writer`，生成 feature 类型的 issue 文档。禁止自己手写 issue 文件，必须通过 skill 生成 issue 文件。
-- 将新生成`feature`类型的 issue 按照模板写成 markdown 文档，并保存到`<当前工作目录>/outputs/issues/admin`目录下。此处是记录`prd feature`变更的`issue`，不是将`prd`拆分为`issue`。
-- 一个 issue 文档生成一个 markdown 文档，**禁止**将多个 issue 合并到一个文档中。
-- 全部功能和方案确认完毕后，根据用户的修改意见完善 issue 文档的"描述"和"验收标准"字段。⚠️ 此步骤只生成/更新 issue 文件，严禁直接修改 PRD 文档。
-- 确认`功能`和`方案`都已回答，如果没有则继续给出未确认的功能，让用户确认。如果全部已回答，则进入下一步骤。
-- 成功后更新状态为`🟢 处理完成`，失败则更新状态为`🔴 处理失败`。
-- 重复以上步骤，直到全部被标记为`🟢 处理完成`或手动停止。
-- 文件`<当前工作目录>/logs/prd-progress-feature-2-issues-admin.txt`中的内容只记录 prd 完成情况，其他信息禁止写入此文件。
-
-**重复执行时如果某个 issue 已经生成了输出文件，则直接覆盖。**
-
-状态说明：
-- `🟡 待处理`：添加完成后，未执行的 prd 文档
-- `🟢 处理完成`：添加完成后，已执行的 prd，且完成确认的 prd 文档
-- `🔴 处理失败`：添加完成后，已执行的 prd，且执行失败的文档
-
----
-
-## 子命令：`prd` - PRD 中 功能修复
-
-- 从用户输入中识别 `@路径/文件名.md` 格式的 PRD 文档路径，解析出目标 PRD 文件的绝对路径。
-- 读取该 PRD 文档内容，结合用户的修改描述，识别用户的修改意图。
-- 将识别到的修改意图整理为清晰的修改清单（包括修改位置、修改前内容、修改后内容），展示给用户确认。
-- 用户确认后，按照修改清单直接编辑目标 PRD 文档，完成修改后告知用户修改结果。
-- 如果未识别到 `@路径/文件名.md` 格式的 PRD 文档路径，提示用户通过 `@路径/文件名.md` 指定要修改的 PRD 文档。
-
----
-
-## 子命令：`journey` — PRD 用户旅程自动修复
-
-- 读取 prd 文档。
-- 根据 `${CLAUDE_PLUGIN_ROOT}/knowledges/dimensions/dimensions-of-scenario.md` 梳理出"常见问题诊断"。要严格按照文档清单，不要自行推断。
-- 每个问题调用 Skill 工具 `/solo:issues-writer`，生成 feature 类型的 issue 文档。禁止自己手写 issue 文件，必须通过 skill 生成 issue 文件。
-- 将新生成`feature`类型的 issue 按照模板写成 markdown 文档，并保存到`<当前工作目录>/outputs/issues/admin`目录下。此处是记录`prd feature`变更的`issue`，不是将`prd`拆分为`issue`。
-- 一个 issue 文档生成一个 markdown 文档，**禁止**将多个 issue 合并到一个文档中。
-- 在更新文档中约定的需要更新的 prd 文档路径，禁止直接更新`<当前工作目录>/outputs/prds/admin`下的 prd 文档。
-
----
-
-## 子命令：`task` — PRD 拆分为 Issues
-
-读取用户提供的 PRD（产品需求文档），将其拆解为具体的开发任务，并为每个任务创建 Issue。
-
-请严格按照以下步骤执行：
-1. **需求理解**：仔细阅读通过 `@` 引入的 PRD 文档，提炼核心业务背景、功能目标和技术约束。
-2. **读取 ui 页面**：首先，请阅读 `<当前工作目录>/outputs/ui/admin` 下的 对应的 html 设计稿。
-3. **任务拆解**：将整体需求拆解为多个独立、可执行的原子化任务（Issue）。每个任务需包含清晰的标题、详细描述、验收标准以及受影响的文件路径。
-4. **去重校验**：检索`<当前工作目录>/outputs/issues/admin`目录中已有的 Issue，确保新拆解的任务不会与现有任务重复。
-5. **创建 Issue**：确认无误后，使用 skill `/solo:issues-writer`逐一创建 Issue。禁止自己手写 issue 文件，必须通过 skill 生成 issue 文件。
-
-### ⚠️ Issue 固定模板要求
-
-创建 Issue 时，使用`/solo:issues-writer` 时必须引用 `issue-task-template.md` 创建拆分出来的 task 类型 issues。不能用其他模板。
-
-- 将新生成`task`类型的 issue 按照模板写成 markdown 文档，并保存到`<当前工作目录>/outputs/issues/admin`目录下。此处将`prd`拆分为`task issue`。
-- 一个 issue 文档生成一个 markdown 文档，**禁止**将多个 issue 合并到一个文档中。
-- issue 的 markdown 文件以 task 为前缀。例如：`task-xxxx.md`。
-
----
-
-## 子命令：`ui` — 设计 UI 页面
-
-这个工作流用于模拟团队讨论，设计出符合 PRD 的 UI 页面。
-
-### 执行步骤
-
-1. **找到本地 git 仓库**：执行 shell 命令：`find <当前工作目录>  -type d -name ".git"`，找到 `本地 git 仓库目录`。如果找不到，则终止这个命令执行。
-
-2. **读取 git 记录**：读取记录文件 `<当前工作目录>/logs/command-git.txt`，查找匹配 `commander-admin = <git_hash>` 的行（注意使用合并后的命令名），提取 `<git_hash>` 赋值给 `last_git`。如果文件不存在或未找到匹配行，则 `last_git` 为空。
-
-   文件格式示例：
-   ```text
-   commander-admin = 31146af3b40b3145a09a4f13ad2f914aca3c4f80
-   ```
-
-3. **获取当前最新 git 版本**：进入<本地 git 仓库目录>， 执行 `git log -1 --format="%H"` 获取当前仓库最新 commit hash（记为 `current_git`）。
-
-4. **判断 `prds/admin` 是否变化**：
-
-   - 如果 `last_git` 为空（首次执行），视为有变化，继续后续步骤。
-   - 如果 `last_git` == `current_git`，说明自上次执行以来没有任何新 commit，**终止执行**，输出提示：`自上次 UI 设计后无新的 commit，无需重新设计。`
-   - 如果 `last_git` != `current_git`，进入<本地 git 仓库目录>，执行 `git diff --name-only <last_git> <current_git> -- prds/admin`：
-     - 如果输出为空，说明 `<本地 git 仓库目录>/prds/admin` 无变化，**终止执行**，输出提示：`prds/admin 自上次 UI 设计后无变化，无需重新设计。`并**终止执行**。
-     - 如果输出非空，说明 `<本地 git 仓库目录>/prds/admin` 有变化，继续后续步骤。
-
-5. **读取变化的 PRD 范围**：
-
-   - 执行 `git diff --name-only <last_git> <current_git> --prds/admin`，获取变更的 diff 内容。只需关注 `<当前工作目录>/outputs/prds/admin` 目录，不关心其他目录的内容变化记录。
-   - 如果 `last_git` 为空，则直接读取 `<git 仓库目录>/prds/admin` 下所有 PRD 文件作为全量输入。
-   - 根据 diff 结果，确定哪些 PRD 页面/模块发生了变更，记录变更范围。
-
-6. **读取 PRD**：阅读 `<当前工作目录>/outputs/prds/admin` 下的 PRD 文件，结合步骤 4 的变更范围，聚焦变更部分。
-
-7. **前端视角**：调用 `vuer` Agent，让它基于 PRD 和变更范围提出 UI 设计初稿。
-
-9. **后端视角**：调用 `javaer` Agent，让它基于 PRD 和前端建议，提出 UI 设计建议。
-
-9. **前端最终决策**：调用 `vuer` Agent，让它综合 PRD 和各方建议，确定最终 UI 设计方案。
-
-10. **输出 ui html**：在 `<当前工作目录>/outputs/ui/admin` 输出最终的 `ui-<system-name>.html` 文件。
-
-   其中 `<system-name>` 参考文档 *${CLAUDE_PLUGIN_ROOT}/knowledges/microservices.md*
-
-   **产出文档**：基于 PRD 和各方建议，调用 `/solo:ui-ux-writer` skill 编写一份符合需求及技术规范的 UI 页面文档，禁止自己编写，只能调用 `/solo:ui-ux-writer` skill。
-
-   - 每个页面独立一个 html 文件。不要合并写。
-   - 文件命名：`<prd-name>-ui.html`，中间不要有空格，连接符用 '-'。
-
-11. **输出 ui 页面索引**：在 `<当前工作目录>/outputs/ui/index.md` 文件中输出索引。
-
-12. **保存 git 版本记录**：
-
-    - 确保 `logs/` 目录存在。
-    - 执行 `git log -1 --format="%H"` 获取当前最新 commit hash。
-    - 更新 `logs/command-git.txt` 文件中的 `commander-admin` 行（注意使用合并后的命令名），格式：`commander-admin = <git_hash>`。如果该行已存在则覆盖，不存在则追加。
----
-
-## 子命令：`api` — 设计 REST API
-
-这个工作流用于模拟团队讨论，设计出符合 PRD 的 REST API。
-
-### 执行步骤
-
-1. **读取 PRD**：首先，请阅读 `<当前工作目录>/outputs/prds/admin` 下的 prd 文件。
-2. **读取 ui 页面**：首先，请阅读 `<当前工作目录>/outputs/ui/admin` 下的 html 设计稿。
-3. **前端视角**：调用 `vuer` Agent，让它基于 PRD 提出 API 设计建议。
-4. **后端视角**：调用 `javaer` Agent，让它基于 PRD 和前端建议，提出 API 设计建议。
-5. **架构师决策**：调用 `architecter` Agent，让它综合 PRD 和前后端建议。
-6. **输出 api 文档**：在 `<当前工作目录>/outputs/apis/admin` 输出最终的 `api-<system-name>.yaml` 文件。
-
-   其中 `<system-name>` 参考文档 *${CLAUDE_PLUGIN_ROOT}/knowledges/microservices.md*
-
-   **产出文档**：基于 PRD 和各方建议，调用 `/solo:rest-api-writer` skill 编写一份符合需求及技术规范的 REST API 文档，禁止自己编写，只能调用 `/solo:rest-api-writer` skill。
-
-   - 每个 api 独立一个 yaml 文件。不要合并写。
-   - 文件命名：`<system-name>-<module-name>-<api name>.yaml`，中间不要有空格，连接符用'-'。
-
-6. **输出 api 索引**：在 `<当前工作目录>/outputs/apis/index.md` 文件中输出索引。
-
----
-
-## 子命令：`develop` — 用 typescript 和 vue3 开发后台管理页面
-
-这个工作流用于用 typescript 和 vue3 开发后台管理页面。
-
-### 执行步骤，严格执行不能跳步
-
-- **解析 prompt 内容**: 解析用户提交的 prompt。
-- **读取 PRD**：从 issue 中解析出 prd 文档路径，仔细阅读 prd 文件，禁止在<当前工作目录>中备份 prd 文档。
-- **读取 UI 页面**：从 issue 中解析出 ui html 文档路径，仔细阅读 ui html 设计稿，禁止在<当前工作目录>中备份 ui html 设计稿。
-- **页面开发**：调用`/solo:vue-developer` skill实现页面布局和 UI 交互，代码开发过程只能使用 `/solo:vue-developer` 组件，禁止自己编辑逻辑。
-- **代码 format**：在`<当前工作目录>`下执行命令:`pnpm run lint:format`。
-- **代码 builid**：在`<当前工作目录>`下执行命令:`pnpm run build`，如果有错误，自动修复。
-- 禁止执行命令`pnpm run serve`。
-
-
 
 

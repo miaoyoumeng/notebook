@@ -1,6 +1,7 @@
 ---
 name: tdesign-vue-next
 description: TDesign Vue 3 component library usage guide, covering tdesign-vue-next 1.x series, including basic components, forms, tables, theme customization, dark mode, and AI Chat components
+model: opus
 ---
 
 # TDesign Vue Next

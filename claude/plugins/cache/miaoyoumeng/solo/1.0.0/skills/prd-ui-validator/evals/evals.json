@@ -1,0 +1,689 @@
+{
+  "skill_name": "prd-ui-validator",
+  "evals": [
+    {
+      "id": 1,
+      "name": "single-prd-single-html-basic",
+      "prompt": "请帮我验证这个 PRD 和 HTML 设计稿的一致性。\n\nPRD 路径：/mock/prd/user-mgmt.md，内容：\n```\n# 用户管理模块 PRD\n## 功能需求\n1. 用户列表页：展示所有注册用户，包含用户名、邮箱、注册时间列\n2. 搜索功能：支持按用户名模糊搜索\n3. 分页功能：每页展示 20 条记录，支持跳转\n4. 导出功能：支持导出为 Excel 格式\n5. 用户详情：点击用户名可查看详情\n```\n\nHTML 路径：/mock/html/user-list.html，内容：\n```\n<!DOCTYPE html>\n<html>\n<body>\n  <div class=\"page\">\n    <h1>用户管理</h1>\n    <input placeholder=\"搜索用户名\" />\n    <table>\n      <thead><tr><th>用户名</th><th>邮箱</th><th>注册时间</th></tr></thead>\n      <tbody><tr><td>user1</td><td>u1@test.com</td><td>2024-01-01</td></tr></tbody>\n    </table>\n    <button>导出</button>\n    <a href=\"/detail/1\">user1</a>\n  </div>\n</body>\n</html>\n```\n请按流程输出完整的验证报告。",
+      "expected_output": "完整的 PRD-UI 验证报告，包含验证总览、详细对比表、严重程度定义。正确识别分页组件缺失，其余需求标记为一致或部分一致。",
+      "files": [],
+      "assertions": [
+        {
+          "text": "报告包含'# PRD-UI 验证报告'标题",
+          "type": "with_skill"
+        },
+        {
+          "text": "报告包含'验证总览'表格",
+          "type": "with_skill"
+        },
+        {
+          "text": "提取至少 4 个带编号的需求项（如 R001、R002 等）",
+          "type": "with_skill"
+        },
+        {
+          "text": "每个需求项均标注一致性级别（一致/部分一致/不一致/待确认）",
+          "type": "with_skill"
+        },
+        {
+          "text": "每个需求项均标注置信度（高/中/低）",
+          "type": "with_skill"
+        },
+        {
+          "text": "分页组件被判定为'不一致'或'部分一致'",
+          "type": "without_skill"
+        },
+        {
+          "text": "搜索功能被判定为'一致'或'部分一致'",
+          "type": "without_skill"
+        },
+        {
+          "text": "用户列表表格被判定为'一致'",
+          "type": "without_skill"
+        },
+        {
+          "text": "缺失的分页组件严重程度标记为'High'",
+          "type": "with_skill"
+        },
+        {
+          "text": "不一致项包含具体修改建议（如'在列表底部添加分页组件'）",
+          "type": "with_skill"
+        },
+        {
+          "text": "报告包含'严重程度定义'章节",
+          "type": "with_skill"
+        },
+        {
+          "text": "整体一致率以百分比形式展示",
+          "type": "with_skill"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "multi-page-html-directory",
+      "prompt": "请验证 PRD 与 HTML 设计稿目录的一致性。\n\nPRD 路径：/mock/prd/order-mgmt.md，内容：\n```\n# 订单管理模块 PRD\n## 功能需求\n1. 订单列表页：展示订单号、金额、状态、创建时间\n2. 订单搜索：支持按订单号/用户名搜索\n3. 订单详情页：展示订单完整信息，包含商品列表、收货地址、支付信息\n4. 订单状态筛选：全部/待支付/已支付/已取消/已退款\n5. 批量操作：批量发货、批量导出\n```\n\nHTML 目录：/mock/html/orders/，包含以下文件：\n\norder-list.html：\n```\n<!DOCTYPE html><html><body>\n<div class=\"page\">\n  <h1>订单列表</h1>\n  <input placeholder=\"搜索订单号或用户名\" />\n  <select><option>全部状态</option><option>待支付</option><option>已支付</option><option>已取消</option></select>\n  <table>\n    <thead><tr><th>订单号</th><th>金额</th><th>状态</th><th>创建时间</th></tr></thead>\n    <tbody><tr><td>ORD001</td><td>¥99.00</td><td>已支付</td><td>2024-03-15</td></tr></tbody>\n  </table>\n</div></body></html>\n```\n\norder-detail.html：\n```\n<!DOCTYPE html><html><body>\n<div class=\"page\">\n  <h1>订单详情 ORD001</h1>\n  <div class=\"info\"><h3>商品信息</h3><ul><li>商品A x1</li></ul></div>\n  <div class=\"address\"><h3>收货地址</h3><p>北京市朝阳区xxx</p></div>\n  <div class=\"payment\"><h3>支付信息</h3><p>微信支付 ¥99.00</p></div>\n</div></body></html>\n```\n\n请验证两个 HTML 页面是否覆盖了 PRD 中所有需求。",
+      "expected_output": "识别多页面 HTML 目录，将 PRD 需求正确分配到对应的 HTML 页面，处理一对多匹配关系，输出跨页面汇总报告。",
+      "files": [],
+      "assertions": [
+        {
+          "text": "识别出多个 HTML 页面（order-list.html 和 order-detail.html）",
+          "type": "with_skill"
+        },
+        {
+          "text": "将 PRD 需求按功能分配到对应的 HTML 页面",
+          "type": "with_skill"
+        },
+        {
+          "text": "处理'一个 PRD 模块对应多个 HTML 页面'的多对多匹配关系",
+          "type": "with_skill"
+        },
+        {
+          "text": "订单列表页的需求与 order-list.html 元素正确对比",
+          "type": "with_skill"
+        },
+        {
+          "text": "订单详情页的需求与 order-detail.html 元素正确对比",
+          "type": "with_skill"
+        },
+        {
+          "text": "识别出'批量操作'功能在 HTML 中未实现",
+          "type": "without_skill"
+        },
+        {
+          "text": "识别出'已退款'状态筛选在 HTML 中缺失",
+          "type": "without_skill"
+        },
+        {
+          "text": "报告包含跨页面汇总对比表",
+          "type": "with_skill"
+        },
+        {
+          "text": "每个 HTML 页面均有独立的元素清单",
+          "type": "with_skill"
+        },
+        {
+          "text": "整体一致率计算覆盖所有页面需求",
+          "type": "with_skill"
+        },
+        {
+          "text": "未遗漏 PRD 中定义的任何功能需求",
+          "type": "without_skill"
+        },
+        {
+          "text": "对 order-list.html 和 order-detail.html 的引用均使用文件路径标识所属页面",
+          "type": "with_skill"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "ambiguous-prd-pending-confirmation",
+      "prompt": "请验证以下 PRD 和 HTML 的一致性。\n\nPRD 路径：/mock/prd/dashboard.md，内容：\n```\n# 数据看板 PRD\n## 功能需求\n1. 数据概览卡片：展示关键指标，包括用户数、订单数、收入\n2. 趋势图表：展示近 30 天的趋势变化\n3. 用户友好的界面：提供直观的交互体验\n4. 智能提醒：当数据异常时给予适当提示\n5. 数据更新时间：展示最后刷新时间\n```\n\nHTML 路径：/mock/html/dashboard.html，内容：\n```\n<!DOCTYPE html><html><body>\n<div class=\"page\">\n  <h1>数据看板</h1>\n  <div class=\"cards\">\n    <div class=\"card\"><span>用户数</span><strong>1,234</strong></div>\n    <div class=\"card\"><span>订单数</span><strong>567</strong></div>\n    <div class=\"card\"><span>收入</span><strong>¥89,012</strong></div>\n  </div>\n  <div class=\"chart\"><canvas id=\"trend-chart\"></canvas></div>\n  <div class=\"updated\">最后更新：2024-03-15 14:30</div>\n</div></body></html>\n```\n注意 PRD 中有一些模糊描述，请按流程处理。",
+      "expected_output": "将'用户友好的界面'、'智能提醒'等模糊描述标记为待确认项，在报告中标注 PRD 建议，而非直接判定为不一致。",
+      "files": [],
+      "assertions": [
+        {
+          "text": "'用户友好的界面'被标记为'待确认'一致性级别",
+          "type": "with_skill"
+        },
+        {
+          "text": "'智能提醒/适当提示'被标记为'待确认'一致性级别",
+          "type": "with_skill"
+        },
+        {
+          "text": "待确认项的置信度为'中'或'低'",
+          "type": "with_skill"
+        },
+        {
+          "text": "待确认项包含具体原因说明（如'PRD 描述过于笼统'）",
+          "type": "with_skill"
+        },
+        {
+          "text": "报告包含针对模糊描述的 PRD 建议",
+          "type": "with_skill"
+        },
+        {
+          "text": "数据概览卡片被正确识别并与 HTML 对比为一致",
+          "type": "without_skill"
+        },
+        {
+          "text": "趋势图表被正确识别并与 HTML 对比为一致或部分一致",
+          "type": "without_skill"
+        },
+        {
+          "text": "数据更新时间被正确识别并与 HTML 对比为一致",
+          "type": "without_skill"
+        },
+        {
+          "text": "报告包含独立的'待确认项'章节",
+          "type": "with_skill"
+        },
+        {
+          "text": "未将模糊描述直接判定为'不一致'",
+          "type": "with_skill"
+        },
+        {
+          "text": "提取的需求项包含所有 5 条 PRD 功能需求",
+          "type": "without_skill"
+        },
+        {
+          "text": "PRD 建议格式符合 SKILL.md 定义的'[PRD 建议] Rxxx 描述过于模糊，建议明确具体形式'格式",
+          "type": "with_skill"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "missing-core-component-detection",
+      "prompt": "请验证 PRD 和 HTML 设计稿的一致性。\n\nPRD 路径：/mock/prd/content-mgmt.md，内容：\n```\n# 内容管理模块 PRD\n## 功能需求\n1. 内容列表：展示标题、作者、分类、发布时间、状态\n2. 搜索和筛选：按标题搜索、按分类筛选、按状态筛选\n3. 分页：每页 20 条，支持跳转\n4. 新建内容：弹出编辑器弹窗\n5. 编辑/删除：操作列包含编辑和删除按钮\n6. 批量删除：支持勾选多条记录批量删除\n7. 排序：支持按发布时间、阅读量排序\n```\n\nHTML 路径：/mock/html/content-list.html，内容：\n```\n<!DOCTYPE html><html><body>\n<div class=\"page\">\n  <h1>内容管理</h1>\n  <input placeholder=\"搜索标题\" />\n  <table>\n    <thead><tr><th>标题</th><th>作者</th><th>发布时间</th></tr></thead>\n    <tbody><tr><td>文章A</td><td>作者A</td><td>2024-01-01</td></tr></tbody>\n  </table>\n  <button>新建</button>\n</div></body></html>\n```\n请详细列出所有不一致项。",
+      "expected_output": "检测出多个核心组件缺失（分类筛选、状态筛选、分页、编辑/删除按钮、批量删除、排序），均标记为 High 严重程度。",
+      "files": [],
+      "assertions": [
+        {
+          "text": "识别出分页组件缺失",
+          "type": "without_skill"
+        },
+        {
+          "text": "识别出分类筛选功能缺失",
+          "type": "without_skill"
+        },
+        {
+          "text": "识别出状态筛选功能缺失",
+          "type": "without_skill"
+        },
+        {
+          "text": "识别出编辑/删除操作按钮缺失",
+          "type": "without_skill"
+        },
+        {
+          "text": "识别出批量删除功能缺失",
+          "type": "without_skill"
+        },
+        {
+          "text": "识别出排序功能缺失",
+          "type": "without_skill"
+        },
+        {
+          "text": "所有核心组件缺失的严重程度均标记为'High'",
+          "type": "with_skill"
+        },
+        {
+          "text": "每个缺失项均有具体修改建议",
+          "type": "with_skill"
+        },
+        {
+          "text": "表格列缺失（分类、状态列）被识别",
+          "type": "with_skill"
+        },
+        {
+          "text": "搜索框功能被识别为已实现",
+          "type": "without_skill"
+        },
+        {
+          "text": "新建按钮被识别为已实现",
+          "type": "without_skill"
+        },
+        {
+          "text": "不一致项详情表中每个缺失项的需求 ID 与需求提取阶段对应",
+          "type": "with_skill"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "modal-component-pairing",
+      "prompt": "请验证 PRD 和 HTML 的一致性。\n\nPRD 路径：/mock/prd/feedback.md，内容：\n```\n# 用户反馈模块 PRD\n## 功能需求\n1. 反馈列表页：展示反馈内容、提交人、时间、处理状态\n2. 新建反馈弹窗：点击'新建反馈'按钮弹出表单弹窗，包含反馈内容、反馈类型、提交人字段\n3. 反馈详情弹窗：点击列表项弹出详情，包含完整反馈信息和处理操作\n4. 筛选：按处理状态筛选\n5. 搜索：按提交人或反馈内容搜索\n```\n\nHTML 路径：/mock/html/feedback-list.html，内容：\n```\n<!DOCTYPE html><html><body>\n<div class=\"page\">\n  <h1>用户反馈</h1>\n  <input placeholder=\"搜索提交人或反馈内容\" />\n  <select><option>全部状态</option><option>待处理</option><option>已处理</option></select>\n  <table>\n    <thead><tr><th>反馈内容</th><th>提交人</th><th>时间</th><th>状态</th></tr></thead>\n    <tbody><tr><td>建议增加...</td><td>用户A</td><td>2024-03-10</td><td>待处理</td></tr></tbody>\n  </table>\n  <button>新建反馈</button>\n  <div class=\"modal\" id=\"new-feedback-modal\">\n    <h3>新建反馈</h3>\n    <textarea placeholder=\"反馈内容\"></textarea>\n    <select><option>功能建议</option><option>Bug反馈</option></select>\n    <input placeholder=\"提交人\" />\n    <button>提交</button><button>取消</button>\n  </div>\n</div></body></html>\n```\n请注意弹窗需要触发按钮 + 弹窗本体配对识别。",
+      "expected_output": "正确识别弹窗组件与其触发按钮的配对关系，验证新建反馈弹窗的字段覆盖度，识别详情弹窗缺失。",
+      "files": [],
+      "assertions": [
+        {
+          "text": "识别'新建反馈'按钮与弹窗的配对关系",
+          "type": "with_skill"
+        },
+        {
+          "text": "验证新建反馈弹窗包含 PRD 要求的三个字段（反馈内容、反馈类型、提交人）",
+          "type": "with_skill"
+        },
+        {
+          "text": "识别'反馈详情弹窗'在 HTML 中缺失",
+          "type": "without_skill"
+        },
+        {
+          "text": "筛选功能被识别为已实现",
+          "type": "without_skill"
+        },
+        {
+          "text": "搜索功能被识别为已实现",
+          "type": "without_skill"
+        },
+        {
+          "text": "反馈列表表格列与 PRD 要求一一对比",
+          "type": "with_skill"
+        },
+        {
+          "text": "交互组件（弹窗）的解析包含触发按钮和弹窗本体两部分",
+          "type": "with_skill"
+        },
+        {
+          "text": "缺失的详情弹窗严重程度标记为'High'",
+          "type": "with_skill"
+        },
+        {
+          "text": "弹窗字段的验证方式标注为'需要交互测试'或'可通过视觉确认'",
+          "type": "with_skill"
+        },
+        {
+          "text": "报告包含待确认项或明确指出需交互测试才能验证的内容",
+          "type": "with_skill"
+        },
+        {
+          "text": "整体一致率计算中包含详情弹窗缺失的负面影响",
+          "type": "without_skill"
+        },
+        {
+          "text": "修改建议具体指出'添加反馈详情弹窗及其触发方式'",
+          "type": "with_skill"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "consistency-confidence-joint-judgment",
+      "prompt": "请验证 PRD 和 HTML 的一致性。\n\nPRD 路径：/mock/prd/notification.md，内容：\n```\n# 通知中心 PRD\n## 功能需求\n1. 通知列表：按时间倒序展示通知，每条通知包含标题、内容摘要、时间、已读/未读状态\n2. 标记已读：点击通知可标记为已读\n3. 全部已读：提供'全部标记为已读'按钮\n4. 通知类型图标：系统通知、私信、告警分别用不同图标标识\n5. 通知设置入口：跳转到通知偏好设置页面\n```\n\nHTML 路径：/mock/html/notifications.html，内容：\n```\n<!DOCTYPE html><html><body>\n<div class=\"page\">\n  <h1>通知中心</h1>\n  <button>全部标记为已读</button>\n  <ul class=\"notification-list\">\n    <li class=\"unread\">\n      <span class=\"title\">系统维护通知</span>\n      <span class=\"summary\">系统将于...</span>\n      <span class=\"time\">2024-03-15 10:00</span>\n    </li>\n    <li class=\"read\">\n      <span class=\"title\">新私信</span>\n      <span class=\"summary\">您收到一条来自...</span>\n      <span class=\"time\">2024-03-14 15:30</span>\n    </li>\n  </ul>\n  <a href=\"/settings\">通知设置</a>\n</div></body></html>\n```\n请按判定标准同时标注一致性级别和置信度。",
+      "expected_output": "对每个需求项同时标注一致性级别和置信度。PRD 明确要求的字段（标题、摘要、时间、已读状态）对应 HTML 元素标记为一致+高置信度；通知类型图标缺失标记为不一致或部分一致+高置信度。",
+      "files": [],
+      "assertions": [
+        {
+          "text": "每个需求项同时标注一致性级别和置信度两个维度",
+          "type": "with_skill"
+        },
+        {
+          "text": "通知列表基本字段（标题、摘要、时间）标记为'一致'且置信度'高'",
+          "type": "with_skill"
+        },
+        {
+          "text": "已读/未读状态标记为'一致'或'部分一致'",
+          "type": "without_skill"
+        },
+        {
+          "text": "'全部标记为已读'按钮标记为'一致'且置信度'高'",
+          "type": "without_skill"
+        },
+        {
+          "text": "通知类型图标缺失被识别并标注置信度'高'",
+          "type": "with_skill"
+        },
+        {
+          "text": "通知设置入口标记为'一致'且置信度'高'",
+          "type": "without_skill"
+        },
+        {
+          "text": "'标记已读'交互的验证方式标注为'需要交互测试'",
+          "type": "with_skill"
+        },
+        {
+          "text": "置信度为'中'的项有合理原因说明（如描述不够具体需人工确认）",
+          "type": "with_skill"
+        },
+        {
+          "text": "对比表同时展示一致性级别和置信度两列",
+          "type": "with_skill"
+        },
+        {
+          "text": "判定标准与 SKILL.md 中定义的表格一致（一致/部分一致/不一致/待确认 × 高/中/低）",
+          "type": "with_skill"
+        },
+        {
+          "text": "未出现'一致+置信度低'的逻辑矛盾组合",
+          "type": "with_skill"
+        },
+        {
+          "text": "整体一致率计算正确反映各需求项的判定结果",
+          "type": "without_skill"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "report-format-completeness",
+      "prompt": "请验证 PRD 和 HTML 的一致性。\n\nPRD 路径：/mock/prd/settings.md，内容：\n```\n# 系统设置 PRD\n## 功能需求\n1. 基本信息设置：昵称、头像、签名\n2. 隐私设置：谁可以看到我的动态、谁可以私信我\n3. 通知设置：邮件通知开关、推送通知开关\n4. 安全设置：修改密码、登录设备管理、两步验证\n5. 主题设置：浅色/深色模式切换\n```\n\nHTML 路径：/mock/html/settings.html，内容：\n```\n<!DOCTYPE html><html><body>\n<div class=\"page\">\n  <h1>设置</h1>\n  <div class=\"section\">\n    <h2>基本信息</h2>\n    <input placeholder=\"昵称\" value=\"user1\" />\n    <input placeholder=\"签名\" value=\"hello\" />\n  </div>\n  <div class=\"section\">\n    <h2>隐私</h2>\n    <select><option>所有人</option><option>仅好友</option></select>\n  </div>\n  <div class=\"section\">\n    <h2>安全</h2>\n    <button>修改密码</button>\n  </div>\n</div></body></html>\n```\n请输出完整格式的验证报告。",
+      "expected_output": "验证报告包含所有必需的章节结构（基本信息、验证总览、严重程度定义、详细对比表、不一致项详情、待确认项），各章节顺序正确。",
+      "files": [],
+      "assertions": [
+        {
+          "text": "报告以'# PRD-UI 验证报告'为标题",
+          "type": "with_skill"
+        },
+        {
+          "text": "报告包含'## 基本信息'章节，列出 PRD 路径和 HTML 路径",
+          "type": "with_skill"
+        },
+        {
+          "text": "报告包含'## 验证总览'章节，含一致/部分一致/不一致/待确认数量和整体一致率",
+          "type": "with_skill"
+        },
+        {
+          "text": "报告包含'## 严重程度定义'章节，定义 High/Medium/Low 三级",
+          "type": "with_skill"
+        },
+        {
+          "text": "报告包含'## 详细对比表'，含序号/需求 ID/功能模块/PRD 要求/HTML 实现/一致性/置信度/差异描述/严重程度列",
+          "type": "with_skill"
+        },
+        {
+          "text": "报告包含'## 不一致项详情'章节",
+          "type": "with_skill"
+        },
+        {
+          "text": "报告包含'## 待确认项'章节",
+          "type": "with_skill"
+        },
+        {
+          "text": "'严重程度定义'章节位于'验证总览'之后、'详细对比表'之前",
+          "type": "with_skill"
+        },
+        {
+          "text": "详细对比表中每个需求项都有严重程度标注",
+          "type": "without_skill"
+        },
+        {
+          "text": "置信度为'中'或'低'的项在待确认项章节中单独列出",
+          "type": "with_skill"
+        },
+        {
+          "text": "验证时间字段出现在基本信息章节中",
+          "type": "without_skill"
+        },
+        {
+          "text": "不一致项详情包含序号/需求 ID/功能模块/差异描述/修改建议/严重程度六列",
+          "type": "without_skill"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "severity-grading-correctness",
+      "prompt": "请验证 PRD 和 HTML 的一致性。\n\nPRD 路径：/mock/prd/product.md，内容：\n```\n# 商品管理 PRD\n## 功能需求\n1. 商品列表：商品名称、价格、库存、分类、状态（上架/下架）\n2. 搜索：按商品名称搜索\n3. 筛选：按分类、状态筛选\n4. 排序：按价格、库存、上架时间排序\n5. 分页：每页 20 条\n6. 商品详情弹窗：点击商品查看完整信息\n7. 编辑/上架/下架操作按钮\n8. 商品封面图缩略图展示\n```\n\nHTML 路径：/mock/html/products.html，内容：\n```\n<!DOCTYPE html><html><body>\n<div class=\"page\">\n  <h1>商品管理</h1>\n  <input placeholder=\"搜索商品名称\" />\n  <select><option>全部分类</option></select>\n  <table>\n    <thead><tr><th>名称</th><th>价格</th><th>库存</th></tr></thead>\n    <tbody>\n      <tr><td>商品A</td><td>¥99</td><td>100</td></tr>\n    </tbody>\n  </table>\n  <div class=\"pagination\">1 2 3</div>\n  <button>编辑</button><button>上架</button><button>下架</button>\n</div></body></html>\n```\n请按严重程度定义正确分级。",
+      "expected_output": "核心功能缺失（状态列、分类筛选缺少状态选项、排序、详情弹窗、缩略图）标记为 High；样式类偏差（如有）标记为 Medium；轻微视觉差异标记为 Low。",
+      "files": [],
+      "assertions": [
+        {
+          "text": "商品状态列缺失标记为'High'严重程度",
+          "type": "with_skill"
+        },
+        {
+          "text": "状态筛选功能缺失标记为'High'严重程度",
+          "type": "with_skill"
+        },
+        {
+          "text": "排序功能缺失标记为'High'严重程度",
+          "type": "with_skill"
+        },
+        {
+          "text": "商品详情弹窗缺失标记为'High'严重程度",
+          "type": "with_skill"
+        },
+        {
+          "text": "商品封面图缩略图缺失标记为'High'或'Medium'严重程度",
+          "type": "without_skill"
+        },
+        {
+          "text": "搜索框、分页、操作按钮等已实现项标记为一致",
+          "type": "without_skill"
+        },
+        {
+          "text": "严重程度定义包含 High（核心功能缺失）、Medium（样式偏差）、Low（轻微视觉差异）三级",
+          "type": "with_skill"
+        },
+        {
+          "text": "无将样式类问题标记为 High 的错误分级",
+          "type": "with_skill"
+        },
+        {
+          "text": "无将核心功能缺失标记为 Low 的错误分级",
+          "type": "with_skill"
+        },
+        {
+          "text": "每个不一致项的严重程度与其差异类型匹配（功能缺失=High，样式=Medium，视觉=Low）",
+          "type": "with_skill"
+        },
+        {
+          "text": "已实现的功能（搜索、分页、操作按钮）置信度为'高'",
+          "type": "without_skill"
+        },
+        {
+          "text": "不一致项详情的修改建议具体到'在 XX 位置添加 XX 元素'",
+          "type": "with_skill"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "validation-loop-trigger",
+      "prompt": "请验证 PRD 和 HTML 的一致性，并执行验证闭环。\n\nPRD 路径：/mock/prd/task-mgmt.md，内容：\n```\n# 任务管理 PRD\n## 功能需求\n1. 任务列表：标题、优先级、状态、截止时间、负责人\n2. 搜索：按标题搜索\n3. 筛选：按优先级、状态筛选\n4. 新建任务弹窗\n5. 任务编辑/删除\n6. 拖拽排序\n7. 批量操作\n```\n\nHTML 路径：/mock/html/tasks.html，内容：\n```\n<!DOCTYPE html><html><body>\n<div class=\"page\">\n  <h1>任务管理</h1>\n  <input placeholder=\"搜索任务\" />\n  <table>\n    <thead><tr><th>标题</th><th>优先级</th><th>状态</th></tr></thead>\n    <tbody><tr><td>任务A</td><td>高</td><td>进行中</td></tr></tbody>\n  </table>\n</div></body></html>\n```\n请输出验证报告，并说明验证闭环的触发条件和执行步骤。",
+      "expected_output": "识别不一致和部分一致项后，说明验证闭环的触发条件，指出需调用 /solo:ui-ux-writer skill 修改 HTML，最多 3 轮重新验证。",
+      "files": [],
+      "assertions": [
+        {
+          "text": "识别出截止时间列缺失",
+          "type": "without_skill"
+        },
+        {
+          "text": "识别出负责人列缺失",
+          "type": "without_skill"
+        },
+        {
+          "text": "识别出新建任务弹窗缺失",
+          "type": "without_skill"
+        },
+        {
+          "text": "识别出任务编辑/删除功能缺失",
+          "type": "without_skill"
+        },
+        {
+          "text": "识别出拖拽排序功能缺失",
+          "type": "without_skill"
+        },
+        {
+          "text": "识别出批量操作功能缺失",
+          "type": "without_skill"
+        },
+        {
+          "text": "明确说明验证闭环的触发条件（报告中存在不一致或部分一致项）",
+          "type": "with_skill"
+        },
+        {
+          "text": "指出必须调用 /solo:ui-ux-writer skill 修改 HTML，禁止自行修改",
+          "type": "with_skill"
+        },
+        {
+          "text": "说明最多执行 3 轮重新验证",
+          "type": "with_skill"
+        },
+        {
+          "text": "重新验证范围仅限不一致和部分一致项",
+          "type": "with_skill"
+        },
+        {
+          "text": "说明将修改建议传递给 ui-ux-writer 作为修改指令",
+          "type": "with_skill"
+        },
+        {
+          "text": "说明重新验证后需标注状态变化（不一致→一致、部分一致→一致、仍不一致）",
+          "type": "with_skill"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "stale-issue-generation",
+      "prompt": "以下是第 3 轮重新验证的结果。连续 3 轮中 R005 和 R007 一直为'不一致'，R003 持续'部分一致'未改善。请生成顽固问题 issue。\n\n历史状态：\n- R001 用户列表：不一致 → 部分一致 → 一致（已修复）\n- R002 搜索功能：不一致 → 一致 → 一致（已修复）\n- R003 筛选功能：部分一致 → 部分一致 → 部分一致（未改善）\n- R004 分页组件：不一致 → 部分一致 → 一致（已修复）\n- R005 导出功能：不一致 → 不一致 → 不一致（顽固）\n- R006 详情弹窗：不一致 → 部分一致 → 一致（已修复）\n- R007 批量操作：不一致 → 不一致 → 不一致（顽固）\n\nPRD 名称：user-mgmt\n\n请为顽固问题生成 issue 并记录到 runner.md。",
+      "expected_output": "为 R003（持续部分一致）、R005（连续 3 轮不一致）、R007（连续 3 轮不一致）生成独立的 issue 文件，保存到指定路径，并追加记录到 runner.md。",
+      "files": [],
+      "assertions": [
+        {
+          "text": "为 R005 生成独立的 issue 文件",
+          "type": "with_skill"
+        },
+        {
+          "text": "为 R007 生成独立的 issue 文件",
+          "type": "with_skill"
+        },
+        {
+          "text": "为 R003 生成 issue 文件或标记为需关注项",
+          "type": "with_skill"
+        },
+        {
+          "text": "issue 文件路径包含 '.claude/logs/prd-ui-validator/user-mgmt/issues/'",
+          "type": "with_skill"
+        },
+        {
+          "text": "issue 文件名格式为 'stale-YYYYMMDD-HHmmss.md'",
+          "type": "with_skill"
+        },
+        {
+          "text": "issue 文件内容包含需求 ID 和功能模块信息",
+          "type": "with_skill"
+        },
+        {
+          "text": "issue 文件内容包含历轮状态变化记录",
+          "type": "with_skill"
+        },
+        {
+          "text": "issue 文件内容包含差异描述和建议重点排查方向",
+          "type": "with_skill"
+        },
+        {
+          "text": "runner.md 中追加 issue 记录，格式包含文件地址和'🟡 待处理'状态",
+          "type": "with_skill"
+        },
+        {
+          "text": "runner.md 路径位于 '.claude/logs/prd-ui-validator/runner.md'",
+          "type": "with_skill"
+        },
+        {
+          "text": "已修复的项（R001/R002/R004/R006）未生成 issue",
+          "type": "without_skill"
+        },
+        {
+          "text": "连续 3 轮的阈值判定逻辑正确（3 轮不一致或持续部分一致未改善）",
+          "type": "with_skill"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "prd-readonly-constraint",
+      "prompt": "请验证 PRD 和 HTML 的一致性。\n\nPRD 路径：/mock/prd/article.md，内容：\n```\n# 文章管理 PRD\n## 功能需求\n1. 文章列表：标题、作者、分类、发布时间、阅读量\n2. 搜索：按标题搜索\n3. 分类筛选\n4. 文章编辑：点击编辑跳转到编辑器\n5. 发布/草稿状态切换\n```\n\n注意：PRD 中'文章编辑：点击编辑跳转到编辑器'这条需求描述与第 4 条有重复，且'编辑器'的定义不明确。\n\nHTML 路径：/mock/html/articles.html，内容：\n```\n<!DOCTYPE html><html><body>\n<div class=\"page\">\n  <h1>文章管理</h1>\n  <input placeholder=\"搜索标题\" />\n  <select><option>全部分类</option></select>\n  <table>\n    <thead><tr><th>标题</th><th>作者</th><th>分类</th><th>发布时间</th></tr></thead>\n    <tbody><tr><td>文章A</td><td>作者A</td><td>技术</td><td>2024-03-15</td></tr></tbody>\n  </table>\n  <a href=\"/edit/1\">编辑</a>\n</div></body></html>\n```\n请在验证过程中注意 PRD 描述模糊的问题，并给出建议。",
+      "expected_output": "遵守 PRD 只读约束，不修改 PRD 文件。在报告中标注 PRD 建议，格式为'[PRD 建议] Rxxx 描述模糊，建议明确...'。",
+      "files": [],
+      "assertions": [
+        {
+          "text": "未修改 PRD 文件内容（只读约束）",
+          "type": "with_skill"
+        },
+        {
+          "text": "在报告中以'[PRD 建议]'格式标注 PRD 描述模糊的问题",
+          "type": "with_skill"
+        },
+        {
+          "text": "PRD 建议指出'编辑器'定义不明确",
+          "type": "with_skill"
+        },
+        {
+          "text": "PRD 建议指出需求描述重复的问题",
+          "type": "with_skill"
+        },
+        {
+          "text": "PRD 建议由用户手动修改而非自行修改",
+          "type": "with_skill"
+        },
+        {
+          "text": "阅读量列缺失被识别为不一致或部分一致项",
+          "type": "without_skill"
+        },
+        {
+          "text": "搜索和分类筛选被识别为已实现",
+          "type": "without_skill"
+        },
+        {
+          "text": "编辑链接被识别为已实现或部分实现",
+          "type": "without_skill"
+        },
+        {
+          "text": "发布/草稿状态切换被识别为缺失",
+          "type": "without_skill"
+        },
+        {
+          "text": "PRD 建议出现在待确认项或独立建议章节中",
+          "type": "with_skill"
+        },
+        {
+          "text": "报告遵循'PRD 文档为只读'的硬性约束",
+          "type": "with_skill"
+        },
+        {
+          "text": "对于 PRD 中重复提及的功能点，合并为一条需求处理",
+          "type": "with_skill"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "html-modification-must-call-skill",
+      "prompt": "请验证 PRD 和 HTML 的一致性，存在不一致项后请说明如何修复。\n\nPRD 路径：/mock/prd/role-mgmt.md，内容：\n```\n# 角色权限管理 PRD\n## 功能需求\n1. 角色列表：角色名称、描述、用户数、创建时间\n2. 新建角色：弹出角色编辑弹窗\n3. 角色权限配置：为角色配置可访问的菜单和操作权限\n4. 角色分配：将用户分配到指定角色\n5. 删除角色：有用户关联的角色不可删除，需先转移用户\n```\n\nHTML 路径：/mock/html/roles.html，内容：\n```\n<!DOCTYPE html><html><body>\n<div class=\"page\">\n  <h1>角色管理</h1>\n  <table>\n    <thead><tr><th>角色名称</th><th>用户数</th></tr></thead>\n    <tbody><tr><td>管理员</td><td>3</td></tr></tbody>\n  </table>\n  <button>新建</button>\n</div></body></html>\n```\n请输出验证报告，并说明存在不一致项后的修复流程。",
+      "expected_output": "验证报告中存在不一致项时，说明修复流程必须调用 /solo:ui-ux-writer skill 来修改 HTML 设计稿，禁止自行编写 HTML 代码。",
+      "files": [],
+      "assertions": [
+        {
+          "text": "识别出角色描述列缺失",
+          "type": "without_skill"
+        },
+        {
+          "text": "识别出创建时间列缺失",
+          "type": "without_skill"
+        },
+        {
+          "text": "识别出角色权限配置功能缺失",
+          "type": "without_skill"
+        },
+        {
+          "text": "识别出角色分配功能缺失",
+          "type": "without_skill"
+        },
+        {
+          "text": "识别出删除角色功能缺失",
+          "type": "without_skill"
+        },
+        {
+          "text": "明确指出修改 HTML 设计稿必须调用 /solo:ui-ux-writer skill",
+          "type": "with_skill"
+        },
+        {
+          "text": "明确禁止自行编写或修改 HTML 代码",
+          "type": "with_skill"
+        },
+        {
+          "text": "将修改建议格式化为'在 XX 位置添加 XX 元素'传递给 ui-ux-writer",
+          "type": "with_skill"
+        },
+        {
+          "text": "说明验证闭环的操作步骤（调用 skill → 获取更新后路径 → 重新验证）",
+          "type": "with_skill"
+        },
+        {
+          "text": "说明重新验证仅针对不一致和部分一致项",
+          "type": "with_skill"
+        },
+        {
+          "text": "HTML 设计稿修改规则中'必须调用 skill'为硬性约束",
+          "type": "with_skill"
+        },
+        {
+          "text": "未直接输出 HTML 代码作为修改方案",
+          "type": "with_skill"
+        }
+      ]
+    }
+  ]
+}

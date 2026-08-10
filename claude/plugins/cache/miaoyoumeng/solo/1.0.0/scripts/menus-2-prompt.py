@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 import argparse
 
-from config import inputs_dir, prompts_dir, outputs_dir, user_story_dir
+from config import prompts_dir, outputs_dir
 
 def parse_menu_tree(lines):
     """
@@ -67,57 +67,63 @@ def build_unique_names(nodes, sep="-"):
 
         children = node.get("children", [])
 
-        if not children:
+        if not children or len(children) == 0:
             result.append({
                 "name": parent_name,
                 "function": [],
-                "page": []
+                "tab": []
                 })
+            # print(parent_name)
             continue
-
+        
         for child in children:
             child_name = child.get("name", "")
             funcs = []
-            pages = []
+            tabs = []
             if child.get("children", []):
-                pages, funcs = build_functions_pages(child.get("children"))
+                tabs, funcs = build_functions_tabs(child.get("children"), sep)
 
             result.append({
-                    "name": f"{parent_name}{sep}{child_name}",
-                    "function": funcs,
-                    "page": pages
-                })
+                "name": f"{parent_name}{sep}{child_name}",
+                "function": funcs,
+                "tab": tabs
+            })
     return list(result)
 
-def build_functions_pages(nodes):
+def build_functions_tabs(nodes, sep="-"):
     funcs = []
-    pages = []
+    tabs = []
 
     for node in nodes:
 
         node_type = node.get("type", "")
         node_name = node.get("name", "")
-
-        if "💠" == node_type:
-            pages.append(node_name)
-        else:
-            funcs.append(node_name)
-
+        
         children = node.get("children", [])
         if not children:
             continue
 
-        for child in children:
-            child_name = child.get("name", "")
-            funcs.append(child_name)
-    return pages, funcs
+        if "💠" == node_type or "🗂️" == node_type:
+            if not children:
+                tabs.append(node_name)
+                continue
+            else:
+                for child in children:
+                    child_name = child.get("name", "")
+                    tabs.append(f"{node_name}{sep}{child_name}")
+        else:
+            funcs.append(node_name)
+
+        
+        
+    return tabs, funcs
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
         description = "根据指定目录下的包含菜单 markdown 文件，为菜单生成对应的prd文档",
         formatter_class = argparse.RawDescriptionHelpFormatter,
-        epilog = "示例: %(prog)s --workspace=<workspace>  --name=<name>"
+        epilog = "示例: %(prog)s --workspace=<workspace>  --name=<name> --pages=<pages>"
     )
     parser.add_argument('--workspace', required = False,
          help = '工作目录目录的路径（非必需）')
@@ -133,50 +139,43 @@ if __name__ == "__main__":
     workspace: Path = Path(args.workspace if args.workspace else str(Path.cwd()))
     name:str = args.name if args.name else "default"
 
-    input_dir: Path = inputs_dir(workspace)
+    # input_dir: Path = inputs_dir(workspace)
 
-    if not input_dir.exists() or not input_dir.is_dir():
-        print(f"目录：{input_dir} 不存在...")
-        sys.exit()  # 退出程序
+    # if not input_dir.exists() or not input_dir.is_dir():
+    #     print(f"目录：{input_dir} 不存在...")
+    #     sys.exit()  # 退出程序
 
     pages = args.pages if args.pages else ""
     context = args.context if args.context else ""
-    print(pages)
     menu_tree = parse_menu_tree(pages.splitlines())
     
     values = build_unique_names(menu_tree)
-
+    # print(values)
     output_dir: Path = outputs_dir(workspace)
     if not output_dir.exists():
         output_dir.mkdir(parents=True, exist_ok=True)
 
     for item in values:
-        menu_name = item["name"].replace("/", "-")
-        menu_function = item["function"]
-        menu_page = item["page"]
+        page_name = item["name"].replace("/", "-")
+        page_function = item["function"]
+        page_tab = item["tab"]
         
         prompt_dir = prompts_dir(workspace)
-        prompt_file = Path(prompt_dir / f"prd-{menu_name}.prompt.md")
-        
-        userstory_dir = user_story_dir(workspace, name)
-        if not userstory_dir.exists():
-            userstory_dir.mkdir(parents=True, exist_ok=True)
+        prompt_file = Path(prompt_dir / f"prd-{page_name}.prompt.md")
 
         prompt = f"""
-{context}
-
-1. 调用 Skill `/solo:prd-writer`，请为系统菜单 "{menu_name}" 生成 prd 文档。
+调用 skill `/solo:prd-writer`，请为管理系统页面 "{page_name}" 生成 prd 文档。
 - 禁止自己手写 prd 文档，必须通过 `/solo:prd-writer` skill 执行生成。
-- 禁止自己手写 issue 文档，必须通过 `/solo:issues-writer` skill 执行生成。
-- prd 功能包含：{menu_function}
-- prd 功能设计包含子页面页面：{menu_page}
-- 参考资料在 `{userstory_dir}` 目录下。
-- 将生成的 prd 文档保存在 {output_dir}/prds/{name}/{menu_name}.prd.md
-- 将 issue 文件遗留问题保存在 {output_dir}/issues/{name}/prd-{menu_name}.issue.md，如果没有遗留问题，可以不用输出这个文件。
-- 如果 `prd 文档` 或者`issue 文件` 已存在，直接覆盖。
+- 将生成的 prd 文档保存在 {output_dir}/prds/{name}/{page_name}.prd.md，如果 prd 文档已存在，则重新生成并直接覆盖。
+{"- prd 包含tab：" + json.dumps(page_tab, ensure_ascii=False) if len(page_tab) > 0 else ""}
+{"- prd 包含功能点：" + json.dumps(page_function, ensure_ascii=False) if len(page_function) > 0 else ""}
+
+{context}
 """
-        prompt_file.write_text(prompt, encoding='utf-8')
-        
+        # prompt_file.write_text(prompt, encoding='utf-8')
+
+        print(prompt)
+        # break
     # print(
     #     json.dumps(
     #         values,

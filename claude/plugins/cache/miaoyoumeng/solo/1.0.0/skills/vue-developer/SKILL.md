@@ -1,11 +1,11 @@
 ---
 name: vue-developer
-description: >
-  基于 Vue3 + TypeScript 的管理后台完整开发工作流。当用户提交前端开发 prompt 时触发此 skill，
+description: "基于 Vue3 + TypeScript 的管理后台完整开发工作流。当用户提交前端开发 prompt 时触发此 skill，
   自动完成：解析 prompt → 读取 PRD 和 UI 设计稿 → 识别页面路由 → 调用 /solo:tdesign-vue-next 实现页面布局 →
   发现 API 接口 → 调用 /solo:tdd-typescript 实现交互逻辑。适用于管理后台页面开发、
-  表单/表格/弹窗交互实现、API 接口对接等场景。即使未明确说"使用 Vue"，
-  只要涉及 Vue 页面组件、路由配置、Pinia 状态管理、Vite 构建或 .vue 文件，均应触发此 skill。
+  表单/表格/弹窗交互实现、API 接口对接等场景。即使未明确说`使用 Vue`，
+  只要涉及 Vue 页面组件、路由配置、Pinia 状态管理、Vite 构建或 .vue 文件，均应触发此 skill。"
+model: opus
 ---
 
 ## 概述

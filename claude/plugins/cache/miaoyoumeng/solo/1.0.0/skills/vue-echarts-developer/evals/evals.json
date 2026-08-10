@@ -1,0 +1,429 @@
+{
+  "skill_name": "vue-echarts-developer",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "帮我做一个 Vue 组件，用折线图展示最近 12 个月的用户增长趋势，要求有标题、tooltip 提示框，支持鼠标滚轮缩放数据。数据从 API 接口 /api/user-growth 获取。",
+      "expected_output": "生成一个完整的 Vue 3 组件，使用 echarts 按需引入 LineChart，包含 axios 数据加载、loading/error 状态处理、DataZoom 组件配置 autoresize 响应式。",
+      "files": [],
+      "assertions": [
+        {
+          "name": "uses_on_demand_import",
+          "description": "组件使用 echarts 按需引入而非全量引入"
+        },
+        {
+          "name": "has_line_chart_registration",
+          "description": "代码中包含 LineChart 的 use() 注册"
+        },
+        {
+          "name": "has_api_data_loading",
+          "description": "包含异步 API 数据加载逻辑（axios 或 fetch）"
+        },
+        {
+          "name": "has_loading_error_states",
+          "description": "有 loading 和 error 状态处理"
+        },
+        {
+          "name": "has_tooltip_component",
+          "description": "注册并配置 TooltipComponent"
+        },
+        {
+          "name": "has_datazoom_component",
+          "description": "配置 DataZoom 组件支持数据缩放"
+        },
+        {
+          "name": "has_autoresize",
+          "description": "v-chart 组件设置了 autoresize 属性"
+        },
+        {
+          "name": "uses_typescript_composition_api",
+          "description": "使用 <script setup> Composition API 语法"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "做一个柱状图组件，对比产品 A 和产品 B 四个季度的销量，用堆叠柱状图展示，颜色要区分清楚。",
+      "expected_output": "生成 Vue 3 柱状图组件，使用 BarChart，dataset + dimensions 格式组织数据，配置堆叠 stack 属性，两个系列不同颜色。",
+      "files": [],
+      "assertions": [
+        {
+          "name": "uses_bar_chart",
+          "description": "使用 BarChart 图表类型"
+        },
+        {
+          "name": "has_stacked_config",
+          "description": "series 中配置了 stack 属性实现堆叠效果"
+        },
+        {
+          "name": "has_two_series",
+          "description": "包含两个 series 分别对应产品 A 和产品 B"
+        },
+        {
+          "name": "has_distinct_colors",
+          "description": "两个 series 配置了不同的颜色"
+        },
+        {
+          "name": "uses_dataset_format",
+          "description": "使用 dataset + dimensions 格式组织数据"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "画个饼图，显示公司五个部门的预算占比，要环形的，中间留空。",
+      "expected_output": "生成 Vue 3 饼图组件，使用 PieChart，配置 radius 为环形（donut），包含五个数据项。",
+      "files": [],
+      "assertions": [
+        {
+          "name": "uses_pie_chart",
+          "description": "使用 PieChart 图表类型"
+        },
+        {
+          "name": "has_donut_radius_config",
+          "description": "配置 radius 属性实现环形效果（如 ['40%', '70%']）"
+        },
+        {
+          "name": "has_five_data_items",
+          "description": "包含五个部门的数据项"
+        },
+        {
+          "name": "has_title_component",
+          "description": "配置 TitleComponent 显示图表标题"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "需要一个仪表盘组件，显示当前系统 CPU 使用率，目标是 80%，超过 60% 变黄色，超过 80% 变红色。",
+      "expected_output": "生成 Vue 3 仪表盘组件，使用 GaugeChart，配置颜色分段（axisLine），指针指向当前使用率。",
+      "files": [],
+      "assertions": [
+        {
+          "name": "uses_gauge_chart",
+          "description": "使用 GaugeChart 图表类型"
+        },
+        {
+          "name": "has_color_segment_config",
+          "description": "配置 axisLine 颜色分段（正常/警告/危险）"
+        },
+        {
+          "name": "has_target_indicator",
+          "description": "有指针指示当前数值"
+        },
+        {
+          "name": "max_value_is_100",
+          "description": "仪表盘 max 值为 100"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "帮我用 Vue 3 写一个雷达图，展示 6 个维度的能力评分（满分 100），同时对比两个员工的数据，用面积填充样式。",
+      "expected_output": "生成 Vue 3 雷达图组件，使用 RadarChart，两个 series 面积填充，6 个维度 indicator。",
+      "files": [],
+      "assertions": [
+        {
+          "name": "uses_radar_chart",
+          "description": "使用 RadarChart 图表类型"
+        },
+        {
+          "name": "has_six_indicators",
+          "description": "radar.indicator 包含 6 个维度"
+        },
+        {
+          "name": "has_two_series",
+          "description": "包含两个 series 对比两个员工"
+        },
+        {
+          "name": "has_area_fill_style",
+          "description": "series 配置 areaStyle 实现面积填充"
+        },
+        {
+          "name": "has_legend_component",
+          "description": "配置 LegendComponent 区分两个员工"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "做一个热力图，展示一周七天、每天 24 小时的用户活跃度矩阵，颜色从浅到深表示低到高。",
+      "expected_output": "生成 Vue 3 热力图组件，使用 HeatmapChart，xAxis 为 24 小时、yAxis 为七天，visualMap 控制颜色映射。",
+      "files": [],
+      "assertions": [
+        {
+          "name": "uses_heatmap_chart",
+          "description": "使用 HeatmapChart 图表类型"
+        },
+        {
+          "name": "has_seven_day_yaxis",
+          "description": "yAxis 包含七天（周一到周日）"
+        },
+        {
+          "name": "has_24_hour_xaxis",
+          "description": "xAxis 包含 24 小时（0-23）"
+        },
+        {
+          "name": "has_visualmap_component",
+          "description": "配置 visualMap 组件控制颜色映射"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "做一个桑基图，展示用户从访问首页到完成购买的整个转化路径，中间经过搜索、加购、结算等节点。",
+      "expected_output": "生成 Vue 3 桑基图组件，使用 SankeyChart，包含 nodes 和 links 数据结构。",
+      "files": [],
+      "assertions": [
+        {
+          "name": "uses_sankey_chart",
+          "description": "使用 SankeyChart 图表类型"
+        },
+        {
+          "name": "has_nodes_and_links",
+          "description": "数据包含 nodes 数组和 links 数组"
+        },
+        {
+          "name": "has_conversion_nodes",
+          "description": "nodes 包含访问、搜索、加购、结算、购买等关键节点"
+        },
+        {
+          "name": "has_tooltip_component",
+          "description": "配置 TooltipComponent 显示节点信息"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "帮我做个散点图，横轴是广告投入（万元），纵轴是销售额（万元），每个点代表一个门店，气泡大小代表门店面积，不同颜色区分区域。",
+      "expected_output": "生成 Vue 3 气泡图组件，使用 ScatterChart，symbolSize 根据门店面积动态计算，不同区域不同颜色。",
+      "files": [],
+      "assertions": [
+        {
+          "name": "uses_scatter_chart",
+          "description": "使用 ScatterChart 图表类型"
+        },
+        {
+          "name": "has_dynamic_symbol_size",
+          "description": "symbolSize 使用函数动态计算（如基于门店面积）"
+        },
+        {
+          "name": "has_region_color_coding",
+          "description": "不同区域 series 配置了不同颜色"
+        },
+        {
+          "name": "has_formatted_tooltip",
+          "description": "tooltip formatter 解析显示广告投入、销售额等坐标值"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "做一个漏斗图，展示招聘流程中从简历投递到最终入职的转化率，阶段包括：简历筛选、面试、发 offer、接受 offer、入职。",
+      "expected_output": "生成 Vue 3 漏斗图组件，使用 FunnelChart，五个阶段按转化率递减排列。",
+      "files": [],
+      "assertions": [
+        {
+          "name": "uses_funnel_chart",
+          "description": "使用 FunnelChart 图表类型"
+        },
+        {
+          "name": "has_five_stages",
+          "description": "包含五个阶段数据项"
+        },
+        {
+          "name": "has_conversion_rate_display",
+          "description": "配置 label 显示转化率或数值"
+        },
+        {
+          "name": "has_descending_order",
+          "description": "数据按递减排列（sort 为 'descending'）"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "做一个 K 线图，展示某股票最近 30 个交易日的行情，包括开盘价、收盘价、最高价、最低价，下方加上成交量柱状图。",
+      "expected_output": "生成 Vue 3 K 线图组件，使用 CandlestickChart，配合 BarChart 显示成交量，使用 grid 分区布局。",
+      "files": [],
+      "assertions": [
+        {
+          "name": "uses_candlestick_chart",
+          "description": "使用 CandlestickChart 图表类型"
+        },
+        {
+          "name": "has_volume_bar_chart",
+          "description": "配合 BarChart 显示成交量"
+        },
+        {
+          "name": "has_grid_layout",
+          "description": "使用 grid 分区布局（K 线和成交量分开显示）"
+        },
+        {
+          "name": "has_datazoom_for_trading_days",
+          "description": "配置 DataZoom 组件支持 30 个交易日的数据浏览"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "帮我用纯 CSS 做一个简单的进度条，显示 75% 的完成度，颜色是蓝色。",
+      "expected_output": "这是一个纯 CSS 进度条需求，不需要 ECharts。不应使用 vue-echarts-developer skill。",
+      "files": [],
+      "assertions": [
+        {
+          "name": "output_not_contains_echarts_import",
+          "description": "输出中不包含 echarts 或 vue-echarts 的 import 语句"
+        },
+        {
+          "name": "output_not_contains_v_chart",
+          "description": "输出中不包含 v-chart 组件"
+        },
+        {
+          "name": "output_uses_css_progress_bar",
+          "description": "输出使用 CSS 实现进度条（如 .progress-bar、width 百分比样式）"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "帮我用 SVG 画一个齿轮图标，要求可以旋转动画，颜色是灰色。",
+      "expected_output": "这是纯 SVG 图标需求，使用 SVG <circle>、<path> 和 CSS animation 实现，不需要 ECharts。不应使用 vue-echarts-developer skill。",
+      "files": [],
+      "assertions": [
+        {
+          "name": "output_not_contains_echarts_import",
+          "description": "输出中不包含 echarts 或 vue-echarts 的 import 语句"
+        },
+        {
+          "name": "output_not_contains_v_chart",
+          "description": "输出中不包含 v-chart 组件"
+        },
+        {
+          "name": "output_uses_svg_and_animation",
+          "description": "输出使用 SVG 元素并包含 CSS animation 旋转效果"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "写一个 Python 脚本，从数据库读取销售数据，导出为 CSV 文件，按月份聚合。",
+      "expected_output": "这是后端数据处理需求，与前端图表无关。不应使用 vue-echarts-developer skill。",
+      "files": [],
+      "assertions": [
+        {
+          "name": "output_not_contains_vue_code",
+          "description": "输出中不包含 Vue 组件代码"
+        },
+        {
+          "name": "output_not_contains_v_chart",
+          "description": "输出中不包含 v-chart 组件"
+        },
+        {
+          "name": "output_uses_python_csv",
+          "description": "输出使用 Python 编写并使用 csv 模块或 pandas 导出 CSV"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "prompt": "用原生 Canvas API 做一个粒子动画背景效果，粒子随机移动，鼠标经过时有跟随效果。",
+      "expected_output": "这是原生 Canvas 2D API 动画需求，使用 requestAnimationFrame 实现，不需要 ECharts。不应使用 vue-echarts-developer skill。",
+      "files": [],
+      "assertions": [
+        {
+          "name": "output_not_contains_echarts_import",
+          "description": "输出中不包含 echarts import"
+        },
+        {
+          "name": "output_not_contains_v_chart",
+          "description": "输出中不包含 v-chart 组件"
+        },
+        {
+          "name": "output_uses_canvas_api",
+          "description": "输出使用原生 Canvas API（getContext、fillRect 等）而非 ECharts"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "prompt": "在 Vue 组件里写一个 HTML table，展示员工列表，支持按姓名搜索和按部门筛选。",
+      "expected_output": "这是表格组件需求，不需要 ECharts 图表。不应使用 vue-echarts-developer skill。",
+      "files": [],
+      "assertions": [
+        {
+          "name": "output_not_contains_echarts_import",
+          "description": "输出中不包含 echarts import"
+        },
+        {
+          "name": "output_not_contains_v_chart",
+          "description": "输出中不包含 v-chart 组件"
+        },
+        {
+          "name": "output_uses_html_table",
+          "description": "输出使用 HTML <table> 元素渲染数据"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "prompt": "用 Chart.js 做一个折线图，显示过去一周的网站访问量。",
+      "expected_output": "用户明确要求使用 Chart.js 而非 ECharts。不应使用 vue-echarts-developer skill。",
+      "files": [],
+      "assertions": [
+        {
+          "name": "output_not_contains_echarts_import",
+          "description": "输出中不包含 echarts import"
+        },
+        {
+          "name": "output_uses_chartjs_not_echarts",
+          "description": "输出使用 Chart.js 而非 ECharts"
+        },
+        {
+          "name": "output_not_contains_v_chart",
+          "description": "输出中不包含 v-chart 组件"
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "prompt": "用纯 CSS 实现一个 loading 加载中的旋转动画，圆圈虚线旋转，放在页面中间。",
+      "expected_output": "这是纯 CSS 动画需求，使用 @keyframes 和 border 实现 loading spinner，不需要 ECharts。不应使用 vue-echarts-developer skill。",
+      "files": [],
+      "assertions": [
+        {
+          "name": "output_not_contains_echarts_import",
+          "description": "输出中不包含 echarts import"
+        },
+        {
+          "name": "output_not_contains_v_chart",
+          "description": "输出中不包含 v-chart 组件"
+        },
+        {
+          "name": "output_uses_css_keyframes",
+          "description": "输出使用 CSS @keyframes 实现旋转动画"
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "prompt": "用 Three.js 做一个 3D 产品旋转展示，用户可以鼠标拖拽旋转，产品是一个简单的立方体形状。",
+      "expected_output": "用户明确要求使用 Three.js/WebGL 做 3D 渲染，不是 ECharts 图表。不应使用 vue-echarts-developer skill。",
+      "files": [],
+      "assertions": [
+        {
+          "name": "output_not_contains_echarts_import",
+          "description": "输出中不包含 echarts import"
+        },
+        {
+          "name": "output_uses_threejs_not_echarts",
+          "description": "输出使用 Three.js 而非 ECharts"
+        },
+        {
+          "name": "output_not_contains_v_chart",
+          "description": "输出中不包含 v-chart 组件"
+        }
+      ]
+    }
+  ]
+}

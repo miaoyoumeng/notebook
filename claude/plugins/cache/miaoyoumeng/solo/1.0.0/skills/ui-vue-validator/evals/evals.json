@@ -1,0 +1,269 @@
+{
+  "skill_name": "ui-vue-validator",
+  "evals": [
+    {
+      "id": 1,
+      "description": "端口自动识别 — 从 package.json scripts.serve 中解析端口",
+      "input": "Vue 项目的 package.json 中 scripts.serve 为 \"vue-cli-service serve --port 8080\"，当前 8080 端口无进程监听",
+      "expected_output": "识别端口 8080，执行 pnpm run serve 启动开发服务器",
+      "assertions": {
+        "with_skill": [
+          { "name": "parses_port_from_package_json", "description": "从 scripts.serve 的 --port 参数中提取端口号 8080" },
+          { "name": "checks_port_with_lsof", "description": "使用 lsof -i :8080 检测端口占用状态" },
+          { "name": "starts_server_with_pnpm", "description": "端口未被占用时执行 pnpm run serve" },
+          { "name": "waits_for_server_ready", "description": "等待服务器就绪后访问 http://localhost:8080/ 确认页面可打开" },
+          { "name": "follows_priority_order", "description": "按 package.json → vite.config → vue.config → .env → 8000 的优先级查找端口" }
+        ],
+        "without_skill": [
+          { "name": "skips_port_detection", "description": "未检查端口配置直接使用默认端口" },
+          { "name": "no_lsof_check", "description": "未使用 lsof 检测端口占用就启动服务" },
+          { "name": "wrong_package_manager", "description": "使用 npm 或 yarn 而非 pnpm 启动" },
+          { "name": "no_server_wait", "description": "启动服务器后未等待就绪就访问页面" },
+          { "name": "hardcoded_port", "description": "硬编码端口而非从配置中解析" }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "description": "功能点拆分 — 将 PRD 需求划分为功能模块和功能点",
+      "input": "用户需求：验证用户管理模块，包含用户列表页（含搜索、分页）、新增用户弹窗、用户详情页、角色分配弹窗",
+      "expected_output": "输出功能点清单表格，划分为 4 个功能点，弹窗单独拆分",
+      "assertions": {
+        "with_skill": [
+          { "name": "identifies_function_modules", "description": "将需求识别为「用户管理」功能模块" },
+          { "name": "splits_into_feature_points", "description": "拆分为至少 4 个功能点：列表页、新增弹窗、详情页、角色分配弹窗" },
+          { "name": "extracts_popups_separately", "description": "弹窗、侧边栏等交互组件单独列为功能点" },
+          { "name": "outputs_feature_point_table", "description": "输出包含序号、功能模块、功能点名称、HTML设计稿文件路径、Vue路由地址的表格" },
+          { "name": "correct_granularity", "description": "拆分粒度合理：一个功能点对应一个可独立截图验证的页面或组件" }
+        ],
+        "without_skill": [
+          { "name": "no_feature_split", "description": "未将需求拆分为功能点" },
+          { "name": "misses_popup_points", "description": "遗漏弹窗等交互组件的功能点" },
+          { "name": "no_table_output", "description": "未输出结构化的功能点清单表格" },
+          { "name": "wrong_granularity", "description": "拆分粒度过粗（整个模块当做一个点）或过细（每个按钮一个点）" },
+          { "name": "missing_path_columns", "description": "功能点表格缺少 HTML 设计稿文件路径或 Vue 路由地址列" }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "description": "导航路径验证 — 识别不同场景的导航方式并执行完整导航",
+      "input": "功能点清单包含：用户列表页（一级页面）、订单详情页（需从列表进入）、编辑弹窗（需点击触发按钮）",
+      "expected_output": "为每个功能点识别正确的导航场景并执行对应导航路径",
+      "assertions": {
+        "with_skill": [
+          { "name": "identifies_first_level_page", "description": "将用户列表页识别为一级页面，通过左侧菜单到达" },
+          { "name": "identifies_detail_page", "description": "将订单详情页识别为详情页，先加载列表页再点击目标行" },
+          { "name": "identifies_popup_dialog", "description": "将编辑弹窗识别为弹窗场景，进入父页面后点击触发按钮" },
+          { "name": "confirms_page_rendered", "description": "确认页面可正常渲染后再进行截图" },
+          { "name": "handles_static_pages", "description": "静态配置页直接访问路由地址即可，无需额外导航" }
+        ],
+        "without_skill": [
+          { "name": "no_navigation_scenario_identification", "description": "未区分不同页面的导航场景" },
+          { "name": "direct_url_for_all_pages", "description": "所有页面都尝试直接访问路由地址，忽略需要前置操作的页面" },
+          { "name": "screenshot_before_render", "description": "未等待页面渲染完成就截图" },
+          { "name": "misses_dialog_trigger", "description": "未执行点击触发按钮的操作直接进入弹窗页面" },
+          { "name": "no_filter_navigation", "description": "需要筛选/搜索才能到达的目标未执行筛选操作" }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "description": "HTML 设计稿截图 — 通过 file:// 协议直接访问",
+      "input": "HTML 设计稿文件路径：/data/ui/user-management/list.html，PRD 名称：user-management，序号：01",
+      "expected_output": "使用 playwright-cli 通过 file:// 协议访问 HTML 文件并截图，命名为 ui-user-management-01.png",
+      "assertions": {
+        "with_skill": [
+          { "name": "uses_file_protocol", "description": "使用 file:///data/ui/user-management/list.html 访问 HTML 文件" },
+          { "name": "calls_playwright_cli", "description": "调用 /solo:playwright-cli skill 打开浏览器" },
+          { "name": "correct_screenshot_naming", "description": "截图命名为 ui-user-management-01.png" },
+          { "name": "correct_screenshot_path", "description": "截图保存到 <当前工作目录>/.claude/logs/ui-vue-validator/user-management/" },
+          { "name": "desktop_viewport", "description": "使用 desktop 1280x720 视口截图" }
+        ],
+        "without_skill": [
+          { "name": "uses_http_protocol", "description": "使用 http:// 协议而非 file:// 协议访问 HTML 文件" },
+          { "name": "no_playwright_skill", "description": "未调用 /solo:playwright-cli skill" },
+          { "name": "wrong_screenshot_name", "description": "截图命名不符合 ui-<prd name>-<序号>.png 规则" },
+          { "name": "wrong_screenshot_path", "description": "截图未保存到 <当前工作目录>/.claude/logs/ui-vue-validator/ 目录" },
+          { "name": "starts_static_server", "description": "启动了静态服务器而非直接访问 HTML 文件" }
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "description": "Vue 页面截图 — 配对命名与渲染等待策略",
+      "input": "功能点：用户列表页（序号 01），PRD 名称：user-management，页面包含 loading 动画和异步数据请求",
+      "expected_output": "截图命名为 vue-user-management-01.png，等待页面渲染完成后截图",
+      "assertions": {
+        "with_skill": [
+          { "name": "correct_vue_screenshot_name", "description": "Vue 截图命名为 vue-user-management-01.png，与 HTML 截图配对" },
+          { "name": "waits_for_loading_disappear", "description": "等待 loading 动画或骨架屏消失后再截图" },
+          { "name": "waits_for_dom_stable", "description": "等待网络请求结束、DOM 不再变化后截图" },
+          { "name": "waits_for_data_render", "description": "列表页等待数据出现后截图，空数据页等待空状态提示出现" },
+          { "name": "same_viewport_as_html", "description": "使用与 HTML 设计稿截图相同的视口尺寸" }
+        ],
+        "without_skill": [
+          { "name": "wrong_vue_screenshot_name", "description": "Vue 截图命名不符合 vue-<prd name>-<序号>.png 规则" },
+          { "name": "screenshot_during_loading", "description": "在 loading 状态截图而非渲染完成状态" },
+          { "name": "no_dom_stable_wait", "description": "未等待 DOM 稳定就截图" },
+          { "name": "inconsistent_viewport", "description": "Vue 截图与 HTML 截图使用不同视口尺寸" },
+          { "name": "no_data_wait", "description": "未等待异步数据渲染完成就截图" }
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "description": "截图配对检查 — 确保每个功能点都有配对的 HTML 和 Vue 截图",
+      "input": "功能点清单有 6 个功能点，当前截图目录中有 ui-01 到 ui-06 和 vue-01 到 vue-04",
+      "expected_output": "识别出 vue-05 和 vue-06 缺失，列出需要补截的功能点",
+      "assertions": {
+        "with_skill": [
+          { "name": "checks_all_feature_points", "description": "检查功能点清单中所有 6 个功能点的截图配对情况" },
+          { "name": "identifies_missing_screenshots", "description": "识别出 vue-05 和 vue-06 缺失" },
+          { "name": "lists_missing_points", "description": "列出需要补截的功能点清单" },
+          { "name": "correct_pairing_rule", "description": "配对规则为 ui-<prd name>-<序号>.png ↔ vue-<prd name>-<序号>.png" },
+          { "name": "does_not_flag_complete", "description": "不将已配对的 4 个功能点标记为缺失" }
+        ],
+        "without_skill": [
+          { "name": "no_pairing_check", "description": "未检查截图配对情况" },
+          { "name": "misses_missing_screenshots", "description": "未发现缺失的 Vue 截图" },
+          { "name": "wrong_pairing_rule", "description": "配对规则不正确" },
+          { "name": "false_positives", "description": "将已配对的功能点错误标记为缺失" },
+          { "name": "no_makeup_list", "description": "未列出需要补截的功能点清单" }
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "description": "AI 视觉差异对比 — 分批策略与差异识别",
+      "input": "12 对配对的截图需要进行视觉差异对比",
+      "expected_output": "分 3 批（每批最多 5 对）进行对比，输出 Markdown 差异表格，包含差异类型、描述、严重程度",
+      "assertions": {
+        "with_skill": [
+          { "name": "batches_correctly", "description": "将 12 对截图分为 3 批，每批最多 5 对" },
+          { "name": "independent_batch_results", "description": "每批独立记录对比结果" },
+          { "name": "outputs_markdown_table", "description": "差异输出为 Markdown 表格，包含序号、功能模块、功能点名称、差异类型、差异描述、严重程度" },
+          { "name": "covers_diff_types", "description": "差异类型覆盖布局偏差、颜色差异、字体差异、元素缺失/多余、图标/图片、交互组件" },
+          { "name": "severity_classification", "description": "严重程度正确定义为 High/Medium/Low" }
+        ],
+        "without_skill": [
+          { "name": "no_batching", "description": "一次性提交所有截图对比，未分批处理" },
+          { "name": "batch_too_large", "description": "单批超过 5 对截图" },
+          { "name": "no_markdown_table", "description": "差异输出不是 Markdown 表格格式" },
+          { "name": "missing_diff_types", "description": "差异类型覆盖不完整" },
+          { "name": "no_severity_level", "description": "缺少严重程度定义或使用不正确的分级" }
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "description": "严重程度判定 — 正确判定差异严重程度",
+      "input": "对比发现以下差异：缺少「取消」按钮、搜索框间距比设计稿多 8px、按钮对齐差 1-2px、缺少整个表格列",
+      "expected_output": "缺少按钮和表格列标记为 High，间距偏差标记为 Medium，对齐差标记为 Low",
+      "assertions": {
+        "with_skill": [
+          { "name": "missing_element_is_high", "description": "元素缺失（缺少「取消」按钮）标记为 High" },
+          { "name": "missing_column_is_high", "description": "缺少整个表格列标记为 High" },
+          { "name": "spacing_diff_is_medium", "description": "间距偏差 8px 标记为 Medium" },
+          { "name": "pixel_alignment_is_low", "description": "1-2px 对齐差标记为 Low" },
+          { "name": "follows_severity_rules", "description": "遵循 SKILL.md 中定义的严重程度规则" }
+        ],
+        "without_skill": [
+          { "name": "wrong_high_classification", "description": "将低严重程度错误标记为 High" },
+          { "name": "wrong_low_classification", "description": "将高严重程度错误标记为 Low" },
+          { "name": "no_medium_level", "description": "未使用 Medium 级别导致中间差异无法分类" },
+          { "name": "inconsistent_severity", "description": "同类差异被标记为不同严重程度" },
+          { "name": "no_severity_definition", "description": "使用自定义的严重程度定义而非 SKILL.md 中的定义" }
+        ]
+      }
+    },
+    {
+      "id": 9,
+      "description": "Bug Issue 生成 — 调用 issues-writer 生成规范 issue",
+      "input": "AI 对比结果包含 3 个差异：High 级别缺少按钮、Medium 级别颜色不一致、Low 级别对齐差",
+      "expected_output": "为每个差异调用 /solo:issues-writer 生成独立的 bug 类型 issue，附带对比截图",
+      "assertions": {
+        "with_skill": [
+          { "name": "one_issue_per_diff", "description": "为每个差异生成一个独立的 bug issue" },
+          { "name": "includes_feature_info", "description": "issue 包含功能模块和功能点信息" },
+          { "name": "attaches_screenshots", "description": "issue 附带对比截图（ui-xxx.png 和 vue-xxx.png）作为证据" },
+          { "name": "includes_severity", "description": "issue 包含严重程度标记（High/Medium/Low）" },
+          { "name": "calls_issues_writer_skill", "description": "调用 /solo:issues-writer skill 而非手动编写" }
+        ],
+        "without_skill": [
+          { "name": "no_issue_created", "description": "未为差异创建 bug issue" },
+          { "name": "no_screenshot_attached", "description": "issue 未附带对比截图" },
+          { "name": "no_severity_marked", "description": "issue 缺少严重程度标记" },
+          { "name": "manual_writing", "description": "手动编写 issue 而非调用 /solo:issues-writer skill" },
+          { "name": "missing_feature_context", "description": "issue 缺少功能模块和功能点上下文" }
+        ]
+      }
+    },
+    {
+      "id": 10,
+      "description": "验证报告输出 — 生成结构化验证报告",
+      "input": "12 个功能点已完成验证，其中 9 个通过、3 个存在差异（共 5 个 bug issue）",
+      "expected_output": "生成 Markdown 格式报告，包含概览（75% 一致率）、差异详情、Bug Issue 列表",
+      "assertions": {
+        "with_skill": [
+          { "name": "report_has_overview", "description": "报告包含概览表格：总功能点数 12、已验证 12、缺失截图 0、通过 9、未通过 3" },
+          { "name": "correct_consistency_rate", "description": "整体视觉一致率计算为 75%（9/12）" },
+          { "name": "report_has_diff_details", "description": "报告包含差异详情表格，列出 3 个未通过的功能点及其差异数和最高严重程度" },
+          { "name": "report_has_bug_list", "description": "报告列出 5 个生成的 Bug Issue 编号、功能点、差异描述、严重程度" },
+          { "name": "markdown_format", "description": "报告整体为 Markdown 格式" }
+        ],
+        "without_skill": [
+          { "name": "no_overview_table", "description": "报告缺少概览表格" },
+          { "name": "wrong_consistency_rate", "description": "视觉一致率计算错误" },
+          { "name": "no_diff_details", "description": "报告缺少差异详情表格" },
+          { "name": "no_bug_list", "description": "报告未列出 Bug Issue 列表" },
+          { "name": "wrong_format", "description": "报告格式非 Markdown 或结构混乱" }
+        ]
+      }
+    },
+    {
+      "id": 11,
+      "description": "多状态截图 — 覆盖同一功能点的不同状态",
+      "input": "功能点：搜索框。需要覆盖空数据状态、有搜索结果状态、无搜索结果状态",
+      "expected_output": "为同一功能点的 3 个状态分别截取 HTML 和 Vue 配对截图",
+      "assertions": {
+        "with_skill": [
+          { "name": "identifies_multi_state", "description": "识别需要多个状态截图的功能点" },
+          { "name": "screenshots_empty_state", "description": "为空数据状态截取一对 HTML + Vue 截图" },
+          { "name": "screenshots_has_data_state", "description": "为有数据/搜索结果状态截取一对截图" },
+          { "name": "screenshots_no_result_state", "description": "为无搜索结果状态截取一对截图" },
+          { "name": "naming_preserves_pairing", "description": "每对截图保持命名配对规则，通过序号区分不同状态" }
+        ],
+        "without_skill": [
+          { "name": "single_state_only", "description": "只截取单一状态，遗漏其他状态" },
+          { "name": "misses_empty_state", "description": "未截取空数据状态" },
+          { "name": "misses_no_result_state", "description": "未截取无搜索结果状态" },
+          { "name": "naming_collision", "description": "多状态截图命名冲突或未通过序号区分" },
+          { "name": "incomplete_pairing", "description": "某个状态缺少 HTML 或 Vue 其中一张截图" }
+        ]
+      }
+    },
+    {
+      "id": 12,
+      "description": "完整流程验证 — 从端口识别到验证报告的全流程",
+      "input": "订单管理模块开发完成，需要验证：订单列表页（含筛选、排序、分页）、订单详情页。HTML 设计稿路径：/data/ui/order/，PRD 名称：order-management",
+      "expected_output": "完成全部 9 步流程：端口识别→功能点拆分→导航验证→HTML截图→Vue截图→配对检查→AI对比→Bug生成→验证报告",
+      "assertions": {
+        "with_skill": [
+          { "name": "all_nine_steps_executed", "description": "9 个步骤全部按顺序执行" },
+          { "name": "feature_points_split_correctly", "description": "拆分为订单列表页和订单详情页两个功能点" },
+          { "name": "html_screenshots_via_file_protocol", "description": "HTML 设计稿截图通过 file:// 协议访问" },
+          { "name": "vue_screenshots_wait_for_render", "description": "Vue 页面截图等待数据渲染完成" },
+          { "name": "final_report_generated", "description": "生成包含概览、差异详情、Bug 列表的验证报告" }
+        ],
+        "without_skill": [
+          { "name": "skips_steps", "description": "跳过某个步骤未执行" },
+          { "name": "wrong_step_order", "description": "步骤执行顺序不正确" },
+          { "name": "incomplete_feature_split", "description": "功能点拆分不完整" },
+          { "name": "no_ai_comparison", "description": "未执行 AI 视觉差异对比" },
+          { "name": "no_final_report", "description": "未生成最终验证报告" }
+        ]
+      }
+    }
+  ]
+}
