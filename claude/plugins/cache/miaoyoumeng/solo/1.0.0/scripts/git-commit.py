@@ -126,8 +126,8 @@ def main(workspace: Path):
 
     # 4. 提交变更
     print("git commit task...")
-    subprocess.run(['git', 'add', '-A'])
-    subprocess.run(['git', 'commit', '-m', command_msg], stderr=subprocess.DEVNULL)
+    # subprocess.run(['git', 'add', '-A'])
+    # subprocess.run(['git', 'commit', '-m', command_msg], stderr=subprocess.DEVNULL)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(

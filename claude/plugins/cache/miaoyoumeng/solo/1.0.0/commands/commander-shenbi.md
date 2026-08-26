@@ -147,14 +147,14 @@ uv run python ${CLAUDE_PLUGIN_ROOT}/scripts/menus-2-prompt.py \
 
 - 请你在对话框中输入 /clear 以清空当前上下文，然后我将继续处理下一个 PRD。
 - 检查 `logs/prd-issues-progress.txt` 是否存在，如果不存在则创建（空文件即可）。
-- 按字母顺序列出 `outputs/prds/shenbi/*.md`，与`logs/prd-issues-progress.txt`内容对比缺失文档。
+- 按字母顺序列出 `<当前工作目录>/prds/shenbi/*.md`，与`logs/prd-issues-progress.txt`内容对比缺失文档。
 - 将缺失的文档，按照文档名称字典序插入对应的位置，并将状态设置为`[文件名] 🟡 待处理` 。
-- 依次读取当前目录下 `outputs/prds/shenbi` 中的 prd 文档。
+- 依次读取当前目录下 `<当前工作目录>/prds/shenbi` 中的 prd 文档。
 - 读取执行 prd 文档中的“功能需求”，显示在交互界面上，让我选择确认。“非功能需求”不用确认。
 - 将我需要修改的功能，调用 Skill 工具 solo:issues-writer，生成 feature 类型的 issue文档。禁止自己手写 issue 文件，必须通过 skill 执行。
-- 将新生成`feature`类型的 issue 按照模板写成 markdown 文档，并保存到`outputs/issues/shenbi`目录下。 
+- 将新生成`feature`类型的 issue 按照模板写成 markdown 文档，并保存到`<当前工作目录>/issues/shenbi`目录下。 
 - 一个 issue 文档生成一个 markdown 文档，**禁止**将多个 issue 合并到一个文档中。
-- 全部`功能`和`方案`确认完毕后，更新文档中约定的文档路径中，禁止直接更新`outputs/prds/shenbi`下的 prd 文档。
+- 全部`功能`和`方案`确认完毕后，更新文档中约定的文档路径中，禁止直接更新`<当前工作目录>/prds/shenbi`下的 prd 文档。
 - 确认`功能`和`方案`都已回答，如果没有则继续给出未确认的功能，让我确认。如果全部已回答，则进入下一步骤。
 - 成功后更新状态为 🟢，失败则更新状态为 🔴
 - 重复以上步骤，直到全部 🟢 或手动停止

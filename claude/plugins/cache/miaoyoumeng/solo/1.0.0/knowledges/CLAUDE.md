@@ -52,9 +52,9 @@
 
 类别 | 存储路径 | 说明
 ---|--- | --- 
-`prd` | `<workspace>/outputs/prds` | prd文档路径
-`bugs` | `<workspace>/outputs/bugs` | bugs 文档路径
-`todos` | `<workspace>/outputs/todos` | 需要确认的问题文档路径
-`prompts` | `<workspace>/outputs/prompts` | prompts 文档路径
+`prd` | `<workspace>/prds` | prd文档路径
+`bugs` | `<workspace>/bugs` | bugs 文档路径
+`todos` | `<workspace>/todos` | 需要确认的问题文档路径
+`prompts` | `<workspace>/prompts` | prompts 文档路径
 `user-story` | `<workspace>/references/user-story` | user-story 文档路径
 

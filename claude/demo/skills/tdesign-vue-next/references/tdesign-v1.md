@@ -102,14 +102,14 @@ export default defineConfig({
 1. **更新依赖**
 
 ```bash
-npm install tdesign-vue-next@latest
-npm install tdesign-icons-vue-next@latest
+pnpm add tdesign-vue-next@latest
+pnpm add tdesign-icons-vue-next@latest
 ```
 
 2. **检查 Vue 版本**
 
 ```bash
-npm install vue@^3.3.0
+pnpm add vue@^3.3.0
 ```
 
 3. **更新 TypeScript 配置**
@@ -157,7 +157,7 @@ import type { ButtonProps, TableProps } from "tdesign-vue-next";
 确保安装并正确引入图标库：
 
 ```bash
-npm install tdesign-icons-vue-next
+pnpm add tdesign-icons-vue-next
 ```
 
 ```vue
@@ -206,5 +206,4 @@ import { ConfigProvider, Button, Space } from "tdesign-vue-next";
 ## 参考文档
 
 - 官方文档：https://tdesign.tencent.com/vue-next/overview
-- 更新日志：https://tdesign.tencent.com/vue-next/changelog
 - GitHub Releases：https://github.com/Tencent/tdesign-vue-next/releases

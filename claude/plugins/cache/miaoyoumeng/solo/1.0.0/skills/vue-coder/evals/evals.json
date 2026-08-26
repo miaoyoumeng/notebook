@@ -1,0 +1,245 @@
+{
+  "skill_name": "vue-coder",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "帮我创建一个用户管理页面，需要展示用户列表表格，包含搜索框、状态筛选、分页功能。PRD 在 docs/prd/user-manage.md，UI 设计稿在 docs/ui/user-list.html。",
+      "expected_output": "创建完整的 Vue 页面文件，包含 TDesign Table 组件布局、搜索表单、分页控件，定义数据模型和 mock 数据。",
+      "files": [],
+      "assertions": [
+        { "name": "vue_file_created", "description": "创建了 src/views/ 目录下的 .vue 页面文件" },
+        { "name": "script_setup_lang_ts", "description": "使用了 <script setup lang=\"ts\"> 语法" },
+        { "name": "tdesign_table_used", "description": "使用了 TDesign Table 组件展示用户列表" },
+        { "name": "namespace_defined", "description": "在 src/api/models/ 下定义了 declare namespace 数据模型" },
+        { "name": "mock_json_created", "description": "在 src/assets/mocks/ 下创建了 JSON mock 数据文件" },
+        { "name": "mock_imported_in_api", "description": "API 函数文件通过 import 引用了 mock json 数据" },
+        { "name": "no_any_type", "description": "全文件未使用 any 类型" },
+        { "name": "handle_prefix_events", "description": "事件处理函数使用 handle 前缀命名（如 handleSearch）" },
+        { "name": "arrow_function_api", "description": "API 函数使用箭头函数声明，以 Api 结尾" },
+        { "name": "template_script_style_order", "description": ".vue 文件中 template、script、style 顺序正确" },
+        { "name": "search_form_implemented", "description": "实现了搜索表单组件" },
+        { "name": "pagination_implemented", "description": "实现了分页控件" }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "在订单管理模块中添加一个订单统计仪表盘页面，需要展示 4 个关键指标卡片（总订单数、总金额、待发货、已完成）和一个订单趋势折线图。",
+      "expected_output": "创建仪表盘页面，使用 TDesign Card 和 Statistic 组件展示指标，使用 ECharts 折线图展示趋势。",
+      "files": [],
+      "assertions": [
+        { "name": "vue_file_created", "description": "创建了订单仪表盘 .vue 页面文件" },
+        { "name": "echarts_line_imported", "description": "按需引入了 echarts LineChart 和 vue-echarts" },
+        { "name": "tdesign_statistic_or_card", "description": "使用了 TDesign Statistic 或 Card 组件展示关键指标" },
+        { "name": "mock_json_for_dashboard", "description": "创建了对应的 mock JSON 数据文件" },
+        { "name": "no_any_type", "description": "全文件未使用 any 类型" },
+        { "name": "reactive_data_declared", "description": "使用了 ref 或 reactive 声明响应式数据" },
+        { "name": "echarts_registered", "description": "使用 echarts.use() 按需注册了图表和组件" },
+        { "name": "option_computed", "description": "图表 option 使用 computed 声明" },
+        { "name": "data_model_defined", "description": "定义了订单统计相关的数据类型接口" },
+        { "name": "no_skip_mock", "description": "先创建 mock 数据再编写交互逻辑" },
+        { "name": "no_api_direct_in_component", "description": "组件内未直接调用 API，通过 api/ 文件封装" },
+        { "name": "four_metrics_displayed", "description": "页面展示了 4 个关键指标" }
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "我需要给商品管理页面添加一个编辑弹窗，点击表格行的'编辑'按钮时弹出表单，包含商品名称、价格、库存、分类下拉选择，保存时校验必填项。",
+      "expected_output": "创建包含 TDialog + TForm 的弹窗组件，实现表单校验和数据提交逻辑。",
+      "files": [],
+      "assertions": [
+        { "name": "dialog_component_used", "description": "使用了 TDesign Dialog 组件实现弹窗" },
+        { "name": "form_component_used", "description": "使用了 TDesign Form 组件实现表单布局" },
+        { "name": "form_fields_complete", "description": "表单包含商品名称、价格、库存、分类字段" },
+        { "name": "form_validation_rules", "description": "定义了表单校验规则（required 等）" },
+        { "name": "define_emits_used", "description": "使用了 defineEmits 定义事件" },
+        { "name": "define_props_typed", "description": "使用了泛型接口为 defineProps 声明类型" },
+        { "name": "type_from_models", "description": "数据类型从 models.ts 导入" },
+        { "name": "handle_prefix_save", "description": "保存事件处理函数使用 handle 前缀（如 handleSave）" },
+        { "name": "component_under_200_lines", "description": "单个组件文件不超过 200 行" },
+        { "name": "no_any_type", "description": "全文件未使用 any 类型" },
+        { "name": "no_echarts_in_model_step", "description": "数据模型文件中未引入 echarts 或 tdesign 组件" },
+        { "name": "namespace_only_no_function", "description": "数据模型文件中未编写 function 或箭头函数" }
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "创建一个数据分析页面，包含柱状图对比各产品销量，饼图展示市场份额分布，雷达图展示产品能力评估。",
+      "expected_output": "创建包含 ECharts 柱状图、饼图、雷达图的页面，使用 TDesign 布局组件组织。",
+      "files": [],
+      "assertions": [
+        { "name": "bar_chart_implemented", "description": "使用 ECharts BarChart 展示产品销量对比" },
+        { "name": "pie_chart_implemented", "description": "使用 ECharts PieChart 展示市场份额" },
+        { "name": "radar_chart_implemented", "description": "使用 ECharts RadarChart 展示能力评估" },
+        { "name": "vue_echarts_wrapper", "description": "图表使用 vue-echarts 组件封装" },
+        { "name": "tdesign_layout_used", "description": "使用 TDesign Grid 或 Space 组件布局" },
+        { "name": "type_interfaces_defined", "description": "定义了各图表的数据类型接口" },
+        { "name": "mock_files_created", "description": "创建了对应的 mock 数据文件" },
+        { "name": "no_any_type", "description": "全文件未使用 any 类型" },
+        { "name": "charts_on_demand_imported", "description": "图表按需引入 echarts/charts 和 echarts/components" },
+        { "name": "mock_before_interaction", "description": "先创建 mock 数据再编写交互逻辑" },
+        { "name": "no_import_model_in_api_wrapper", "description": "API wrapper 文件中未定义 declare namespace、type 或 interface" },
+        { "name": "handle_prefix_used", "description": "交互事件处理函数使用 handle 前缀" }
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "帮我把这个路由的页面改造一下：/src/views/report/monthly/index.vue，需要加上一个导出按钮，点击后调用 /api/report/export 接口下载 Excel 文件，下载期间显示 loading 状态。",
+      "expected_output": "修改现有页面，添加导出按钮、loading 状态、API 调用逻辑。",
+      "files": [],
+      "assertions": [
+        { "name": "export_button_added", "description": "添加了导出按钮，使用 TDesign Button 组件" },
+        { "name": "loading_state_controlled", "description": "实现了 loading 状态控制" },
+        { "name": "api_via_wrapper_file", "description": "API 调用通过 api/ 接口文件而非组件内直接调用" },
+        { "name": "ref_for_loading", "description": "使用了 ref 管理 loading 状态" },
+        { "name": "handle_prefix_export", "description": "事件处理函数使用 handle 前缀（如 handleExport）" },
+        { "name": "no_any_type", "description": "全文件未使用 any 类型" },
+        { "name": "error_handling_download", "description": "下载逻辑包含错误处理（try-catch 或 catch 链）" },
+        { "name": "api_function_arrow", "description": "API 函数使用箭头函数声明" },
+        { "name": "api_function_ends_with_api", "description": "API 函数名以 Api 结尾" },
+        { "name": "no_tdesign_in_api_file", "description": "API 文件中未引入 tdesign-vue-next 或 echarts" },
+        { "name": "no_namespace_in_api_file", "description": "API 文件中未定义 declare namespace、type 或 interface" },
+        { "name": "surgical_change_only_target", "description": "仅修改了目标页面和新增 API 文件，未改动无关文件" }
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "创建一个 Pinia store 来管理用户信息，包含用户基本数据、权限列表、主题设置，需要支持持久化到 localStorage。",
+      "expected_output": "创建 Pinia store 文件，定义 state、actions，配置持久化插件。",
+      "files": [],
+      "assertions": [
+        { "name": "store_file_camelcase", "description": "Store 文件命名为 camelCase 如 useUserStore.ts" },
+        { "name": "define_store_used", "description": "使用了 defineStore 定义 store" },
+        { "name": "state_has_user_info_permissions_theme", "description": "state 包含用户基本信息、权限列表、主题设置" },
+        { "name": "typescript_interface_for_state", "description": "定义了 TypeScript 接口用于 state 类型" },
+        { "name": "persistence_configured", "description": "配置了持久化插件" },
+        { "name": "use_function_exported", "description": "导出了 store 的 use 函数" },
+        { "name": "no_any_type", "description": "全文件未使用 any 类型" },
+        { "name": "as_const_for_constants", "description": "使用 as const 定义了常量配置" },
+        { "name": "no_tdesign_in_model_file", "description": "数据模型文件中未引入 tdesign 或 echarts 组件" },
+        { "name": "no_function_in_model_file", "description": "数据模型文件中未编写 function 或箭头函数" },
+        { "name": "actions_for_mutations", "description": "使用了 actions 定义状态变更方法" },
+        { "name": "no_over_abstract", "description": "未为单一用途创建不必要的抽象或辅助函数" }
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "我需要一个角色权限管理页面，左边是角色列表 Tree，右边是当前角色的权限表格，支持勾选权限后保存。",
+      "expected_output": "创建左右分栏页面，左侧 TDesign Tree 展示角色，右侧 Table 展示权限，支持勾选操作。",
+      "files": [],
+      "assertions": [
+        { "name": "tree_component_used", "description": "使用了 TDesign Tree 组件展示角色列表" },
+        { "name": "table_component_used", "description": "使用了 TDesign Table 组件展示权限列表" },
+        { "name": "checkbox_selection", "description": "权限表格支持 checkbox 勾选" },
+        { "name": "space_or_grid_layout", "description": "使用 TDesign Space 或 Grid 进行左右布局" },
+        { "name": "type_interfaces_defined", "description": "定义了角色和权限的数据类型接口" },
+        { "name": "mock_file_created", "description": "创建了 mock 数据文件" },
+        { "name": "save_business_logic", "description": "有保存权限的业务逻辑函数" },
+        { "name": "handle_prefix_save", "description": "事件处理函数使用 handle 前缀" },
+        { "name": "no_any_type", "description": "全文件未使用 any 类型" },
+        { "name": "mock_before_interaction", "description": "先创建 mock 数据再编写交互逻辑" },
+        { "name": "api_via_wrapper", "description": "API 调用通过 api/ 封装的函数" },
+        { "name": "no_complex_template_expression", "description": "模板中未使用复杂表达式，提取为 computed" }
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "给现有的表格组件加上 rowSelection 多选功能，并且表头支持列排序和列筛选。",
+      "expected_output": "修改表格页面，添加多选、排序、筛选功能。",
+      "files": [],
+      "assertions": [
+        { "name": "row_selection_configured", "description": "TDesign Table 配置了 rowSelection 属性" },
+        { "name": "selection_state_managed", "description": "实现了选中行的状态管理" },
+        { "name": "sortable_column", "description": "列配置中设置了 sortable 属性" },
+        { "name": "filter_column", "description": "列配置中设置了 filter 属性" },
+        { "name": "ref_for_selection_data", "description": "使用 ref 管理选中行数据" },
+        { "name": "no_any_type", "description": "全文件未使用 any 类型" },
+        { "name": "selection_type_defined", "description": "定义了选中行的数据类型" },
+        { "name": "surgical_change", "description": "仅修改了目标表格文件，未改动无关文件" },
+        { "name": "no_new_features_beyond_request", "description": "未添加被要求之外的功能（如额外的导出、刷新等）" },
+        { "name": "handle_prefix_selection", "description": "选中事件处理函数使用 handle 前缀" },
+        { "name": "no_over_complicated", "description": "实现简洁，未出现过度抽象或多余辅助函数" },
+        { "name": "computed_for_derived_data", "description": "如有派生数据，使用 computed 而非直接计算" }
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "创建一个系统日志查看页面，需要支持按日志级别筛选（Info/Warn/Error），按时间范围搜索，日志内容支持关键字高亮。",
+      "expected_output": "创建日志查看页面，包含筛选表单、日志列表、关键字高亮功能。",
+      "files": [],
+      "assertions": [
+        { "name": "level_filter_select_or_radio", "description": "使用 TDesign Select 或 Radio 实现日志级别筛选" },
+        { "name": "date_picker_for_range", "description": "使用 TDesign DatePicker 实现时间范围选择" },
+        { "name": "table_or_list_for_logs", "description": "使用 TDesign Table 或 List 展示日志列表" },
+        { "name": "keyword_highlight_implemented", "description": "实现了关键字高亮逻辑" },
+        { "name": "log_entry_type_interface", "description": "定义了日志条目的类型接口" },
+        { "name": "mock_log_data_created", "description": "创建了 mock 日志数据" },
+        { "name": "computed_for_highlight", "description": "使用了 computed 处理高亮内容" },
+        { "name": "no_any_type", "description": "全文件未使用 any 类型" },
+        { "name": "mock_first_approach", "description": "先创建 mock 数据再编写交互逻辑" },
+        { "name": "no_skip_validation", "description": "表单筛选包含基本校验或默认值处理" },
+        { "name": "handle_prefix_filter", "description": "筛选事件处理函数使用 handle 前缀" },
+        { "name": "no_dead_code_introduced", "description": "未引入未使用的变量、函数或导入" }
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "请帮我修复这个 bug：用户列表页面的搜索功能，输入关键词后点击搜索，表格数据没有刷新，但控制台没有报错。",
+      "expected_output": "定位并修复搜索功能的问题，可能是事件绑定、数据刷新或 API 调用问题。",
+      "files": [],
+      "assertions": [
+        { "name": "root_cause_identified", "description": "识别了搜索未触发表格刷新的根本原因" },
+        { "name": "event_binding_or_refresh_fixed", "description": "修复了搜索事件绑定或数据刷新逻辑" },
+        { "name": "search_function_handle_prefix", "description": "搜索函数使用了 handle 前缀命名" },
+        { "name": "search_filters_data", "description": "修复后搜索能正确过滤表格数据" },
+        { "name": "no_any_type_introduced", "description": "修复未引入 any 类型" },
+        { "name": "no_extra_changes", "description": "仅修改了修复 bug 必需的代码，未改动无关部分" },
+        { "name": "no_new_dead_code", "description": "修复后未遗留未使用的变量或函数" },
+        { "name": "goal_driven_verification", "description": "修复后执行了验证步骤（如 build 或功能确认）" },
+        { "name": "assumptions_stated", "description": "如有不确定的地方，明确陈述了假设" },
+        { "name": "simplest_fix_used", "description": "使用了最简修复方案，未过度设计" },
+        { "name": "existing_style_matched", "description": "修复代码风格与现有代码一致" },
+        { "name": "error_handling_added", "description": "修复中包含了适当的错误处理" }
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "写一个工具函数 utils/format.ts，包含日期格式化、数字千分位格式化、文件大小格式化三个函数。",
+      "expected_output": "创建工具函数文件，包含三个格式化函数，有完整的 TypeScript 类型定义。",
+      "files": [],
+      "assertions": [
+        { "name": "file_named_format_ts", "description": "文件命名为 utils/format.ts" },
+        { "name": "date_format_function", "description": "包含日期格式化函数" },
+        { "name": "thousand_separator_function", "description": "包含数字千分位格式化函数" },
+        { "name": "file_size_format_function", "description": "包含文件大小格式化函数" },
+        { "name": "arrow_functions_used", "description": "使用箭头函数声明" },
+        { "name": "types_for_params_and_return", "description": "函数参数和返回值有明确类型定义" },
+        { "name": "no_any_type", "description": "全文件未使用 any 类型" },
+        { "name": "as_const_for_config", "description": "使用 as const 定义常量配置" },
+        { "name": "no_over_abstraction", "description": "未为三个函数创建不必要的抽象或基类" },
+        { "name": "no_tech_debt_added", "description": "未添加被要求的\"灵活性\"或\"可配置性\"" },
+        { "name": "function_names_camelcase", "description": "函数名使用 camelCase 命名" },
+        { "name": "no_unused_imports", "description": "未引入未使用的导入" }
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "给上面的 format.ts 工具函数写单元测试，要求覆盖正常输入、边界值、异常输入三种情况。",
+      "expected_output": "创建测试文件，使用 TDD 方式编写测试用例。",
+      "files": [],
+      "assertions": [
+        { "name": "test_file_created", "description": "创建了 format.test.ts 测试文件" },
+        { "name": "normal_input_covered", "description": "测试覆盖了正常输入场景" },
+        { "name": "boundary_value_covered", "description": "测试覆盖了边界值场景" },
+        { "name": "exception_input_covered", "description": "测试覆盖了异常输入场景" },
+        { "name": "describe_it_expect_structure", "description": "使用了 describe 和 it/expect 结构" },
+        { "name": "test_file_lang_ts", "description": "测试文件使用了 TypeScript" },
+        { "name": "no_any_type_in_test", "description": "测试文件中未使用 any 类型" },
+        { "name": "all_three_functions_tested", "description": "三个格式化函数都有对应测试" },
+        { "name": "assertions_match_expected", "description": "断言检查了具体的返回值而非仅 toBeDefined" },
+        { "name": "no_test_only_or_skip", "description": "未使用 test.skip 或 test.only 跳过测试" },
+        { "name": "test_names_descriptive", "description": "测试用例名称描述了具体的测试场景" },
+        { "name": "no_extra_test_files", "description": "未创建多余的测试文件（如单独的 setup 文件）" }
+      ]
+    }
+  ]
+}

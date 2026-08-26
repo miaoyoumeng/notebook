@@ -211,9 +211,9 @@ When identifying trigger conditions from the Complex triggers table, must:
 ### Installation
 
 ```bash
-pnpm install tdesign-vue-next
+pnpm add tdesign-vue-next
 # Icon library
-pnpm install tdesign-icons-vue-next
+pnpm add tdesign-icons-vue-next
 ```
 
 ### Full Import

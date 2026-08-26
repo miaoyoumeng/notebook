@@ -122,6 +122,11 @@ case "$1" in
         shift  # 将第一个参数移除，以便将剩余的参数传递给函数
         push_code "$@"
         ;;
+    "consistency")
+        shift  # 将第一个参数移除，以便将剩余的参数传递给函数
+        pull_code "$@"
+        push_code "$@"
+        ;;
     *)
         echo "subcommand: pull or push "
         exit 1

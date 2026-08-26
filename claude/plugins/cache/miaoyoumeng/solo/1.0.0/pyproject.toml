@@ -1,5 +1,5 @@
 [project]
-name = "you-sole"
+name = "you-solo"
 version = "1.0.0"
 description = "claude code 插件市场"
 requires-python = ">=3.12"
@@ -12,4 +12,3 @@ dependencies = [
 ]
 
 [tool.ruff]
-line-length = 100
