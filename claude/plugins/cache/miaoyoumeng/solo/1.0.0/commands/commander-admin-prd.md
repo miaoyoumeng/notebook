@@ -15,10 +15,10 @@ argument-hint: <subcommand>
 | `init` | 初始化 PRD 页面树和 prompt |
 | `prd` | PRD 中 功能修复 |
 | `validator` | 验证 PRD 文档中是否合格 |
+| `definition` | 从 prd 中解析出业务概念 |
 | `journey` | PRD 中用户旅程自动修复 |
-| `task` | PRD 拆分为 Issues |
 
-**只能修改`<当前工作目录>/prds/admin` 和 `<当前工作目录>/issues/admin` 目录下的 markdown 内容，其他目录的禁止修改**
+**只能修改`[当前工作目录]/prds/admin` 和 `[当前工作目录]/issues/admin` 目录下的 markdown 内容，其他目录的禁止修改**
 
 ---
 
@@ -27,7 +27,7 @@ argument-hint: <subcommand>
 执行 shell 命令：
 
 ```bash
-uv run python ${CLAUDE_PLUGIN_ROOT}/scripts/menus-2-prompt.py --workspace=<当前工作目录> --name=admin --pages=<上文的页面树>
+uv run python ${CLAUDE_PLUGIN_ROOT}/scripts/menus-2-prompt.py --workspace=[当前工作目录] --name=admin --pages=[上文的页面树]
 ```
 
 功能说明：
@@ -37,7 +37,37 @@ uv run python ${CLAUDE_PLUGIN_ROOT}/scripts/menus-2-prompt.py --workspace=<当�
 
 *预期结果*
 - 生成针对系统导航菜单树，识别对应的 user-story 目录。
-- 为每个菜单生成对应的`prd-<页面名称>.prompt.md` 文件。
+- 为每个菜单生成对应的`prd-[页面名称].prompt.md` 文件。
+
+---
+
+## 子命令：`prd` - PRD 中 功能修复
+
+- 从用户输入中识别 `@路径/文件名.md` 格式的 PRD 文档路径，解析出目标 PRD 文件的绝对路径。其中`@`代表`[当前工作目录]`。
+- 如果未识别到 `@路径/文件名.md` 格式的 PRD 文档路径，则终止操作。
+- 读取`@路径/文件名.md`对应 PRD 文档内容，
+- 解析用户的修改描述，识别用户的修改意图。调用 Skill `/solo:prd-writer`直接编辑目标 PRD 文档。
+- 将任务交给`admin-pm` agent 执行。
+
+**只能修改`[当前工作目录]/prds/admin` 目录下的 markdown 内容，其他目录的禁止修改**
+
+---
+
+## 子命令：`validator` - 验证PRD 中 功能修复
+
+- 从用户输入中识别 `@路径/[文件名].md` 格式的 PRD 文档路径，解析出目标 PRD 文件的绝对路径。其中`@`代表`[当前工作目录]`。
+- 读取最新的 prd 文档内容，调用 Skill `/solo:prd-validator` 验证文档是合规，并输出校验结果到控制台。
+- 根据校验结果，再调用 Skill `/solo:prd-writer`直接修复目标 PRD 文档。
+
+---
+
+## 子命令：`definition` - 从 prd 中解析出业务概念
+
+从用户输入的 prd 文档路径中，做如下动作。
+
+- 调用 Skill `/solo:prd-concept` 解析出`字典`，去重保存在`[当前工作目录]/prds/dicts.md`
+- 调用 Skill `/solo:prd-concept` 解析出`概念`，去重保存在`[当前工作目录]/prds/concepts.md`
+- 调用 Skill `/solo:prd-concept` 解析出`指标`，去重保存在`[当前工作目录]/prds/metrics.md`
 
 ---
 
@@ -46,47 +76,9 @@ uv run python ${CLAUDE_PLUGIN_ROOT}/scripts/menus-2-prompt.py --workspace=<当�
 - 读取 prd 文档。
 - 根据 `${CLAUDE_PLUGIN_ROOT}/knowledges/dimensions/dimensions-of-scenario.md` 梳理出"常见问题诊断"。要严格按照文档清单，不要自行推断。
 - 每个问题调用 Skill 工具 `/solo:issues-writer`，生成 feature 类型的 issue 文档。禁止自己手写 issue 文件，必须通过 skill 生成 issue 文件。
-- 将新生成`feature`类型的 issue 按照模板写成 markdown 文档，并保存到`<当前工作目录>/issues/admin`目录下。此处是记录`prd feature`变更的`issue`，不是将`prd`拆分为`issue`。
+- 将新生成`feature`类型的 issue 按照模板写成 markdown 文档，并保存到`[当前工作目录]/issues/admin`目录下。此处是记录`prd feature`变更的`issue`，不是将`prd`拆分为`issue`。
 - 一个 issue 文档生成一个 markdown 文档，**禁止**将多个 issue 合并到一个文档中。
-- 在更新文档中约定的需要更新的 prd 文档路径，禁止直接更新`<当前工作目录>/prds/admin`下的 prd 文档。
-
----
-
-## 子命令：`prd` - PRD 中 功能修复
-
-- 从用户输入中识别 `@路径/文件名.md` 格式的 PRD 文档路径，解析出目标 PRD 文件的绝对路径。其中`@`代表`<当前工作目录>`。
-- 如果未识别到 `@路径/文件名.md` 格式的 PRD 文档路径，则终止操作。
-- 读取`@路径/文件名.md`对应 PRD 文档内容，
-- 解析用户的修改描述，识别用户的修改意图。调用 Skill `/solo:prd-writer`直接编辑目标 PRD 文档。
-
-**只能修改`<当前工作目录>/prds/admin` 目录下的 markdown 内容，其他目录的禁止修改**
-
-## 子命令：`validator` - 验证PRD 中 功能修复
-
-- 从用户输入中识别 `@路径/<文件名>.md` 格式的 PRD 文档路径，解析出目标 PRD 文件的绝对路径。其中`@`代表`<当前工作目录>`。
-- 读取最新的 prd 文档内容，调用 Skill `/solo:prd-validator` 验证文档是合规，并输出校验结果到控制台。
-- 根据校验结果，再调用 Skill `/solo:prd-writer`直接修复目标 PRD 文档。
-
----
-
-## 子命令：`task` — PRD 拆分为 Issues
-
-读取用户提供的 PRD（产品需求文档），将其拆解为具体的开发任务，并为每个任务创建 Issue。
-
-请严格按照以下步骤执行：
-1. **需求理解**：仔细阅读通过 `@` 引入的 PRD 文档，提炼核心业务背景、功能目标和技术约束。
-2. **读取 ui 页面**：首先，请阅读 `<当前工作目录>/ui/admin` 下的 对应的 html 设计稿。
-3. **任务拆解**：将整体需求拆解为多个独立、可执行的原子化任务（Issue）。每个任务需包含清晰的标题、详细描述、验收标准以及受影响的文件路径。
-4. **去重校验**：检索`<当前工作目录>/issues/admin`目录中已有的 Issue，确保新拆解的任务不会与现有任务重复。
-5. **创建 Issue**：确认无误后，使用 skill `/solo:issues-writer`逐一创建 Issue。禁止自己手写 issue 文件，必须通过 skill 生成 issue 文件。
-
-### ⚠️ Issue 固定模板要求
-
-创建 Issue 时，使用`/solo:issues-writer` 时必须引用 `issue-task-template.md` 创建拆分出来的 task 类型 issues。不能用其他模板。
-
-- 将新生成`task`类型的 issue 按照模板写成 markdown 文档，并保存到`<当前工作目录>/issues/admin`目录下。此处将`prd`拆分为`task issue`。
-- 一个 issue 文档生成一个 markdown 文档，**禁止**将多个 issue 合并到一个文档中。
-- issue 的 markdown 文件以 task 为前缀。例如：`task-xxxx.md`。
+- 在更新文档中约定的需要更新的 prd 文档路径，禁止直接更新`[当前工作目录]/prds/admin`下的 prd 文档。
 
 ---
 
@@ -298,4 +290,4 @@ uv run python ${CLAUDE_PLUGIN_ROOT}/scripts/menus-2-prompt.py --workspace=<当�
 | ✅ | 页面具有`生效`功能 |
 | 🕹️ | 一系列交互操作 |
 
-其中 `<system-name>` 参考文档 *${CLAUDE_PLUGIN_ROOT}/knowledges/microservices.md*
+其中 `[system-name]` 参考文档 *${CLAUDE_PLUGIN_ROOT}/knowledges/microservices.md*

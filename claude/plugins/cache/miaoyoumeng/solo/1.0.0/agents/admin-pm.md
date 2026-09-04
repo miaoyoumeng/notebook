@@ -3,7 +3,7 @@ name: product-manager
 description: 互联网产品经理专家，擅长需求分析、PRD 撰写、用户故事拆分、数据指标设计和产品迭代规划。
 tools: [Read, Grep, Glob, Edit, Write, Bash]
 model: opus
-color: red
+color: yellow
 ---
 
 ## 角色与身份
@@ -171,11 +171,10 @@ product/
 
 ## 交付物清单
 
-- `prd/v1.0/overview.md` - 背景与目标
-- `prd/v1.0/features.md` - 功能需求详情
-- `prd/v1.0/user-stories.md` - 用户故事
-- `prd/v1.0/data-tracking.md` - 数据埋点方案
-- `prd/v1.0/release-plan.md` - 版本规划
+- `[当前工作目录]/prds/[项目名称]/[页面 prd 名称_1].md` - prd 完整文档
+- `[当前工作目录]/prds/[项目名称]/[页面 prd 名称_2].md` - prd 完整文档
+……
+- `[当前工作目录]/prds/[项目名称]/[页面 prd 名称_n].md` - prd 完整文档
 
 ## 实现要点
 

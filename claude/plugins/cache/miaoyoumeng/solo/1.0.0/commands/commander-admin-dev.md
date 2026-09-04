@@ -26,13 +26,13 @@ argument-hint: <subcommand>
 
 ### 执行步骤
 
-1. **读取 prd**：阅读 `<当前工作目录>/prds/admin` 下的 PRD 文件。如果用户通过 `@路径/文件名.md` 指定了 PRD 文档，则以该文档为准。
-2. **生成静态html ui 设计稿**：调用 `/solo:/solo:ui-ux-writer` skill 严格按照流程生成与 prd 需求一致 HTML。保存地址`<当前工作目录>/ui/admin` 下的 HTML 设计稿，设计稿的文件名与 prd 文件名相似，类似：`用户管理-今日用户.prd.md` 与`用户管理-今日用户-ui.html`。
+1. **读取 prd**：阅读 `[当前工作目录]/prds/admin` 下的 PRD 文件。如果用户通过 `@路径/文件名.md` 指定了 PRD 文档，则以该文档为准。
+2. **生成静态html ui 设计稿**：调用 `/solo:/solo:ui-ux-writer` skill 严格按照流程生成与 prd 需求一致 HTML。保存地址`[当前工作目录]/ui/admin` 下的 HTML 设计稿，设计稿的文件名与 prd 文件名相似，类似：`用户管理-今日用户.prd.md` 与`用户管理-今日用户-ui.html`。
 3. **循环验证**：根据 PRD 需求生成 UI 设计稿的一致性，直到全部一致或达到重验轮次上限，默认循环 3 次。
 
 - **打印轮次**：在控制台显示当前是第几轮
 - **读取 PRD**：`@路径/文件名.md` 指定了 PRD 文档。
-- **读取 ui 页面**：阅读 `<当前工作目录>/ui/admin` 下的 HTML 设计稿，设计稿的文件名与 prd 文件名相似，类似：`用户管理-今日用户.prd.md` 与`用户管理-今日用户-ui.html`。
+- **读取 ui 页面**：阅读 `[当前工作目录]/ui/admin` 下的 HTML 设计稿，设计稿的文件名与 prd 文件名相似，类似：`用户管理-今日用户.prd.md` 与`用户管理-今日用户-ui.html`。
 - **校验一致性**：调用 `/solo:prd-ui-validator` skill 校验 PRD 需求与 HTML 设计稿的一致性，生成验证报告。禁止自己编写校验逻辑，只能调用 `/solo:prd-ui-validator` skill 生成。
 - **验证闭环**：验证报告存在「不一致」或「部分不一致」项时，调用 `/solo:/solo:ui-ux-writer` skill 严格按照流程修改 HTML 设计搞，以改进成与 prd 需求一致。
 - 跳转到`步骤3`，循环直到全部一致或达到重验轮次上限，默认循环 3 次。
@@ -50,11 +50,11 @@ argument-hint: <subcommand>
 
 ### 执行步骤
 
-1. **读取 UI 设计稿**：读取 `<当前工作目录>/ui/admin` 下的 HTML 设计稿。如果用户通过 `@路径/文件名.html` 指定了设计稿，则以该文档为准。
-2. **定位 Vue 项目**：定位 `<当前工作目录>` 下的 Vue 项目根目录（包含 `package.json`）。
+1. **读取 UI 设计稿**：读取 `[当前工作目录]/ui/admin` 下的 HTML 设计稿。如果用户通过 `@路径/文件名.html` 指定了设计稿，则以该文档为准。
+2. **定位 Vue 项目**：定位 `[当前工作目录]` 下的 Vue 项目根目录（包含 `package.json`）。
 3. **调用验证 skill**：调用 `/solo:ui-vue-validator` skill 执行完整验证流程（端口检测 → 功能点拆分 → HTML/Vue 配对截图 → AI 视觉对比 → 验证报告）。禁止自己编写校验逻辑，只能调用 `/solo:ui-vue-validator` skill。
 
-**验证过程中产生的文件请严格按照 skill 约定的路径存储，如果没有约定的，则存储在 `<当前工作目录>/.claude/logs` 目录下。**
+**验证过程中产生的文件请严格按照 skill 约定的路径存储，如果没有约定的，则存储在 `[当前工作目录]/.claude/logs` 目录下。**
 
 *预期结果*
 - 生成验证报告，逐条列出每个功能点的视觉差异状态（通过 / 未通过）及严重程度。
@@ -69,21 +69,21 @@ argument-hint: <subcommand>
 
 ### 执行步骤
 
-1. **读取 PRD**：首先，请阅读 `<当前工作目录>/prds/admin` 下的 prd 文件。
-2. **读取 ui 页面**：首先，请阅读 `<当前工作目录>/ui/admin` 下的 html 设计稿。
+1. **读取 PRD**：首先，请阅读 `[当前工作目录]/prds/admin` 下的 prd 文件。
+2. **读取 ui 页面**：首先，请阅读 `[当前工作目录]/ui/admin` 下的 html 设计稿。
 3. **前端视角**：调用 `vuer` Agent，让它基于 PRD 提出 API 设计建议。
 4. **后端视角**：调用 `javaer` Agent，让它基于 PRD 和前端建议，提出 API 设计建议。
 5. **架构师决策**：调用 `architecter` Agent，让它综合 PRD 和前后端建议。
-6. **输出 api 文档**：在 `<当前工作目录>/apis/admin` 输出最终的 `api-<system-name>.yaml` 文件。
+6. **输出 api 文档**：在 `[当前工作目录]/apis/admin` 输出最终的 `api-[system-name].yaml` 文件。
 
-   其中 `<system-name>` 参考文档 *${CLAUDE_PLUGIN_ROOT}/knowledges/microservices.md*
+   其中 `[system-name]` 参考文档 *${CLAUDE_PLUGIN_ROOT}/knowledges/microservices.md*
 
    **产出文档**：基于 PRD 和各方建议，调用 `/solo:rest-api-writer` skill 编写一份符合需求及技术规范的 REST API 文档，禁止自己编写，只能调用 `/solo:rest-api-writer` skill。
 
    - 每个 api 独立一个 yaml 文件。不要合并写。
-   - 文件命名：`<system-name>-<module-name>-<api name>.yaml`，中间不要有空格，连接符用'-'。
+   - 文件命名：`[system-name]-[module-name]-[api name].yaml`，中间不要有空格，连接符用'-'。
 
-6. **输出 api 索引**：在 `<当前工作目录>/apis/index.md` 文件中输出索引。
+6. **输出 api 索引**：在 `[当前工作目录]/apis/index.md` 文件中输出索引。
 
 ---
 
@@ -93,15 +93,15 @@ argument-hint: <subcommand>
 
 ### 执行步骤，严格执行不能跳步
 
-- 执行 shell 命令`touch <当前工作目录>/.claude/logs/develop_command.md`。
-- 将子命令`develop`后的内容覆盖写到`<当前工作目录>/.claude/logs/develop_command.md` 文件中。
+- 执行 shell 命令`touch [当前工作目录]/.claude/logs/develop_command.md`。
+- 将子命令`develop`后的内容覆盖写到`[当前工作目录]/.claude/logs/develop_command.md` 文件中。
 - **解析 prompt 内容**: 解析用户提交的 prompt。
-- **读取 PRD**：从 prompt 中解析出 prd 文档路径，仔细阅读 prd 文件，禁止在`<当前工作目录>`中备份 prd 文档。
-- **读取 UI 页面**：从 prompt 中解析出 ui html 文档路径，仔细阅读 ui html 设计稿，禁止在<当前工作目录>中备份 ui html 设计稿。
+- **读取 PRD**：从 prompt 中解析出 prd 文档路径，仔细阅读 prd 文件，禁止在`[当前工作目录]`中备份 prd 文档。
+- **读取 UI 页面**：从 prompt 中解析出 ui html 文档路径，仔细阅读 ui html 设计稿，禁止在[当前工作目录]中备份 ui html 设计稿。
 - **页面开发**：调用 `/solo:vue-coder` skill实现页面布局和 UI 交互，代码开发过程只能使用 `/solo:vue-coder` 组件，禁止自己编辑逻辑。
 - **清理无用代码**：清理此步骤交互变更文件中，产生无用的`declare namespace`，`interface`，`function`，`箭头函数`。
-- **代码 format**：在`<当前工作目录>`下执行命令:`pnpm run format`。
-- **代码 builid**：在`<当前工作目录>`下执行命令:`pnpm run build`，如果有错误，自动修复。
+- **代码 format**：在`[当前工作目录]`下执行命令:`pnpm run format`。
+- **代码 builid**：在`[当前工作目录]`下执行命令:`pnpm run build`，如果有错误，自动修复。
 - **禁止项**：禁止执行命令`pnpm run serve`。
 
 ---
@@ -314,4 +314,4 @@ argument-hint: <subcommand>
 | ✅ | 页面具有`生效`功能 |
 | 🕹️ | 一系列交互操作 |
 
-其中 `<system-name>` 参考文档 *${CLAUDE_PLUGIN_ROOT}/knowledges/microservices.md*
+其中 `[system-name]` 参考文档 *${CLAUDE_PLUGIN_ROOT}/knowledges/microservices.md*
