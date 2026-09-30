@@ -20,6 +20,14 @@ pull_code() {
 
     SOURCE_DIR="/Users/miaoyoumeng/apps/claude/office/solo/"
 
+    cd ${DEST_DIR}
+    WORKSPACE_STATUS=$(git status -s)
+    if [ -n "${WORKSPACE_STATUS}" ]; then
+        echo "git repository has changes. files must \`git commit\`."
+        echo "please use \`git add [files]...\`"
+        exit 0
+    fi
+
     if [ ! -d "${DEST_DIR}" ]; then
         echo "错误：目标 cache 目录不存在: ${DEST_DIR}"
         exit 1
