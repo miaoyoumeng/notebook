@@ -17,28 +17,8 @@
       }
     },
     {
-      "name": "painter",
-      "description": "Claude Code 的核心技能库：经过验证的协作模式。",
-      "version": "1.0.0",
-      "source": "./",
-      "author": {
-        "name": "miaoyoumeng",
-        "email": "miaoyoumeng@gmail.com"
-      }
-    },
-    {
-      "name": "java",
-      "description": "Claude Code 的核心技能库：满足我作为 java 开发人员的工具需求",
-      "version": "1.0.0",
-      "source": "./",
-      "author": {
-        "name": "miaoyoumeng",
-        "email": "miaoyoumeng@gmail.com"
-      }
-    },
-    {
-      "name": "nodejs",
-      "description": "Claude Code 的核心技能库：满足我作为 node 开发人员的工具需求",
+      "name": "wubu",
+      "description": "编辑适合 Claude Code 的各种 skills、commands、workflows、hooks、CLAUDE.md等工具。",
       "version": "1.0.0",
       "source": "./",
       "author": {
