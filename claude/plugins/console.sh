@@ -58,12 +58,13 @@ publish_code() {
 
 
     echo "正在将 ${SOURCE_DIR}/cache/ 同步到 ${USER_CLAUDE_PLUGIN_DIR}/cache/ ..."
-    rsync -av --delete \
+    rsync -avn --delete \
         "${SOURCE_DIR}/cache/"   "${USER_CLAUDE_PLUGIN_DIR}/cache/"   \
-        --include='miaoyoumeng'  --include='miaoyoumeng/**' \
-        --exclude='__pycache__/' --exclude='.venv/'         \
-        --exclude='uv.lock'      --exclude='.DS_Store'      \
-        --exclude='.in_use'      --exclude='.orphaned_at'   \
+        --include='miaoyoumeng'                                       \
+        --exclude='__pycache__/' --exclude='.venv/'                   \
+        --exclude='uv.lock'      --exclude='.DS_Store'                \
+        --exclude='.in_use'      --exclude='.orphaned_at'             \
+        --include='miaoyoumeng/**'                                    \
         --exclude="*"
 
 }

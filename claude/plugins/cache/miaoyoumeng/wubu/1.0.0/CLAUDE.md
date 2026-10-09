@@ -22,7 +22,7 @@ Claude Code 插件 **wubu**：只编辑插件资产（skills、commands、hooks�
 └── pyproject.toml            # 只声明 Python 依赖
 ```
 
-- `skills/`、`commands/`、`agents/`、`hooks/` 由 Claude Code 直接加载。
-- `knowledges/`、`scripts/` 不被直接加载，生效依赖上面 4 类对它们的引用。
-- `knowledges/`、`scripts/` 不被直接加载，生效依赖上面 4 类对它们的引用。
+- `skills/`、`commands/`、`agents/`、`hooks/` 由 Claude Code 直接加载；
+- `knowledges/`、`scripts/` 不被直接加载，生效依赖上面 4 类对它们的引用；
+- `pyproject.toml` 只用于声明 Python 工具链依赖，即 `scripts/`、`skills/[skill-name]/` 下 Python 脚本的依赖清单。
 - `knowledges` 是提供给 `skills/`、`commands/`、`agents/` 描述需要共享的知识 。
