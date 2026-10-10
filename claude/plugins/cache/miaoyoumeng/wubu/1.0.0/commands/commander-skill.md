@@ -12,8 +12,11 @@ argument-hint: init | improve | evals | score | benchmark | clean <skill-name>
 
 ## 解析规则
 
-- `$1` = 子命令（init / improve / evals / score / benchmark / clean）
-- `$2` = 技能名称
+把「用户输入」按空白切词：第 1 个 token 是子命令，第 2 个是技能名称，其余归本次操作的补充说明。
+
+斜杠命令还会另外注入一组按位编号的参数，别用它们来解析：经 Skill 工具（而不是手打斜杠命令）调用时，这组编号会整体错位一位——`improve deepseek-picker` 会被读成子命令 `deepseek-picker`、技能名 `修正两处…`，直接判成非法子命令。以「用户输入」整串为准自己切词，两条调用路径才对得上。
+
+补充说明只在 `improve` 子命令里用到，它描述这次要改什么；其余子命令忽略它。
 
 子命令仅接受上述英文名，不做中文或同义词映射。子命令不在上述六者中、或技能名称为空，均输出用法说明并停止。
 
@@ -58,7 +61,7 @@ python3 ${CLAUDE_PLUGIN_ROOT}/skills/skill-creator/scripts/quick_validate.py ski
 **用法说明**（子命令不合法或缺失时原样输出）：
 
 ```text
-用法：<子命令> <skill-name>
+用法：<子命令> <skill-name> [补充说明]
 
 子命令：
   init       按标准目录结构初始化技能（幂等，已存在则跳过）
@@ -69,6 +72,7 @@ python3 ${CLAUDE_PLUGIN_ROOT}/skills/skill-creator/scripts/quick_validate.py ski
   clean      删除技能目录下的空目录
 
 示例：init my-skill
+      improve my-skill 把 README 里「写入本地文件」改成输出到控制台
 ```
 
 ---
@@ -129,6 +133,7 @@ python3 ${CLAUDE_PLUGIN_ROOT}/skills/skill-creator/scripts/quick_validate.py ski
 3. 调用 `skill-creator` 技能，按文件类型应用其编辑工作流：
 
    **`SKILL.md`**
+   - 严格按照下文中`SKILL.md 章节模板`组织内容
    - 删除基础模型已具备的通用建议
    - 保留关键的命令语法、认证注意事项、安全规则和校验步骤
    - 除非明确需要，否则把表格替换为项目符号列表
@@ -148,6 +153,11 @@ python3 ${CLAUDE_PLUGIN_ROOT}/skills/skill-creator/scripts/quick_validate.py ski
 4. 用 `Edit` 工具修改，只做必要变更。
 5. 修改后重新校验 YAML frontmatter（命令见「通用约定」）；改动过 `scripts/` 时，运行受影响的脚本验证仍可执行。
 6. 输出变更摘要与校验结果。
+
+7. 约束条件
+- `SKILL.md`：最多 500 行。
+- `references/`目录下参考文档：最多 350 行。
+- `scripts/`目录下脚本：行数没有限制。
 
 ---
 
@@ -295,3 +305,22 @@ python3 ${CLAUDE_PLUGIN_ROOT}/skills/skill-creator/scripts/quick_validate.py ski
    ```
 
 4. 输出删除结果。
+
+---
+
+## SKILL.md 章节模板
+
+```markdown
+## 概述        [必填]
+## 上下文层级   [必填]
+## 使用时机     [必填]
+## 编码四原则   [可选]
+## 流程        [必填]
+## 代码分析     [可选]
+## 验证清单     [必填]
+## 危险信号     [必填]
+## 理由辩解     [必填]
+## 验证        [必填]
+## 实现检查表   [可选]
+## 参考资料     [必填]
+```

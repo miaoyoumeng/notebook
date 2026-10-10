@@ -1,0 +1,40 @@
+{
+  "skill_name": "deepseek-picker",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "帮我把这个问题丢给 DeepSeek 问问：Python 的 GIL 到底解决了什么问题？现在还有必要担心它吗？",
+      "expected_output": "打开 chat.deepseek.com 提交该问题，等流式输出结束后把回答原样以 Markdown 打印到控制台，用「## 第 1 轮 / **问** / **答**」的结构呈现。",
+      "files": [],
+      "expectations": [
+        "通过 wubu:playwright-cli 打开 https://chat.deepseek.com/，命令带 --headed、--persistent 和固定会话名 -s=chat.deepseek",
+        "提交前判断了登录状态；停在登录页时请用户自己登录，没有代填账号密码或尝试绕过登录",
+        "输出到控制台的回答保留 Markdown 语法（加粗星号、代码块围栏等未被抹平成纯文本）",
+        "回答按「## 第 1 轮」加 **问** / **答** 的结构输出到控制台",
+        "没有写文件，技能目录与工作区均无新增产物"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "用 DeepSeek 帮我调研一下：我们团队要新起一个后端项目，2024 年以后 Python 打包工具链（uv / poetry / pip）该选哪个？多问几轮，把结论问透。",
+      "expected_output": "首轮提问后根据回答继续追问，追问不超过 5 轮；结束后把所有轮次按顺序一并输出。",
+      "files": [],
+      "expectations": [
+        "首轮之后至少追加了一轮追问，且追问总轮数不超过 5 轮",
+        "所有轮次的问答都出现在最终输出里，按「## 第 N 轮」顺序排列",
+        "每轮提交前重新取了一次快照 ref，没有跨步骤复用上一轮的 ref",
+        "每轮都等到流式输出结束才取值（文本长度两次读取一致，或「停止生成」按钮消失）"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "DeepSeek 是什么公司？跟幻方量化是什么关系？",
+      "expected_output": "直接回答这个问题，不开浏览器、不调用 deepseek-picker。",
+      "files": [],
+      "expectations": [
+        "没有调用 playwright-cli，没有启动浏览器",
+        "没有触发 deepseek-picker 技能，直接给出知识性回答"
+      ]
+    }
+  ]
+}

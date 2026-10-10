@@ -4,7 +4,38 @@ version = "1.0.0"
 description = "claude code 插件市场"
 requires-python = ">=3.12"
 dependencies = [
-    
+    "beautifulsoup4>=4.12",
 ]
 
 [tool.ruff]
+
+# 目标 Python 版本
+target-version = "py312"
+indent-width = 4
+# 行长度限制
+line-length = 100
+# 排除的文件/目录
+exclude = [".venv", ".git", "dist", "build", "node_modules"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "B", "W"]
+extend-select = ["I", "UP", "RUF"]
+ignore = ["E501"]
+fixable = ["ALL"]
+unfixable = ["B"]
+
+# 注释、文档字符串、提示语里的全角标点是中文正文的一部分，不是「歧义字符」。
+# 只放行常用符号，RUF001/002/003 对西里尔字母 а、希腊字母 ο 这类真·同形字依然生效。
+allowed-confusables = [
+    "，", "。", "：", "；", "（", "）", "、", "？", "！",
+    "“", "”", "‘", "’", "《", "》", "—", "…",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402"]
+"tests/**/*.py" = ["F841"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
