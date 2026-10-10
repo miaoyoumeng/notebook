@@ -17,6 +17,16 @@
       }
     },
     {
+      "name": "sunny",
+      "description": "适合互联网产品经理的 Claude Code 的各种 skills、commands、workflows、hooks、CLAUDE.md等工具。",
+      "version": "1.0.0",
+      "source": "./",
+      "author": {
+        "name": "miaoyoumeng",
+        "email": "miaoyoumeng@gmail.com"
+      }
+    },
+    {
       "name": "wubu",
       "description": "编辑适合 Claude Code 的各种 skills、commands、workflows、hooks、CLAUDE.md等工具。",
       "version": "1.0.0",
