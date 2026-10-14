@@ -39,7 +39,7 @@ chat-deepseek.py — 用 playwright-cli 驱动 DeepSeek 网页版，批量提交
 提交、等收尾、落盘、删会话、关浏览器都是那边写好的，本文件只写 DeepSeek 的差异——
 选择器、页面探测、提交方式、收尾判据、删会话的 DOM 操作、「深度思考」开关，
 以及页面特有的 HTML → Markdown 转换。要改公共流程请去改 chat_base.py，
-改一处五个平台都生效。
+改一处所有平台都生效。
 
 与 deepseek-picker 技能（sunny 插件）流程的差异，三处：
 

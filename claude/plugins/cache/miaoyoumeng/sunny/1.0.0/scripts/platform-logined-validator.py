@@ -25,14 +25,16 @@ platform-logined-validator.py — 校验各 AI 平台网页版的登录态，未
 - **未登录** → 把窗口**恢复出来**、提示用户在里面自己登，然后轮询等着；
   登完报「已登录完成」，同样关掉那个窗口
 
-五个平台按 doubao → deepseek → kimi → qwen → yuanbao 的顺序逐个走完，不并发——
-同时开好几个登录窗口，用户分不清该登哪个。`--keep-open` 可让窗口留着不关。
+八个平台按 doubao → deepseek → glm → kimi → qwen → xunfei → yuanbao → wenxin 的顺序逐个走完，
+不并发——同时开好几个登录窗口，用户分不清该登哪个。`--keep-open` 可让窗口留着不关。
 
 平台身份（会话名、入口地址）在 config.py，浏览器封装在 playwright-cli.py，
 本文件只管「怎么判断某个平台登没登录」。
 
 登录流程参考 sunny 插件里五个 picker 技能（doubao / deepseek / kimi / qwen / yuanbao）
 的「打开 → 判断登录 → 让用户登录 → 复核」四步，只取登录那几步，提问与取值不管。
+glm、xunfei 与 wenxin 没有对应的 picker 技能，它们的探针是按各自站点（bigmodel.cn、
+xinghuo.xfyun.cn、wenxin.baidu.com）实测写的。
 
 三个沿用自那些技能的红线：不代用户登录、不触碰 cookie 与 token、登录永远由用户本人完成。
 """
@@ -83,6 +85,25 @@ DEEPSEEK_STATE_JS = """(() => {
   return loginBtn > 0 ? "logged_out" : "logged_in";
 })()"""
 
+# 智谱体验中心（bigmodel.cn）。两个信号各管一头，都已实测：
+#
+#   未登录：访问体验中心会被整页重定向到 /login?redirect=...，**停在那儿不自己跳回**
+#           （干净 profile 实测 60 秒以上纹丝不动），所以 URL 就是未登录的硬信号。
+#   已登录：URL 回到 /trialcenter/modeltrial/text，前端把用户写进 localStorage.user
+#           （含 id / customerName），进页面就有。
+#
+# 判据顺序是「先 URL 后 user」，不是反过来：停在 /login 说明这次访问被挡在门外，
+# 该把人叫去重登一遍，而不是相信本地残留的 user（token 过期就可能残留）。
+# 报未登录最多是白弹一次窗口，脚本下一轮就能自愈改口说「登录完成」；
+# 反过来漏报成已登录，用户拿着一个用不了的页面去跑批量提问，才会真卡住。
+GLM_STATE_JS = """(() => {
+  if (location.pathname.startsWith("/login")) return "logged_out";
+  let user = null;
+  try { user = JSON.parse(localStorage.getItem("user") || "null"); } catch (e) {}
+  if (user && (user.id || user.customerName)) return "logged_in";
+  return "unknown";
+})()"""
+
 KIMI_STATE_JS = """(() => {
   const login = document.querySelectorAll(".login-button").length;
   const user = document.querySelectorAll("[data-testid=sidebar-user-menu-trigger]").length;
@@ -97,6 +118,37 @@ QWEN_STATE_JS = """(() => {
   const loginBtn = [...document.querySelectorAll("button")]
     .filter(b => (b.textContent || "").trim() === "登录").length;
   return loginBtn > 0 ? "logged_out" : "logged_in";
+})()"""
+
+# 讯飞星火（xinghuo.xfyun.cn/desk）。两个信号各管一头，已用两个窗口双向对测过：
+#
+#   未登录：右上角有「登录 / 注册」按钮（类名 experience-page_login_btn），
+#           侧栏用户位写着「未登录」（类名 LeftSide_user_name）。
+#   已登录：这两个元素**整个消失**，前端把用户写进顶栏浮层（类名 userInfoModal_name，
+#           实测拿到的就是用户名）。
+#
+# 星火不改 URL——未登录也停在 /desk，所以这次没有 URL 这条硬信号，只能看元素。
+#
+# **一个必须绕开的坑**：顶栏的 Header_userInfoContent（里面就有「退出登录」那一项）
+# 未登录时**已经在 DOM 里**，只是被 CSS 藏着（getClientRects() 为空、Header_name
+# 是空串）。换言之「退出登录」这四个字在未登录页面上读得到。拿它当已登录判据，
+# 未登录会被稳定误报成已登录——正是本文件最不想要的错法。判据里因此一次都没用它。
+#
+# 类名一律用 [class*=前缀] 匹配，不写全名：星火用 CSS Modules，类名尾巴带哈希
+# （LeftSide_user_entry__RWUZ4），写全名一次改版就废。前缀在前后两次实测里都稳。
+#
+# 判据顺序仍是「先未登录后已登录」，理由同 GLM：报未登录最多白弹一次窗口，
+# 脚本下一轮自愈改口说「登录完成」；漏报成已登录才会让用户拿着用不了的页面去跑批量提问。
+XUNFEI_STATE_JS = """(() => {
+  const vis = e => !!e && e.getClientRects().length > 0;
+  const txt = e => (e ? (e.textContent || "").trim() : "");
+  const q = s => document.querySelector(s);
+  const loginBtn = q("[class*=login_btn]");
+  if (vis(loginBtn) && txt(loginBtn).includes("登录")) return "logged_out";
+  const sideName = q("[class*=LeftSide_user_name]");
+  if (vis(sideName) && txt(sideName).includes("未登录")) return "logged_out";
+  if (txt(q("[class*=userInfoModal_name]"))) return "logged_in";
+  return "unknown";
 })()"""
 
 # 元宝未登录时右上会弹登录浮层，侧栏那一格写着「未登录」。
@@ -118,13 +170,41 @@ YUANBAO_STATE_JS = """(() => {
   return "unknown";
 })()"""
 
+# 文心一言（wenxin.baidu.com）。两个干净 profile 对测过（2026-10-14）：
+#
+#   未登录：侧栏用户位（类名 chat-aside-user-info）写着「请登录」，
+#           页面同时自动弹出登录浮层（「请使用百度APP扫码登录」）。
+#   已登录：同一个位置换成用户名，页面上的「登录」按钮归零。
+#
+# 判据只认这一个位置，不认 URL：已登录时前端有时给地址补上 ?login_type=weixin、
+# 有时不补（同一天两次读数各见一次），拿它判断会飘。
+#
+# 也不拿「退出登录」四个字当判据：已登录时它确实在 DOM 里，但挂在侧栏浮层
+# （chat-aside-user-mask）那个收起的菜单（chat-aside-user-menu 不可见）底下，
+# 靠用户悬停才展开——交互状态不该掺进登录判据。讯飞的 Header_userInfoContent
+# 就是栽在这类「藏在收起菜单里的文本」上。
+#
+# 判据顺序仍是「先未登录后已登录」，理由同 GLM：报未登录最多白弹一次窗口，
+# 脚本下一轮自愈改口说「登录完成」；漏报成已登录才会让用户拿着用不了的页面去跑批量提问。
+WENXIN_STATE_JS = """(() => {
+  const info = document.querySelector("[class*=chat-aside-user-info]");
+  if (!info || info.getClientRects().length === 0) return "unknown";
+  const text = (info.textContent || "").trim();
+  if (!text) return "unknown";
+  if (text.includes("请登录")) return "logged_out";
+  return "logged_in";
+})()"""
+
 # 平台 key → 登录态探针。key 取自 config.PLATFORMS，两边对不上会在这里露馅
 STATE_JS: dict[str, str] = {
     "doubao": DOUBAO_STATE_JS,
     "deepseek": DEEPSEEK_STATE_JS,
+    "glm": GLM_STATE_JS,
     "kimi": KIMI_STATE_JS,
     "qwen": QWEN_STATE_JS,
+    "xunfei": XUNFEI_STATE_JS,
     "yuanbao": YUANBAO_STATE_JS,
+    "wenxin": WENXIN_STATE_JS,
 }
 
 
@@ -190,7 +270,7 @@ def check_platform(platform: Platform, args: argparse.Namespace) -> dict[str, An
     """校验一个平台的登录态；需要登录时等到用户登完。
 
     返回一条结论记录，不在这里决定退出码——中途失败不打断后面的平台，
-    用户跑一次就能看全五个平台的状态。
+    用户跑一次就能看全所有平台的状态。
     """
     session = platform.session
     state_js = STATE_JS[platform.key]

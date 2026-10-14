@@ -37,7 +37,7 @@ chat-kimi.py — 用 playwright-cli 驱动 Kimi 网页版，批量提交 prompt 
 **流程骨架在 `chat_base.py`**（模板方法模式）：三步验证、开浏览器、等页面就绪、
 提交、等收尾、落盘、删会话、关浏览器都是那边写好的，本文件只写 Kimi 的差异——
 选择器、页面探测、提交方式、收尾判据、删会话的 DOM 操作，以及页面特有的
-HTML → Markdown 转换。要改公共流程请去改 chat_base.py，改一处五个平台都生效。
+HTML → Markdown 转换。要改公共流程请去改 chat_base.py，改一处所有平台都生效。
 
 与 kimi-picker 技能（sunny 插件）流程的差异，四处：
 

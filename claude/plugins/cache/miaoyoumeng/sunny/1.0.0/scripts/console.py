@@ -14,9 +14,9 @@ console.py — 批量提问的统一入口：按 --model 转发到对应平台�
 
 可用平台 = 同目录下的 `chat-<平台>.py`（清单来自 config.py）。目前：
 
-    doubao   deepseek   kimi   qwen   yuanbao
+    doubao   deepseek   glm   kimi   qwen   xunfei   yuanbao   wenxin
 
-为什么要有这一层：5 个平台的脚本名和参数各有一点差异，记「哪个平台用哪个开关」
+为什么要有这一层：7 个平台的脚本名和参数各有一点差异，记「哪个平台用哪个开关」
 比记参数烦。这里只做「选谁」这一件事——不解释参数、不改写参数、不给参数补默认值。
 多解析一层就多一处会和平台脚本对不上的地方，透传才是能长期对得上的做法。
 
@@ -78,7 +78,12 @@ def script_for(model: str) -> Path:
         )
     path = HERE / f"chat-{model}.py"
     if not path.exists():
-        sys.exit(f"{LOG_PREFIX} 找不到平台脚本：{path}")
+        sys.exit(
+            f"{LOG_PREFIX} 平台 {model} 还没有提问脚本（{path.name} 不在 {HERE}）\n"
+            f"  config.py 里登记了它，说明登录校验是有的，但提问脚本可能还没写。\n"
+            f"  只做登录校验："
+            f"uv run python scripts/platform-logined-validator.py --platform={model}"
+        )
     return path
 
 

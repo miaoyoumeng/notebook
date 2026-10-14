@@ -31,9 +31,12 @@ class Platform:
 PLATFORMS: tuple[Platform, ...] = (
     Platform("doubao", "chat.doubao", "https://www.doubao.com/chat"),
     Platform("deepseek", "chat.deepseek", "https://chat.deepseek.com/"),
+    Platform("glm", "chat.glm", "https://bigmodel.cn/trialcenter/modeltrial/text"),
     Platform("kimi", "chat.kimi", "https://www.kimi.com/"),
     Platform("qwen", "chat.qwen", "https://qianwen.com/"),
+    Platform("xunfei", "chat.xunfei", "https://xinghuo.xfyun.cn/desk"),
     Platform("yuanbao", "chat.yuanbao", "https://yuanbao.tencent.com/chat"),
+    Platform("wenxin", "chat.wenxin", "https://wenxin.baidu.com/"),
 )
 
 PLATFORM_KEYS: tuple[str, ...] = tuple(p.key for p in PLATFORMS)
@@ -42,9 +45,12 @@ PLATFORM_BY_KEY: dict[str, Platform] = {p.key: p for p in PLATFORMS}
 # 批量提问脚本各自的默认目标，一个平台一个，名字就是平台 key 的大写
 DOUBAO = PLATFORM_BY_KEY["doubao"]
 DEEPSEEK = PLATFORM_BY_KEY["deepseek"]
+GLM = PLATFORM_BY_KEY["glm"]
 KIMI = PLATFORM_BY_KEY["kimi"]
 QWEN = PLATFORM_BY_KEY["qwen"]
+XUNFEI = PLATFORM_BY_KEY["xunfei"]
 YUANBAO = PLATFORM_BY_KEY["yuanbao"]
+WENXIN = PLATFORM_BY_KEY["wenxin"]
 
 
 def make_logger(prefix: str) -> Callable[[str], None]:
