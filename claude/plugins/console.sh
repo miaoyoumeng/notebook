@@ -40,13 +40,13 @@ publish_code() {
         exit 1
     fi
 
-    # cd ${SOURCE_DIR}
-    # WORKSPACE_STATUS=$(git status -s)
-    # if [ -n "${WORKSPACE_STATUS}" ]; then
-    #     echo "git repository has changes. files must \`git commit\`."
-    #     echo "please use \`git add [files]...\`"
-    #     exit 0
-    # fi
+    cd ${SOURCE_DIR}
+    WORKSPACE_STATUS=$(git status -s)
+    if [ -n "${WORKSPACE_STATUS}" ]; then
+        echo "git repository has changes. files must \`git commit\`."
+        echo "please use \`git add [files]...\`"
+        exit 0
+    fi
 
     echo "正在将 ${SOURCE_DIR}/marketplaces/miaoyoumeng/ 同步到 ${USER_CLAUDE_PLUGIN_DIR}/marketplaces/miaoyoumeng ..."
     rsync -av --delete \
