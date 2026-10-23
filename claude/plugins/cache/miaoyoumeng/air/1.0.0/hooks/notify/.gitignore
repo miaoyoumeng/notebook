@@ -1,0 +1,10 @@
+# logs ignore
+logs/
+*.log
+
+# Python ignore
+__pycache__/
+*.pyc
+
+outputs
+.hook-lock
