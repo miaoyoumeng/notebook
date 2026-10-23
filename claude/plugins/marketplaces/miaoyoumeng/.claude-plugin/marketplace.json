@@ -7,7 +7,7 @@
   },
   "plugins": [
     {
-      "name": "dew",
+      "name": "tsu",
       "description": "根据 Claude Code 的插件规范，开发适合 Claude Code 的核心技能库。",
       "version": "1.0.0",
       "source": "./",
@@ -17,7 +17,7 @@
       }
     },
     {
-      "name": "sun",
+      "name": "fzu",
       "description": "适合互联网产品经理的 Claude Code 的各种 skills、commands、workflows、hooks、CLAUDE.md等工具。",
       "version": "1.0.0",
       "source": "./",

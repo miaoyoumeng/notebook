@@ -1,0 +1,17 @@
+{
+  "name": "tsu",
+  "description": "根据 Claude Code 的插件规范，开发适合 Claude Code 的核心技能库。",
+  "version": "1.0.0",
+  "author": {
+    "name": "miaoyoumeng",
+    "email": "miaoyoumeng@gmail.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "collaboration",
+    "best-practices",
+    "workflows",
+    "solopreneurs"
+  ]
+}
