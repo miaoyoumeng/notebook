@@ -1,0 +1,21 @@
+{
+  "skill_name": "typescript-simplify",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "帮我把 skills/typescript-simplify/evals/fixtures/user-service.ts 清理一下。这个文件是上个月赶出来的，里面嵌套太深，还有些没用的东西。别改行为，导出给别处用的函数名和参数都别动。",
+      "expected_output": "删除未使用的常量与注释掉的旧实现；用守卫语句展平嵌套；合并 createUser 与 updateUser 的重复校验；保留导出函数名、参数与行为。",
+      "files": [
+        "evals/fixtures/user-service.ts"
+      ],
+      "expectations": [
+        "未使用的 LEGACY_PREFIX 被删除",
+        "注释掉的旧实现被删除",
+        "createUser 与 updateUser 不再包含三层嵌套条件",
+        "重复的 name/email 校验被合并或复用",
+        "导出的 createUser、updateUser、formatBirthday、describeUser 名称与参数未改变",
+        "formatBirthday 对非法日期的返回值仍为 'Invalid date'"
+      ]
+    }
+  ]
+}

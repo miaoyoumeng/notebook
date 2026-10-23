@@ -1,0 +1,73 @@
+{
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "XXXXX",
+    "ANTHROPIC_BASE_URL": "https://api.deepseek.com/anthropic",
+    "ANTHROPIC_MODEL": "deepseek-v4-flash[1m]",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "deepseek-v4-flash[1m]",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "deepseek-v4-flash[1m]",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "deepseek-v4-flash[1m]",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "deepseek-v4-flash[1m]",
+    "CLAUDE_CODE_EFFORT_LEVEL": "max",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    "CLAUDE_CODE_MAX_TOOL_USE_CONCURRENCY": "1",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "0",
+    "CLAUDE_CODE_DISABLE_UNKNOWN_MODEL_WINDOW_ENFORCEMENT": "1",
+    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "786432"
+  },
+  "permissions": {
+    "allow": [
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Grep",
+      "Bash(ls *)",
+      "Bash(grep *)",
+      "Bash(cat *)",
+      "Bash(find *)",
+      "Bash(git *)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(rm -rf ~/)",
+      "Bash(rm -r *)",
+      "Bash(rm -r ~/)",
+      "Bash(sudo *)",
+      "Bash(eval *)",
+      "Bash(git push --force *)",
+      "Bash(git reset --hard *)",
+      "Bash(pnpm publish *)",
+      "Bash(npm *)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./**/*.pem)",
+      "Read(./**/*.key)"
+    ],
+    "defaultMode": "default"
+  },
+  "hooks": {
+    "UserPromptSubmit": [],
+    "Stop": []
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash -c 'exec \"/Library/nodejs/node-v22.22.0/bin/node\" \"/Users/miaoyoumeng/.claude/plugins/cache/claude-hud/claude-hud/0.0.10/dist/index.js\"'"
+  },
+  "enabledPlugins": {
+    "claude-hud@claude-hud": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-hud": {
+      "source": {
+        "source": "github",
+        "repo": "jarrodwatts/claude-hud"
+      }
+    }
+  },
+  "language": "zh-CN",
+  "alwaysThinkingEnabled": true,
+  "skipDangerousModePermissionPrompt": true,
+  "verbose": true,
+  "codemossProviderId": "3d000126-9df4-4426-b47f-2ad61d115da2",
+  "model": "deepseek-v4-pro[1m]"
+}

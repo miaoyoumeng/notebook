@@ -1,6 +1,6 @@
 ---
 description: 向指定 AI 平台网页版提问，抓取回答并转成标准化 User Story 文档落盘
-argument-hint: doubao | deepseek | kimi | qwen | xunfei | yuanbao <--prompt=[prompt]> [--dir=<目录>]
+argument-hint: doubao | deepseek | kimi | qwen | wenxin | xunfei | yuanbao <--prompt=[prompt]> [--dir=<目录>]
 ---
 
 # commander-story
@@ -27,6 +27,7 @@ argument-hint: doubao | deepseek | kimi | qwen | xunfei | yuanbao <--prompt=[pro
 | `deepseek` | DeepSeek | DeepSeek |
 | `kimi` | Kimi | Kimi |
 | `qwen` | 千问 | 千问 |
+| `wenxin` | 文心一言 | 文心一言 |
 | `xunfei` | 讯飞星火 | 讯飞星火 |
 | `yuanbao` | 腾讯元宝 | 腾讯元宝 |
 
