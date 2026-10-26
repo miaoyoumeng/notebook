@@ -1,14 +1,54 @@
 {
   "name": "miaoyoumeng",
-  "description": "Development marketplace for miaoyoumeng core skills library",
+  "description": "",
   "owner": {
       "name": "miaoyoumeng",
       "email": "miaoyoumeng@gmail.com"
   },
   "plugins": [
     {
+      "name": "bisheng",
+      "description": "",
+      "version": "1.0.0",
+      "source": "./",
+      "author": {
+        "name": "miaoyoumeng",
+        "email": "miaoyoumeng@gmail.com"
+      }
+    },
+    {
+      "name": "fangdu",
+      "description": "",
+      "version": "1.0.0",
+      "source": "./",
+      "author": {
+        "name": "miaoyoumeng",
+        "email": "miaoyoumeng@gmail.com"
+      }
+    },
+    {
+      "name": "lijie",
+      "description": "",
+      "version": "1.0.0",
+      "source": "./",
+      "author": {
+        "name": "miaoyoumeng",
+        "email": "miaoyoumeng@gmail.com"
+      }
+    },
+    {
+      "name": "luban",
+      "description": "",
+      "version": "1.0.0",
+      "source": "./",
+      "author": {
+        "name": "miaoyoumeng",
+        "email": "miaoyoumeng@gmail.com"
+      }
+    },
+    {
       "name": "pangu",
-      "description": "根据 Claude Code 的插件规范，开发适合 Claude Code 的核心技能库。",
+      "description": "",
       "version": "1.0.0",
       "source": "./",
       "author": {
@@ -17,8 +57,8 @@
       }
     },
     {
-      "name": "fzu",
-      "description": "适合互联网产品经理的 Claude Code 的各种 skills、commands、workflows、hooks、CLAUDE.md等工具。",
+      "name": "wangwei",
+      "description": "",
       "version": "1.0.0",
       "source": "./",
       "author": {
@@ -27,8 +67,8 @@
       }
     },
     {
-      "name": "wubu",
-      "description": "编辑适合 Claude Code 的各种 skills、commands、workflows、hooks、CLAUDE.md等工具。",
+      "name": "zaofu",
+      "description": "",
       "version": "1.0.0",
       "source": "./",
       "author": {

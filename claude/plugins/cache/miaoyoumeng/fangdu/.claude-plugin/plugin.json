@@ -1,0 +1,17 @@
+{
+  "name": "fangdu",
+  "description": "对话、商量、谋划使用的 claude 套件。",
+  "version": "1.0.0",
+  "author": {
+    "name": "miaoyoumeng",
+    "email": "miaoyoumeng@gmail.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "collaboration",
+    "best-practices",
+    "workflows",
+    "solopreneurs"
+  ]
+}

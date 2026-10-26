@@ -1,7 +1,7 @@
 ---
 description: 调度 skill-creator 完成 Claude Skill 的初始化、优化、用例编写、评分、基准测试与清理。
 allowed-tools: ["Bash(find *)", "Bash(mkdir *)", "Bash(uv run python *)", "Glob", "Read", "Write", "Edit", "AskUserQuestion", "Skill", "Task"]
-argument-hint: <plugin-name> init | improve | evals | score | benchmark | clean <skill-name>
+argument-hint: <plugin-name> init | improve | humanizer | evals | score | benchmark | clean <skill-name>
 ---
 
 # Commander Skill
@@ -103,6 +103,9 @@ find <plugin-name>skills/<skill-name> -maxdepth 0 -type d 2>/dev/null
 
 5. 按`frontmatter 规则`逐项核对，不符则修正。
 6. 输出初始化结果，分「已创建」「已跳过」两栏列出，并提示下一步用 `improve` 子命令完善内容。
+7. 只需按照规范创建文件即可，如果用户没有说明，就不需要自行填充内容。禁止调用`AskUserQuestion`
+8. 禁止读取`<plugin-name>/skills`目录下 skill 文件。
+
 
 ## 子命令：improve
 
@@ -113,10 +116,20 @@ find <plugin-name>skills/<skill-name> -maxdepth 0 -type d 2>/dev/null
 1. 检查 `<plugin-name>/skills/<skill-name>` 是否存在（命令见「通用约定」），不存在则提示先运行 `init` 子命令。
 2. 读取 `SKILL.md`，并列出 `scripts/`、`references/` 的文件清单；按需读取这些文件的内容。
 3. 调用 `skill-creator` 技能完成修改，只做必要变更，覆盖下列要求：
-
-   - **`SKILL.md`**——按`SKILL.md 章节模板`组织章节，按`格式要求`与`行文分格`组织行文
-   - **`scripts/`**——在 `SKILL.md` 中补上每个脚本的用途与调用示例
+   - **`SKILL.md`**——按`SKILL.md 章节模板`组织章节，按`格式要求`与`行文分格`组织行文。
+     - 行文中如果需要安装 `typescript` 包，优先使用 pnpm 命令，不用使用 npm 命令。
+     - 行文中如果需要使用 python 脚本，请使用 `uv run python *` 方式执行。
+     - SKILL.md 和 `references` 目录中文档里的 typescript 函数都用箭头函数编写。
+     - 行文中禁止存在前后矛盾的条款，必要的时候直接删除。
+     - 行文中禁止存在有歧义的条款，必要的时候直接删除。
+     - 行文中禁止存在不利于 AI 识别执行流程的，没有意义的条款，必要的时候直接删除。
+     - 行文中禁止存在哲学性、理念性、宏观性等没有执行逻辑的条款，必要的时候直接删除。
+   - **`scripts/`**——在 `SKILL.md` 中补上每个脚本的用途与调用示例。
    - **`references/`**——补齐被 `SKILL.md` 引用但缺失的章节
+     - 行文中禁止存在前后矛盾的条款，必要的时候直接删除。
+     - 行文中禁止存在有歧义的条款，必要的时候直接删除。
+     - 行文中禁止存在不利于 AI 识别执行流程的，没有意义的条款，必要的时候直接删除。
+     - 行文中禁止存在哲学性、理念性、宏观性等没有执行逻辑的条款，必要的时候直接删除。
 
 4. 修改后按`frontmatter 规则`复核；改动过 `scripts/` 时，运行受影响的脚本验证仍可执行。
 5. 输出变更摘要与校验结果。
@@ -181,7 +194,7 @@ find <plugin-name>skills/<skill-name> -maxdepth 0 -type d 2>/dev/null
 4. 计算加权总分：
 
    ```text
-   总分 = 文档质量×0.40 + 代码质量×0.10 + 参考文档质量×0.15 + 完整性×0.20 + 可用性×0.15
+   总分 = 文档质量×0.40 + 代码质量×0.10 + 参考文档质量×0.20 + 完整性×0.15 + 可用性×0.15
    ```
 
 5. 输出评分报告：
@@ -213,7 +226,7 @@ find <plugin-name>skills/<skill-name> -maxdepth 0 -type d 2>/dev/null
 **执行步骤**：
 
 1. 检查 `<plugin-name>/skills/<skill-name>` 是否存在（命令见「通用约定」），不存在则提示先运行 `init` 子命令。
-2. 读取 `evals/evals.json` 确定用例列表。工作区取 `<plugin-name>/skills/<skill-name>-workspace/iteration-<N>/`，`<N>` 从 1 起，已存在则递增。
+2. 读取 `evals/evals.json` 确定用例列表。工作区取 `<plugin-name>-<skill-name>-workspace/iteration-<N>/`，`<N>` 从 1 起，已存在则递增。
 3. 按 `skill-creator` 技能的对拍规范，**同一轮**为每个用例启动两组子代理：
 
    - `with_skill` 组：传入技能路径 `<plugin-name>/skills/<skill-name>`
@@ -240,8 +253,7 @@ find <plugin-name>skills/<skill-name> -maxdepth 0 -type d 2>/dev/null
    `-mindepth 1` 保证技能根目录本身不会被删。
 
 2. 清单为空，报告「无空目录」并停止。
-3. 清单非空，用 `AskUserQuestion` 让用户确认后执行删除：
-
+3. 清单非空，不必使用 `AskUserQuestion` 让用户确认后执行删除，直接删除即可。删除命令：
    ```bash
    find <plugin-name>/skills/<skill-name> -depth -mindepth 1 -type d -empty -exec rmdir {} +
    ```
