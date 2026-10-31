@@ -74,13 +74,13 @@ digraph tdd_cycle {
 
 - 一个测试一个行为；名称含 “and” 时拆开。
 - 测试名描述预期行为：`should<行为>_when<条件>`。
-- 优先使用真实代码，mock 只在不可避免时使用。
+- 优先使用 mock 代码使用。
 - 测试文件放在与 `src` 同级的 `test` 目录，目录结构镜像 `src`。
-- mock 测试命名 `*.mock.test.ts`，真实依赖测试命名 `*.real.test.ts`。
+- mock 测试命名 `*.mock.test.ts`。
 - 使用 `describe`、`it`、`expect` 组织测试。
 
 ```typescript
-// test/utils/formatPrice.real.test.ts
+// test/utils/formatPrice.mock.test.ts
 import { describe, expect, it } from 'vitest';
 import { formatPrice } from '../../src/utils/formatPrice';
 
@@ -98,7 +98,7 @@ describe('formatPrice', () => {
 运行目标测试：
 
 ```bash
-pnpm vitest run test/utils/formatPrice.real.test.ts
+pnpm vitest run test/utils/formatPrice.mock.test.ts
 ```
 
 确认：
@@ -193,7 +193,7 @@ beforeEach(() => {
 RED：
 
 ```typescript
-// test/form.real.test.ts
+// test/form.mock.test.ts
 it('shouldReturnError_whenEmailIsEmpty', async () => {
   const result = await submitForm({ email: '' });
   expect(result.error).toBe('Email required');
@@ -203,7 +203,7 @@ it('shouldReturnError_whenEmailIsEmpty', async () => {
 验证 RED：
 
 ```bash
-pnpm vitest run test/form.real.test.ts
+pnpm vitest run test/form.mock.test.ts
 # 失败：expected 'Email required', received undefined
 ```
 
@@ -220,7 +220,7 @@ export const submitForm = async (data: FormData) => {
 验证 GREEN：
 
 ```bash
-pnpm vitest run test/form.real.test.ts
+pnpm vitest run test/form.mock.test.ts
 # 通过
 ```
 
@@ -236,7 +236,7 @@ REFACTOR：多个字段重复校验时，提取校验函数，并保持测试通
 - [ ] 每个测试用最小代码通过
 - [ ] 全部测试通过
 - [ ] 输出干净，无 error、无 warning
-- [ ] 测试使用真实代码，mock 只在不可避免时使用
+- [ ] 测试使用 mock 代码
 - [ ] 边界场景与错误输入已覆盖
 - [ ] 测试相互独立，不依赖执行顺序
 - [ ] 未遗留 `.only`、`.skip`
@@ -314,10 +314,10 @@ TDD 并不教条。测试先行在提交前发现缺陷，防止回归，记录�
 pnpm tsc --noEmit
 
 # 运行目标测试
-pnpm vitest run test/utils/formatPrice.real.test.ts
+pnpm vitest run test/utils/formatPrice.mock.test.ts
 
 # 运行单个用例
-pnpm vitest run test/utils/formatPrice.real.test.ts -t "shouldThrow_whenAmountIsNegative"
+pnpm vitest run test/utils/formatPrice.mock.test.ts -t "shouldThrow_whenAmountIsNegative"
 
 # 运行全部测试
 pnpm test
@@ -341,7 +341,7 @@ pnpm add -D vitest @vitest/coverage-v8
 ## 实现检查表
 
 - 测试文件位于 `test/`，目录结构镜像 `src/`。
-- mock 测试文件命名 `*.mock.test.ts`，真实依赖测试命名 `*.real.test.ts`。
+- mock 测试文件命名 `*.mock.test.ts`。
 - 测试使用 `describe`、`it`、`expect`。
 - 异步测试使用 `async` / `await`，不返回裸 Promise。
 - mock 使用 `vi.fn()`、`vi.mock()`、`vi.spyOn()`。
@@ -382,11 +382,16 @@ TDD 工作流：
 
 | 文件 | 内容 |
 |------|------|
+| `${CLAUDE_PLUGIN_ROOT}/knowledge/specs-typescript-naming-conventions.md` | 命名原则、按返回值命名、TypeScript 命名约定与反模式。|
+| `${CLAUDE_PLUGIN_ROOT}/knowledge/specs-typescript-functions-and-comments.md` | 函数拆分、参数设计、副作用控制、注释取舍。|
+| `${CLAUDE_PLUGIN_ROOT}/knowledge/specs-typescript-error-handling.md` |异常分层、null 处理。|
+| `${CLAUDE_PLUGIN_ROOT}/knowledge/specs-typescript-testing.md` |TDD 与 FIRST 原则、测试反模式。|
 | `references/tdd-best-practices.md` | TDD 纪律、RED/GREEN 验证、借口与危险信号、验证清单 |
 | `references/testing-anti-patterns.md` | 五类测试反模式、mock 门控函数、快速参考 |
 | `references/framework-guide.md` | Vitest 配置、测试文件组织、纯函数、异步函数、mock、覆盖率输出 |
 | `references/ci-integration.md` | GitHub Actions、覆盖率门禁、并行与缓存 |
 | `assets/sample_input.json` | 脚本输入字段示例：源代码、需求、验收标准、覆盖率阈值 |
+
 
 脚本依赖 `typer` 与 `rich`，统一使用以下前缀运行：
 
@@ -396,9 +401,9 @@ uv run --with typer --with rich python scripts/<script>.py <子命令> [参数]
 
 | 脚本 | 用途 | 调用示例 |
 |------|------|----------|
-| `test_generator.py` | 从 TypeScript 源码生成 Vitest 测试桩，或分析函数结构 | `uv run --with typer --with rich python scripts/test_generator.py generate --input src/utils/formatPrice.ts --output test/utils/formatPrice.real.test.ts` |
+| `test_generator.py` | 从 TypeScript 源码生成 Vitest 测试桩，或分析函数结构 | `uv run --with typer --with rich python scripts/test_generator.py generate --input src/utils/formatPrice.ts --output test/utils/formatPrice.mock.test.ts` |
 | `coverage_analyzer.py` | 解析 LCOV/JSON 覆盖率报告，按 P0/P1/P2 排列缺口 | `uv run --with typer --with rich python scripts/coverage_analyzer.py analyze --report coverage/lcov.info --threshold 80` |
-| `tdd_workflow.py` | 初始化、推进与校验 RED/GREEN/REFACTOR 阶段 | `uv run --with typer --with rich python scripts/tdd_workflow.py next --phase red --test test/utils/formatPrice.real.test.ts --impl src/utils/formatPrice.ts --state .tdd-state.json` |
+| `tdd_workflow.py` | 初始化、推进与校验 RED/GREEN/REFACTOR 阶段 | `uv run --with typer --with rich python scripts/tdd_workflow.py next --phase red --test test/utils/formatPrice.mock.test.ts --impl src/utils/formatPrice.ts --state .tdd-state.json` |
 | `fixture_generator.py` | 从 interface/type 生成夹具、边界值与 vi.fn() mock | `uv run --with typer --with rich python scripts/fixture_generator.py fixture --entity User --count 5 --source src/types.ts` |
 
 补充用法：

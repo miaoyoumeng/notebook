@@ -69,6 +69,7 @@ const processPayment = (amount: number | null, currency: string | null) => {
 // 好：类型系统禁止 null
 const processPayment = (amount: number, currency: string): void => {
   // 类型系统保证参数不为 null
+  savePayment(amount, currency);
 };
 ```
 
@@ -107,71 +108,3 @@ const handleCreateOrder = async (req: Request): Promise<Response> => {
 };
 ```
 
-## 测试原则
-
-### TDD 三定律
-
-1. 在写出失败的单元测试之前，不写生产代码。
-2. 单元测试只写到刚好失败；编译失败也算失败。
-3. 生产代码只写到刚好通过当前失败的测试。
-
-### FIRST 原则
-
-| 原则 | 含义 | TypeScript 示例 |
-|------|------|-----------------|
-| **F**ast | 测试必须快 | 用 mock 替代真实数据库调用 |
-| **I**ndependent | 测试不互相依赖 | 每个测试独立 setup/teardown |
-| **R**epeatable | 任何环境可跑 | 不依赖本地文件/网络 |
-| **S**elf-Validating | 自动断言 | `expect(result).toBe(expected)` |
-| **T**imely | 先写测试 | 生产代码之前写测试 |
-
-### 测试结构：Arrange-Act-Assert
-
-```typescript
-describe('UserService', () => {
-  it('should create user with valid data', () => {
-    // Arrange
-    const params = { name: 'Alice', email: 'alice@example.com' };
-
-    // Act
-    const user = userService.createUser(params);
-
-    // Assert
-    expect(user.name).toBe('Alice');
-    expect(user.email).toBe('alice@example.com');
-    expect(user.id).toBeDefined();
-  });
-});
-```
-
-### 测试命名
-
-```typescript
-// 差：名称含糊
-it('should work', () => { ... });
-it('test create', () => { ... });
-
-// 好：名称描述行为和条件
-it('should throw ValidationError when email is missing', () => { ... });
-it('should return active users when status is active', () => { ... });
-it('should calculate total with tax when country is US', () => { ... });
-```
-
-### 避免测试反模式
-
-```typescript
-// 差：测试实现细节
-it('should call saveUser', () => {
-  const spy = vi.spyOn(db, 'saveUser');
-  userService.createUser(params);
-  expect(spy).toHaveBeenCalled(); // 测试了实现，不是行为
-});
-
-// 好：测试行为
-it('should persist user to database', () => {
-  userService.createUser(params);
-  const found = db.findUserByEmail(params.email);
-  expect(found).toBeDefined();
-  expect(found.name).toBe(params.name);
-});
-```

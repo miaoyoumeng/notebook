@@ -106,21 +106,14 @@ const hasPermission = checkPermission(user);
 const canEdit = checkEditPermission(user);
 ```
 
-## 枚举命名
+## 有限集合命名
 
 ```typescript
-// 差
-enum Status {
-  A, B, C
-}
+// 差：成员含义不明
+type Status = 'A' | 'B' | 'C';
 
-// 好
-enum PaymentStatus {
-  Pending = 'PENDING',
-  Processing = 'PROCESSING',
-  Completed = 'COMPLETED',
-  Failed = 'FAILED',
-}
+// 好：成员含义明确
+type PaymentStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
 ```
 
 ## 常见反模式
@@ -135,11 +128,11 @@ enum PaymentStatus {
 
 ## TypeScript 特有约定
 
+变量、函数、类、接口、类型别名的命名格式由 ESLint `@typescript-eslint/naming-convention` 校验，此处不再重复。以下保留 ESLint 未覆盖的约定：
+
 | 元素 | 约定 | 示例 |
 |------|------|------|
-| 接口 | PascalCase，不加 `I` 前缀 | `interface User { ... }` |
-| 类型别名 | PascalCase | `type UserId = string` |
+| 接口 | 不加 `I` 前缀 | `interface User { ... }` |
 | 泛型参数 | 单字母或描述性 | `T` 或 `TItem` |
-| 常量 | UPPER_SNAKE_CASE 或 camelCase | `MAX_RETRY_COUNT` |
 | 私有成员 | `#` 前缀或 `_` 前缀 | `#internalState` |
 | 文件名 | kebab-case | `user-service.ts` |

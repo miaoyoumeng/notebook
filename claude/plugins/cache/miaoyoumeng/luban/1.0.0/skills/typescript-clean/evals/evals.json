@@ -1,4 +1,56 @@
 {
   "skill_name": "typescript-clean",
-  "evals": []
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "evals/fixtures/user-service.ts 是我们用户服务的旧代码，process 越来越长，d、list 这种名字也看不懂，邮箱校验和规范化在 process 与 update 里重复。你按 Clean Code 整理一下，行为别变，User 的公开字段也别改。改完跑类型检查，能跑测试就跑，把改了什么列出来。",
+      "expected_output": "重命名 d、list 等含糊符号，拆分 process 为校验、规范化、保存、通知等小函数，提取 process 与 update 共用的邮箱校验与规范化逻辑，用守卫语句降低嵌套；保持 User 字段、错误消息、返回值与副作用不变；报告类型检查与测试结果。",
+      "files": [
+        "evals/fixtures/user-service.ts"
+      ],
+      "expectations": [
+        "将 d 与 list 重命名为能揭示用途的名称，且不保留单字母变量",
+        "提取邮箱校验与邮箱规范化逻辑，process 与 update 不再各自重复实现",
+        "process 被拆分为多个小函数，或至少将校验、保存、通知分离",
+        "使用守卫语句或提前返回，将条件嵌套降到 3 层以内",
+        "保持 User 的公开字段、错误消息、布尔返回值与 sendEmail 副作用不变",
+        "未引入 any、@ts-ignore 或新增类型断言",
+        "报告中列出类型检查与测试命令及实际结果"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "evals/fixtures/find-user.ts 里 findUser 找不到人返回 null，调用方到处判空；findUserByEmail 还返回 'NOT_FOUND' 字符串。我想改成异常或空集合，但现有调用方不能坏，getDisplayName 找不到人时仍然返回 'Unknown'。顺手补一下找到和找不到的测试，跑完告诉我结果。",
+      "expected_output": "把 findUser 与 findUserByEmail 的 null/字符串错误码改为异常或明确的非空契约，更新 getDisplayName 等调用方并保持缺失用户返回 'Unknown'；新增或更新测试覆盖找到与找不到两条路径；报告类型检查与测试结果。",
+      "files": [
+        "evals/fixtures/find-user.ts"
+      ],
+      "expectations": [
+        "findUser 不再返回 null，改为抛出明确异常或返回非空结果",
+        "findUserByEmail 不再返回 'NOT_FOUND' 字符串联合，改为异常或明确的结果类型",
+        "更新所有调用方，getDisplayName 对缺失用户仍返回 'Unknown'",
+        "新增或更新测试，覆盖用户存在与用户不存在两条路径",
+        "公开函数签名与调用方同步更新，未留下失效的 null 检查",
+        "未改变已存在用户的返回值或副作用",
+        "报告中列出类型检查与测试命令及实际结果"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "evals/fixtures/order-calculator.ts 的 calculate 嵌套太深，里面还有注释掉的旧实现，preview 又重复了一遍金额校验。你按简化流程处理：先跑现有测试做基线，不要改行为和公开签名，改完再跑一遍，跳过的项也告诉我。",
+      "expected_output": "按简化流程建立基线、列出候选、应用最小安全改动：用守卫语句展平 calculate，提取金额计算与校验供 calculate/preview 共用，删除注释掉的旧实现；保持错误消息、返回结构、公开签名与副作用不变；报告基线、最终验证与跳过项。",
+      "files": [
+        "evals/fixtures/order-calculator.ts"
+      ],
+      "expectations": [
+        "使用守卫语句或提前返回，将 calculate 的嵌套层级降到 3 层以内",
+        "提取金额计算与价格校验逻辑，calculate 与 preview 不再重复实现",
+        "删除注释掉的旧实现与未使用代码",
+        "保持错误消息、返回对象结构、公开签名与计算顺序不变",
+        "先说明基线检查结果；无可用测试时明确声明，改完报告最终验证结果",
+        "列出跳过的简化候选及原因",
+        "未改变求值顺序或删除边界处理"
+      ]
+    }
+  ]
 }
